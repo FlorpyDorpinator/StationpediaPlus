@@ -3,15 +3,45 @@
     "slots": {
       "SortingClass": "Sorting class for the item in slot.",
       "Class": "Class type hash of item in slot.",
-      "ChargeRatio": "Charge as ratio of maximum capacity.",
+      "ChargeRatio": "Charge as ratio of maximum capacity (0-1).",
       "PrefabHash": "Same as OccupantHash - prefab hash of item.",
       "Charge": "Charge level of battery/cell in slot.",
-      "Occupied": "Returns 1 if slot contains an item.",
+      "Occupied": "Returns 1 if slot contains an item, 0 if empty.",
       "Damage": "Damage level of item in slot (0=pristine, 1=destroyed).",
       "MaxQuantity": "Maximum stack size for slot.",
       "OccupantHash": "PrefabHash of item in slot, or 0 if empty.",
       "Quantity": "Stack quantity of item in slot.",
-      "ReferenceId": "Reference ID of item in slot."
+      "ReferenceId": "Reference ID of item in slot.",
+      "Efficiency": "Efficiency rating of the item in the slot (0-1 ratio).",
+      "Health": "Current health value of the item in the slot.",
+      "Growth": "Growth progress of a plant (used in hydroponics/agriculture).",
+      "Pressure": "Internal pressure of the item in the slot (kPa).",
+      "Temperature": "Temperature of the item in the slot (Kelvin).",
+      "PressureWaste": "Waste gas pressure in the slot (used in suit slots).",
+      "PressureAir": "Air pressure in the slot (used in suit backpack slots).",
+      "Mature": "Whether the plant in the slot is mature (1=mature, 0=growing).",
+      "Seeding": "Whether the plant in the slot is producing seeds (1=seeding).",
+      "LineNumber": "Current line number being executed (for IC chips in slots).",
+      "Volume": "Volume capacity of the item in the slot (Liters).",
+      "Open": "Whether the item in the slot is open (1=open, 0=closed).",
+      "On": "Whether the item in the slot is powered on (1=on, 0=off).",
+      "Lock": "Whether the item in the slot is locked (1=locked, 0=unlocked).",
+      "FilterType": "Filter type hash of the item in slot (for filter cartridges).",
+      "HarvestedHash": "Prefab hash of what will be harvested from the plant.",
+      "Mode": "Current mode setting of the item in the slot.",
+      "MaturityRatio": "Maturity progress ratio of the plant (0-1).",
+      "SeedingRatio": "Seeding progress ratio of the plant (0-1).",
+      "FreeSlots": "Number of free slots available in the container item.",
+      "TotalSlots": "Total number of slots in the container item.",
+      "None": "No slot type specified."
+    },
+    "versions": {
+      "Tier One": "Base manufacturing tier. Standard speed and efficiency. Available by default on all printers.",
+      "Tier Two": "Upgraded manufacturing tier. Unlocks additional recipes and displays recipe icon on the printer. Apply a Printer Mod upgrade kit to reach this tier.",
+      "Tier Three": "Advanced manufacturing tier. Highest capability with fastest production and most recipe options. Apply a second Printer Mod upgrade kit to reach this tier.",
+      "TierOne": "Base manufacturing tier. Standard speed and efficiency. Available by default on all printers.",
+      "TierTwo": "Upgraded manufacturing tier. Unlocks additional recipes and displays recipe icon on the printer. Apply a Printer Mod upgrade kit to reach this tier.",
+      "TierThree": "Advanced manufacturing tier. Highest capability with fastest production and most recipe options. Apply a second Printer Mod upgrade kit to reach this tier."
     },
     "logic": {
       "RatioCarbonDioxide": "Ratio of CO2 in internal atmosphere.",
@@ -61,50 +91,276 @@
       "Pipe Liquid Input 2": "Secondary liquid input connection."
     },
     "memory": {
-      "TraderInstruction.FilterPrefabHashNotEquals": "Filter trade items where PrefabHash does NOT equal the specified value.",
-      "RocketAvionicsInstruction.StackPointer": "Sets the avionics instruction stack pointer.",
-      "TraderInstruction.None": "No operation. Placeholder instruction.",
-      "SorterInstruction.FilterSlotTypeCompare": "Filter items by comparing their SlotType using the specified comparison operation.",
-      "RocketAvionicsInstruction.ChildSurveySite": "Targets a child survey site for scanning/surveying operations.",
-      "SorterInstruction.FilterSortingClassCompare": "Filter items by comparing their SortingClass using the specified comparison operation.",
-      "PrinterInstruction.EjectReagent": "Ejects the specified reagent from the printer.",
-      "SorterInstruction.LimitNextExecutionByCount": "Limits the next filter instruction to only process the specified number of items.",
-      "SorterInstruction.FilterPrefabHashEquals": "Filter items where PrefabHash equals the specified value. Only matching items pass through.",
-      "TraderInstruction.FilterGasNotContains": "Filter for items/containers that do NOT contain the specified gas type.",
-      "TraderInstruction.WriteTraderBuyData": "Writes a buy order to purchase items from the trader.",
-      "TraderInstruction.TraderBuyGasData": "Specifies gas to purchase from the trader.",
-      "TraderInstruction.StrongestContactIdHash": "Returns the ID hash of the strongest trader contact signal.",
-      "PrinterInstruction.WaitUntilNextValid": "Pauses execution until the next instruction becomes valid.",
-      "TraderInstruction.TraderSellGasData": "Specifies gas to sell to the trader.",
-      "SorterInstruction.FilterQuantityCompare": "Filter items by comparing their stack quantity using the specified comparison operation.",
-      "PrinterInstruction.DeviceSetLock": "Sets the device lock state (0=unlocked, 1=locked).",
-      "TraderInstruction.WriteTraderData": "Writes data to the trader communication buffer.",
-      "TraderInstruction.FilterSortingClassCompare": "Filter trade items by comparing their SortingClass.",
-      "RocketAvionicsInstruction.JumpToAddress": "Jumps to the specified instruction address.",
-      "TraderInstruction.FilterPrefabHashEquals": "Filter trade items where PrefabHash equals the specified value.",
-      "RocketAvionicsInstruction.ChildResourceSite": "Targets a child resource site of the specified type for mining operations.",
-      "PrinterInstruction.None": "No operation. Placeholder instruction.",
-      "TraderInstruction.StrongestContactSignalData": "Returns signal strength data for the strongest trader contact.",
-      "TraderInstruction.TraderSellThingData": "Specifies an item to sell to the trader by PrefabHash.",
-      "TraderInstruction.WriteTraderSellData": "Writes a sell order to sell items to the trader.",
-      "SorterInstruction.None": "No operation. Placeholder instruction.",
-      "OccupancyInstruction.None": "No operation. Placeholder instruction.",
-      "SorterInstruction.FilterPrefabHashNotEquals": "Filter items where PrefabHash does NOT equal the specified value. Non-matching items pass through.",
-      "TraderInstruction.StrongestContactMetaData": "Returns metadata about the strongest trader contact.",
-      "TraderInstruction.FilterQuantityCompare": "Filter trade items by comparing their quantity.",
-      "PrinterInstruction.EjectAllReagents": "Ejects all reagents from the printer.",
-      "PrinterInstruction.JumpIfNextInvalid": "Jumps to the specified address if the next recipe is invalid.",
-      "RocketAvionicsInstruction.None": "No operation. Placeholder instruction.",
-      "TraderInstruction.TraderSellThingChildData": "Specifies a child item to sell (item contained within another item).",
-      "PrinterInstruction.MissingRecipeReagent": "Returns the hash of a missing reagent needed for the recipe.",
-      "PrinterInstruction.JumpToAddress": "Unconditionally jumps to the specified instruction address.",
-      "OccupancyInstruction.Inventory": "Detects inventory occupancy (items in slots).",
-      "TraderInstruction.TraderBuyThingData": "Specifies an item to buy from the trader by PrefabHash.",
-      "TraderInstruction.TraderBuyThingChildData": "Specifies a child item to buy (item contained within another item).",
-      "PrinterInstruction.StackPointer": "Sets the instruction stack pointer to the specified address.",
-      "PrinterInstruction.ExecuteRecipe": "Executes the specified recipe if materials are available.",
-      "OccupancyInstruction.Entity": "Detects entity occupancy (players, NPCs, creatures).",
-      "TraderInstruction.FilterGasContains": "Filter for items/containers that contain the specified gas type."
+      "PrinterInstruction.None": {
+        "opCode": "PrinterInstruction.None",
+        "parameters": "none",
+        "description": "No operation. Placeholder instruction.",
+        "byteLayout": "0-63: Unused"
+      },
+      "PrinterInstruction.StackPointer": {
+        "opCode": "PrinterInstruction.StackPointer",
+        "parameters": "Index (ushort)",
+        "description": "Sets the instruction stack pointer to the specified address. Valid only at address 63.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-23: Index (USHORT_16)\n24-63: Unused"
+      },
+      "PrinterInstruction.ExecuteRecipe": {
+        "opCode": "PrinterInstruction.ExecuteRecipe",
+        "parameters": "Quantity (byte), Prefab_Hash (int)",
+        "description": "Executes the specified recipe if materials are available. Produces the specified quantity of items.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Quantity (BYTE_8)\n16-47: Prefab_Hash (INT_32)\n48-63: Unused"
+      },
+      "PrinterInstruction.WaitUntilNextValid": {
+        "opCode": "PrinterInstruction.WaitUntilNextValid",
+        "parameters": "none",
+        "description": "Pauses execution until the next recipe instruction becomes valid (has required materials).",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-63: Unused"
+      },
+      "PrinterInstruction.JumpIfNextInvalid": {
+        "opCode": "PrinterInstruction.JumpIfNextInvalid",
+        "parameters": "Stack_Address (ushort)",
+        "description": "Jumps to the specified address if the next recipe cannot be executed due to missing materials.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-23: Stack_Address (USHORT_16)\n24-63: Unused"
+      },
+      "PrinterInstruction.JumpToAddress": {
+        "opCode": "PrinterInstruction.JumpToAddress",
+        "parameters": "Stack_Address (ushort)",
+        "description": "Unconditionally jumps to the specified instruction address.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-23: Stack_Address (USHORT_16)\n24-63: Unused"
+      },
+      "PrinterInstruction.DeviceSetLock": {
+        "opCode": "PrinterInstruction.DeviceSetLock",
+        "parameters": "Lock_State (bool)",
+        "description": "Sets the device lock state (0=unlocked, 1=locked).",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Lock_State (BOOL_8)\n16-63: Unused"
+      },
+      "PrinterInstruction.EjectReagent": {
+        "opCode": "PrinterInstruction.EjectReagent",
+        "parameters": "Reagent_Hash (int)",
+        "description": "Ejects the specified reagent from the printer by its hash.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-39: Reagent_Hash (INT_32)\n40-63: Unused"
+      },
+      "PrinterInstruction.EjectAllReagents": {
+        "opCode": "PrinterInstruction.EjectAllReagents",
+        "parameters": "none",
+        "description": "Ejects all reagents from the printer.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-63: Unused"
+      },
+      "PrinterInstruction.MissingRecipeReagent": {
+        "opCode": "PrinterInstruction.MissingRecipeReagent",
+        "parameters": "Quantity_Ceil (byte), Reagent_Hash (int)",
+        "description": "OUTPUT DATA: Contains missing reagent info for current recipe. Valid only at addresses 54-62 (read-only).",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Quantity_Ceil (BYTE_8)\n16-47: Reagent_Hash (INT_32)\n48-63: Unused"
+      },
+      "SorterInstruction.None": {
+        "opCode": "SorterInstruction.None",
+        "parameters": "none",
+        "description": "No operation. Placeholder instruction.",
+        "byteLayout": "0-63: Unused"
+      },
+      "SorterInstruction.FilterPrefabHashEquals": {
+        "opCode": "SorterInstruction.FilterPrefabHashEquals",
+        "parameters": "Prefab_Hash (int)",
+        "description": "Filter items where PrefabHash equals the specified value. Only matching items pass through.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-39: Prefab_Hash (INT_32)\n40-63: Unused"
+      },
+      "SorterInstruction.FilterPrefabHashNotEquals": {
+        "opCode": "SorterInstruction.FilterPrefabHashNotEquals",
+        "parameters": "Prefab_Hash (int)",
+        "description": "Filter items where PrefabHash does NOT equal the specified value. Non-matching items pass through.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-39: Prefab_Hash (INT_32)\n40-63: Unused"
+      },
+      "SorterInstruction.FilterSortingClassCompare": {
+        "opCode": "SorterInstruction.FilterSortingClassCompare",
+        "parameters": "Condition (byte), Sorting_Class (ushort)",
+        "description": "Filter items by comparing their SortingClass. Condition: 0=Equals, 1=Greater, 2=Less, 3=NotEquals.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Condition_Operation (BYTE_8)\n16-31: Sorting_Class (USHORT_16)\n32-63: Unused"
+      },
+      "SorterInstruction.FilterSlotTypeCompare": {
+        "opCode": "SorterInstruction.FilterSlotTypeCompare",
+        "parameters": "Condition (byte), Slot_Type (ushort)",
+        "description": "Filter items by comparing their SlotType. Condition: 0=Equals, 1=Greater, 2=Less, 3=NotEquals.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Condition_Operation (BYTE_8)\n16-31: Slot_Type (USHORT_16)\n32-63: Unused"
+      },
+      "SorterInstruction.FilterQuantityCompare": {
+        "opCode": "SorterInstruction.FilterQuantityCompare",
+        "parameters": "Condition (byte), Quantity (ushort)",
+        "description": "Filter items by comparing their stack quantity. Condition: 0=Equals, 1=Greater, 2=Less, 3=NotEquals.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Condition_Operation (BYTE_8)\n16-31: Quantity (USHORT_16)\n32-63: Unused"
+      },
+      "SorterInstruction.LimitNextExecutionByCount": {
+        "opCode": "SorterInstruction.LimitNextExecutionByCount",
+        "parameters": "Count (uint)",
+        "description": "Limits the next filter instruction to only process the specified number of items (decrements on match).",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-39: Count (UINT_32)\n40-63: Unused"
+      },
+      "RocketAvionicsInstruction.None": {
+        "opCode": "RocketAvionicsInstruction.None",
+        "parameters": "none",
+        "description": "No operation. Placeholder instruction.",
+        "byteLayout": "0-63: Unused"
+      },
+      "RocketAvionicsInstruction.StackPointer": {
+        "opCode": "RocketAvionicsInstruction.StackPointer",
+        "parameters": "Index (ushort)",
+        "description": "Sets the avionics instruction stack pointer. Valid only at address 63.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-23: Index (USHORT_16)\n24-63: Unused"
+      },
+      "RocketAvionicsInstruction.JumpToAddress": {
+        "opCode": "RocketAvionicsInstruction.JumpToAddress",
+        "parameters": "Stack_Address (ushort)",
+        "description": "Jumps to the specified instruction address. Valid at addresses 0-53.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-23: Stack_Address (USHORT_16)\n24-63: Unused"
+      },
+      "RocketAvionicsInstruction.ChildResourceSite": {
+        "opCode": "RocketAvionicsInstruction.ChildResourceSite",
+        "parameters": "Resource_Type, Density, Richness, Size (bytes)",
+        "description": "OUTPUT DATA: Contains child resource mining site information. Valid at addresses 54-62 (read-only).",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Resource_Type (BYTE_8)\n16-23: Density_Ratio_x10 (BYTE_8, 0-255 = 0-25.5)\n24-31: Richness_Ratio_x10 (BYTE_8, 0-255 = 0-25.5)\n32-39: Size_Ratio_x10 (BYTE_8, 0-255 = 0-25.5)\n40-63: Unused"
+      },
+      "RocketAvionicsInstruction.ChildSurveySite": {
+        "opCode": "RocketAvionicsInstruction.ChildSurveySite",
+        "parameters": "Resource_Type (byte), Survey_Progress (ushort)",
+        "description": "OUTPUT DATA: Contains child survey site information for scanning operations. Valid at addresses 54-62 (read-only).",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Resource_Type (BYTE_8)\n16-31: Survey_Progress (USHORT_16)\n32-63: Unused"
+      },
+      "TraderInstruction.None": {
+        "opCode": "TraderInstruction.None",
+        "parameters": "none",
+        "description": "No operation. Placeholder instruction.",
+        "byteLayout": "0-63: Unused"
+      },
+      "TraderInstruction.WriteTraderData": {
+        "opCode": "TraderInstruction.WriteTraderData",
+        "parameters": "Write_Index (byte)",
+        "description": "Writes trader contact data to the stack at the specified index.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Write_Index (BYTE_8)\n16-63: Unused"
+      },
+      "TraderInstruction.StrongestContactIdHash": {
+        "opCode": "TraderInstruction.StrongestContactIdHash",
+        "parameters": "Trader_Id_Hash (int)",
+        "description": "Contains the ID hash of the strongest trader contact signal.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-39: Trader_Id_Hash (INT_32)\n40-63: Unused"
+      },
+      "TraderInstruction.StrongestContactMetaData": {
+        "opCode": "TraderInstruction.StrongestContactMetaData",
+        "parameters": "Shuttle_Type, Contact_Tier, Contacted",
+        "description": "Returns metadata about the strongest trader contact including shuttle type and tier.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Shuttle_Type (BYTE_8)\n16-23: Contact_Tier (BYTE_8)\n24-31: Contacted (BOOL_8)\n32-63: Unused"
+      },
+      "TraderInstruction.StrongestContactSignalData": {
+        "opCode": "TraderInstruction.StrongestContactSignalData",
+        "parameters": "Watts_To_Resolve (ushort), Lifetime (ushort)",
+        "description": "Returns signal strength data for the strongest trader contact.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-23: Watts_To_Resolve (USHORT_16)\n24-39: Lifetime (USHORT_16)\n40-63: Unused"
+      },
+      "TraderInstruction.WriteTraderBuyData": {
+        "opCode": "TraderInstruction.WriteTraderBuyData",
+        "parameters": "Write_Index (byte), Write_Count (byte)",
+        "description": "Writes a buy order to purchase items from the trader.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Write_Index (BYTE_8)\n16-23: Write_Count (BYTE_8)\n24-63: Unused"
+      },
+      "TraderInstruction.WriteTraderSellData": {
+        "opCode": "TraderInstruction.WriteTraderSellData",
+        "parameters": "Write_Index (byte), Write_Count (byte)",
+        "description": "Writes a sell order to sell items to the trader.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Write_Index (BYTE_8)\n16-23: Write_Count (BYTE_8)\n24-63: Unused"
+      },
+      "TraderInstruction.TraderBuyThingData": {
+        "opCode": "TraderInstruction.TraderBuyThingData",
+        "parameters": "Quantity (byte), Prefab_Hash (int)",
+        "description": "Specifies an item to buy from the trader by PrefabHash.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Quantity (BYTE_8)\n16-47: Prefab_Hash (INT_32)\n48-63: Unused"
+      },
+      "TraderInstruction.TraderBuyThingChildData": {
+        "opCode": "TraderInstruction.TraderBuyThingChildData",
+        "parameters": "Quantity (byte), Prefab_Hash (int)",
+        "description": "Specifies a child item to buy (item contained within another item).",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Quantity (BYTE_8)\n16-47: Prefab_Hash (INT_32)\n48-63: Unused"
+      },
+      "TraderInstruction.TraderBuyGasData": {
+        "opCode": "TraderInstruction.TraderBuyGasData",
+        "parameters": "Quantity (byte), Gas_Types_Bitflag (uint)",
+        "description": "Specifies gas to purchase from the trader using gas type bitflags.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Quantity (BYTE_8)\n16-47: Gas_Types_Bitflag (UINT_32)\n48-63: Unused"
+      },
+      "TraderInstruction.TraderSellThingData": {
+        "opCode": "TraderInstruction.TraderSellThingData",
+        "parameters": "Quantity (byte), Prefab_Hash (int)",
+        "description": "Specifies an item to sell to the trader by PrefabHash.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Quantity (BYTE_8)\n16-47: Prefab_Hash (INT_32)\n48-63: Unused"
+      },
+      "TraderInstruction.TraderSellGasData": {
+        "opCode": "TraderInstruction.TraderSellGasData",
+        "parameters": "Quantity (byte), Gas_Types_Bitflag (uint)",
+        "description": "Specifies gas to sell to the trader using gas type bitflags.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Quantity (BYTE_8)\n16-47: Gas_Types_Bitflag (UINT_32)\n48-63: Unused"
+      },
+      "TraderInstruction.TraderSellThingChildData": {
+        "opCode": "TraderInstruction.TraderSellThingChildData",
+        "parameters": "Quantity (byte), Prefab_Hash (int)",
+        "description": "Specifies a child item to sell (item contained within another item).",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Quantity (BYTE_8)\n16-47: Prefab_Hash (INT_32)\n48-63: Unused"
+      },
+      "TraderInstruction.FilterPrefabHashEquals": {
+        "opCode": "TraderInstruction.FilterPrefabHashEquals",
+        "parameters": "Prefab_Hash (int)",
+        "description": "Filter trade items where PrefabHash equals the specified value.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-39: Prefab_Hash (INT_32)\n40-63: Unused"
+      },
+      "TraderInstruction.FilterPrefabHashNotEquals": {
+        "opCode": "TraderInstruction.FilterPrefabHashNotEquals",
+        "parameters": "Prefab_Hash (int)",
+        "description": "Filter trade items where PrefabHash does NOT equal the specified value.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-39: Prefab_Hash (INT_32)\n40-63: Unused"
+      },
+      "TraderInstruction.FilterSortingClassCompare": {
+        "opCode": "TraderInstruction.FilterSortingClassCompare",
+        "parameters": "Condition (byte), Sorting_Class (ushort)",
+        "description": "Filter trade items by comparing their SortingClass.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Condition_Operation (BYTE_8)\n16-31: Sorting_Class (USHORT_16)\n32-63: Unused"
+      },
+      "TraderInstruction.FilterQuantityCompare": {
+        "opCode": "TraderInstruction.FilterQuantityCompare",
+        "parameters": "Condition (byte), Quantity (ushort)",
+        "description": "Filter trade items by comparing their quantity.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Condition_Operation (BYTE_8)\n16-31: Quantity (USHORT_16)\n32-63: Unused"
+      },
+      "TraderInstruction.FilterGasContains": {
+        "opCode": "TraderInstruction.FilterGasContains",
+        "parameters": "Gas_Types_Bitflag (uint)",
+        "description": "Filter for items/containers that contain the specified gas types.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-39: Gas_Types_Bitflag (UINT_32)\n40-63: Unused"
+      },
+      "TraderInstruction.FilterGasNotContains": {
+        "opCode": "TraderInstruction.FilterGasNotContains",
+        "parameters": "Gas_Types_Bitflag (uint)",
+        "description": "Filter for items/containers that do NOT contain the specified gas types.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-39: Gas_Types_Bitflag (UINT_32)\n40-63: Unused"
+      },
+      "OccupancyInstruction.None": {
+        "opCode": "OccupancyInstruction.None",
+        "parameters": "none",
+        "description": "No operation. Placeholder instruction.",
+        "byteLayout": "0-63: Unused"
+      },
+      "OccupancyInstruction.Entity": {
+        "opCode": "OccupancyInstruction.Entity",
+        "parameters": "Entity data",
+        "description": "Detects entity occupancy (players, NPCs, creatures in the sensor area).",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-63: Entity_Data"
+      },
+      "OccupancyInstruction.Inventory": {
+        "opCode": "OccupancyInstruction.Inventory",
+        "parameters": "Inventory data",
+        "description": "Detects inventory occupancy (items in slots within the sensor area).",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-63: Inventory_Data"
+      },
+      "CelestialTrackerInstruction.BodyOrientation": {
+        "opCode": "CelestialTrackerInstruction.BodyOrientation",
+        "parameters": "Celestial_Index (byte), Horizontal (short), Vertical (short)",
+        "description": "Celestial body orientation data. Auto-populated by device with azimuth and elevation in deci-degrees.",
+        "byteLayout": "0-7: OP_CODE (BYTE_8)\n8-15: Celestial_Index (BYTE_8)\n16-31: Horizontal_Deci_Degrees (SHORT_16)\n32-47: Vertical_Deci_Degrees (SHORT_16)\n48-63: Unused"
+      }
     },
     "slotTypes": {
       "Hand": "Hand-held item slot.",
@@ -184,6 +440,157 @@
       "Target Plant": "Target plant for genetic operations.",
       "Chip": "Accepts microchip items.",
       "Propellant": "Accepts propellant for jetpacks/rockets."
+    },
+    "modes": {
+      "Inward": "Direction is inward - pulls atmosphere into the device/pipe network.",
+      "Outward": "Direction is outward - pushes atmosphere out of the device/pipe network.",
+      "Left": "Device operates on the left side/direction.",
+      "Right": "Device operates on the right side/direction.",
+      "Center": "Device operates in center position.",
+      "Horizontal": "Device orientation is horizontal.",
+      "Vertical": "Device orientation is vertical.",
+      "Mode0": "First mode (see device documentation for specific function).",
+      "Mode1": "Second mode (see device documentation for specific function).",
+      "Active": "Device is actively operating.",
+      "Inactive": "Device is inactive/standby.",
+      "Idle": "Device is idle, waiting for input or conditions.",
+      "Operate": "Device is in active operation mode.",
+      "Standby": "Device is on standby, ready but not actively operating.",
+      "Automatic": "Device operates automatically based on conditions.",
+      "Logic": "Logic mode - device responds to logic network signals.",
+      "None": "No mode selected / disabled.",
+      "Follow": "Robot follows the player.",
+      "Roam": "Robot roams freely.",
+      "MoveToTarget": "Robot moves to target location.",
+      "PathToTarget": "Robot finds path to target.",
+      "Mine": "Robot/device in mining mode.",
+      "Low": "Low level/intensity setting.",
+      "Medium": "Medium level/intensity setting.",
+      "High": "High level/intensity setting.",
+      "VeryLow": "Very low level/intensity setting.",
+      "Critical": "Critical warning level.",
+      "Default": "Default mode/setting.",
+      "Empty": "Indicates empty state.",
+      "Full": "Indicates full state.",
+      "Charging": "Device is charging.",
+      "Charged": "Device is fully charged.",
+      "Discharging": "Device is discharging.",
+      "Discharged": "Device is fully discharged.",
+      "Celsius": "Temperature displayed in Celsius.",
+      "Fahrenheit": "Temperature displayed in Fahrenheit.",
+      "Kelvin": "Temperature displayed in Kelvin.",
+      "Degrees": "Display format: degrees.",
+      "Percent": "Display format: percentage.",
+      "Seconds": "Time unit: seconds.",
+      "Minutes": "Time unit: minutes.",
+      "Days": "Time unit: days.",
+      "Number": "Display as numeric value.",
+      "String": "Display as text string.",
+      "Credits": "Display format: credits/currency.",
+      "Error": "Error state/display.",
+      "Warning": "Warning state/display.",
+      "Danger": "Danger warning display.",
+      "Dead": "Entity/plant is dead.",
+      "Pressurising": "Airlock is pressurizing.",
+      "Depressurising": "Airlock is depressurizing.",
+      "AirlockCycling": "Airlock is cycling between states.",
+      "Cold": "Cooling mode - device cools the atmosphere.",
+      "Hot": "Heating mode - device heats the atmosphere.",
+      "Flatten": "Terrain flattening mode for mining equipment.",
+      "Filter": "Sorter filters items based on criteria.",
+      "Split": "Sorter splits items to alternate outputs.",
+      "All": "Sorter requires all conditions to match.",
+      "Any": "Sorter requires any condition to match.",
+      "Auto": "Automatic mode - device operates without manual input.",
+      "Stabilize": "Genetic stabilization mode.",
+      "Destabilize": "Genetic destabilization mode.",
+      "Linked": "Wireless transmitter/receiver is linked.",
+      "Unlinked": "Wireless transmitter/receiver is not linked.",
+      "Passive": "Passive mode - device only receives, does not transmit.",
+      "Holding": "Landing pad is holding position.",
+      "Landed": "Spacecraft has landed on pad.",
+      "Moving": "Spacecraft is moving/docking.",
+      "NoContact": "Landing pad has no spacecraft contact.",
+      "Generating": "Generator is actively producing power.",
+      "Not Generating": "Generator is not producing power.",
+      "StorageFull": "Robot storage is full.",
+      "Unload": "Robot unload mode.",
+      "Happy": "Harvie robot is in happy state.",
+      "UnHappy": "Harvie robot is in unhappy state.",
+      "InStorm": "Weather station detects active storm.",
+      "NoStorm": "Weather station detects no storm.",
+      "StormIncoming": "Weather station detects incoming storm.",
+      "Survey": "Rocket avionics survey mode.",
+      "Chart": "Rocket avionics chart mode.",
+      "Deploy": "Rocket avionics deploy mode.",
+      "Discover": "Rocket avionics discover mode.",
+      "Invalid": "Invalid/error mode.",
+      "Prefab": "Hash display shows prefab hash.",
+      "GasLiquid": "Hash display shows gas/liquid type hash.",
+      "AND": "Logic gate AND operation.",
+      "OR": "Logic gate OR operation.",
+      "NAND": "Logic gate NAND operation.",
+      "NOR": "Logic gate NOR operation.",
+      "XOR": "Logic gate XOR (exclusive OR) operation.",
+      "XNOR": "Logic gate XNOR (exclusive NOR) operation.",
+      "Not": "Logical NOT operation - inverts input.",
+      "Add": "Math operation: addition (A + B).",
+      "Subtract": "Math operation: subtraction (A - B).",
+      "Multiply": "Math operation: multiplication (A * B).",
+      "Divide": "Math operation: division (A / B).",
+      "Mod": "Math operation: modulo (remainder of A / B).",
+      "Pow": "Math operation: power (A raised to power B).",
+      "Log": "Math operation: logarithm.",
+      "Atan2": "Math operation: two-argument arctangent.",
+      "Abs": "Math operation: absolute value.",
+      "Sqrt": "Math operation: square root.",
+      "Sin": "Math operation: sine (trigonometric).",
+      "Cos": "Math operation: cosine (trigonometric).",
+      "Tan": "Math operation: tangent (trigonometric).",
+      "Asin": "Math operation: arc sine (inverse sine).",
+      "Acos": "Math operation: arc cosine (inverse cosine).",
+      "Atan": "Math operation: arc tangent (inverse tangent).",
+      "Exp": "Math operation: exponential (e^x).",
+      "Ceil": "Math operation: ceiling (round up).",
+      "Floor": "Math operation: floor (round down).",
+      "Round": "Math operation: round to nearest integer.",
+      "Rand": "Math operation: random number generation.",
+      "Equals": "Comparison: equal (A == B).",
+      "NotEquals": "Comparison: not equal (A != B).",
+      "Greater": "Comparison/selection: greater than (A > B).",
+      "Less": "Comparison/selection: less than (A < B).",
+      "Litres": "Display unit: litres (volume).",
+      "Meters": "Display unit: meters (distance).",
+      "Mol": "Display unit: moles (amount of substance).",
+      "Pa": "Display unit: Pascals (pressure).",
+      "Newtons": "Display unit: Newtons (force).",
+      "Power": "Display unit/mode: power/watts.",
+      "Occupied": "Slot/space is occupied.",
+      "Low Power": "Flashlight low power mode.",
+      "High Power": "Flashlight high power mode.",
+      "Whole Note": "Musical timing: whole note duration.",
+      "Half Note": "Musical timing: half note duration.",
+      "Quarter Note": "Musical timing: quarter note duration.",
+      "Eighth Note": "Musical timing: eighth note duration.",
+      "Sixteenth Note": "Musical timing: sixteenth note duration.",
+      "Red": "Color filter: Red.",
+      "Blue": "Color filter: Blue.",
+      "Green": "Color filter: Green.",
+      "Yellow": "Color filter: Yellow.",
+      "Orange": "Color filter: Orange.",
+      "Purple": "Color filter: Purple.",
+      "Pink": "Color filter: Pink.",
+      "White": "Color filter: White.",
+      "Black": "Color filter: Black.",
+      "Brown": "Color filter: Brown.",
+      "Gray": "Color filter: Gray.",
+      "Khaki": "Color filter: Khaki.",
+      "Alert": "Klaxon alert sound.",
+      "One": "Klaxon countdown: One.",
+      "Two": "Klaxon countdown: Two.",
+      "Three": "Klaxon countdown: Three.",
+      "Four": "Klaxon countdown: Four.",
+      "Five": "Klaxon countdown: Five."
     }
   },
   "devices": [
@@ -280,6 +687,16 @@
           "range": "CRC32",
           "description": "Custom name hash."
         }
+      },
+      "modeDescriptions": {
+        "Operate": {
+          "modeValue": "Operate",
+          "description": "Manual operation mode - responds to direct Open/Close commands."
+        },
+        "Logic": {
+          "modeValue": "Logic",
+          "description": "Logic mode - controlled via logic network signals."
+        }
       }
     },
     {
@@ -351,6 +768,28 @@
           "range": "CRC32",
           "access": "Read",
           "description": "Custom name hash."
+        }
+      },
+      "modeDescriptions": {
+        "Whole Note": {
+          "modeValue": "Whole Note",
+          "description": "Oscillation period: whole note duration (4 beats)."
+        },
+        "Half Note": {
+          "modeValue": "Half Note",
+          "description": "Oscillation period: half note duration (2 beats)."
+        },
+        "Quarter Note": {
+          "modeValue": "Quarter Note",
+          "description": "Oscillation period: quarter note duration (1 beat)."
+        },
+        "Eighth Note": {
+          "modeValue": "Eighth Note",
+          "description": "Oscillation period: eighth note duration (half beat)."
+        },
+        "Sixteenth Note": {
+          "modeValue": "Sixteenth Note",
+          "description": "Oscillation period: sixteenth note duration (quarter beat)."
         }
       }
     },
@@ -844,6 +1283,16 @@
           "slotType": "ProgrammableChip",
           "description": "IC for automated control logic."
         }
+      },
+      "modeDescriptions": {
+        "Idle": {
+          "modeValue": "Idle",
+          "description": "Idle mode - combustor is not processing hydrogen."
+        },
+        "Active": {
+          "modeValue": "Active",
+          "description": "Active mode - combustor is burning hydrogen to generate heat."
+        }
       }
     },
     {
@@ -889,6 +1338,16 @@
           "dataType": "Integer",
           "range": "Any",
           "description": "Unique reference ID for this specific device instance."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Default tablet mode."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Secondary tablet mode."
         }
       }
     },
@@ -1266,6 +1725,16 @@
           "dataType": "Integer",
           "range": "N/A",
           "description": "Unique reference ID for this specific item instance."
+        }
+      },
+      "modeDescriptions": {
+        "Low Power": {
+          "modeValue": "Low Power",
+          "description": "Low power mode - dimmer light, longer battery life."
+        },
+        "High Power": {
+          "modeValue": "High Power",
+          "description": "High power mode - brighter light, faster battery drain."
         }
       }
     },
@@ -2164,6 +2633,16 @@
           "range": "Any",
           "description": "Unique reference identifier."
         }
+      },
+      "modeDescriptions": {
+        "Outward": {
+          "modeValue": "Outward",
+          "description": "Expel mode - releases collected liquid into the environment."
+        },
+        "Inward": {
+          "modeValue": "Inward",
+          "description": "Collect mode - vacuums liquid from the environment into internal storage."
+        }
       }
     },
     {
@@ -2211,6 +2690,16 @@
           "range": "Any",
           "description": "Unique reference identifier."
         }
+      },
+      "modeDescriptions": {
+        "Default": {
+          "modeValue": "Default",
+          "description": "Normal mining mode - removes terrain and collects ore into your inventory."
+        },
+        "Flatten": {
+          "modeValue": "Flatten",
+          "description": "Flattening mode - levels terrain to create flat surfaces for building without collecting ore."
+        }
       }
     },
     {
@@ -2246,6 +2735,16 @@
           "dataType": "Integer",
           "range": "Any",
           "description": "Unique reference identifier."
+        }
+      },
+      "modeDescriptions": {
+        "Default": {
+          "modeValue": "Default",
+          "description": "Normal mining mode - maximum power for tough terrain and dense ore."
+        },
+        "Flatten": {
+          "modeValue": "Flatten",
+          "description": "Flattening mode - powerful leveling for industrial-scale terrain modification."
         }
       }
     },
@@ -2346,6 +2845,16 @@
           "range": "Any",
           "description": "Unique reference identifier."
         }
+      },
+      "modeDescriptions": {
+        "Default": {
+          "modeValue": "Default",
+          "description": "Normal mining mode - faster ore collection with deeper penetration."
+        },
+        "Flatten": {
+          "modeValue": "Flatten",
+          "description": "Flattening mode - quickly levels terrain for large construction projects."
+        }
       }
     },
     {
@@ -2414,6 +2923,16 @@
           "range": "Any",
           "description": "Unique reference identifier."
         }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Sample mode - extracts genetic sample from plant."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Insert mode - inserts genetic sample into plant."
+        }
       }
     },
     {
@@ -2455,7 +2974,17 @@
         }
       },
       "deviceKey": "ThingItemRemoteDetonator",
-      "displayName": "Remote Detonator"
+      "displayName": "Remote Detonator",
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Arm mode - prepares charges for detonation."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Detonate mode - triggers armed charges."
+        }
+      }
     },
     {
       "logicDescriptions": {
@@ -3032,6 +3561,16 @@
           "range": "Variable",
           "description": "Unique reference ID of the device."
         }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Add terrain mode - places terrain material."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Remove terrain mode - removes terrain material."
+        }
       }
     },
     {
@@ -3235,7 +3774,29 @@
         }
       },
       "deviceKey": "ThingLandingpad_DataConnectionPiece",
-      "displayName": null
+      "displayName": null,
+      "modeDescriptions": {
+        "None": {
+          "modeValue": "None",
+          "description": "No landing pad status."
+        },
+        "NoContact": {
+          "modeValue": "NoContact",
+          "description": "Landing pad has no spacecraft contact."
+        },
+        "Moving": {
+          "modeValue": "Moving",
+          "description": "Spacecraft is approaching or departing."
+        },
+        "Holding": {
+          "modeValue": "Holding",
+          "description": "Spacecraft is holding position above pad."
+        },
+        "Landed": {
+          "modeValue": "Landed",
+          "description": "Spacecraft has successfully landed and data link active."
+        }
+      }
     },
     {
       "logicDescriptions": {
@@ -3603,7 +4164,17 @@
         }
       },
       "deviceKey": "ThingLandingpad_GasTankConnectorPiece",
-      "displayName": null
+      "displayName": null,
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Refuel mode - transfers fuel TO landed spacecraft."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Drain mode - transfers fuel FROM landed spacecraft."
+        }
+      }
     },
     {
       "logicDescriptions": {
@@ -3971,7 +4542,17 @@
         }
       },
       "deviceKey": "ThingLandingpad_LiquidTankConnectorPiece",
-      "displayName": null
+      "displayName": "Landingpad Tank Connector (Liquid)",
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Refuel mode - transfers liquid TO the landed spacecraft from your pipe network."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Drain mode - transfers liquid FROM the landed spacecraft into your pipe network."
+        }
+      }
     },
     {
       "deviceKey": "ThingLandingpad_ThreshholdPiece",
@@ -4126,6 +4707,28 @@
           "range": "CRC32",
           "description": "Custom name hash."
         }
+      },
+      "modeDescriptions": {
+        "Whole Note": {
+          "modeValue": "Whole Note",
+          "description": "Step timing: whole note duration (slowest)."
+        },
+        "Half Note": {
+          "modeValue": "Half Note",
+          "description": "Step timing: half note duration."
+        },
+        "Quarter Note": {
+          "modeValue": "Quarter Note",
+          "description": "Step timing: quarter note duration."
+        },
+        "Eighth Note": {
+          "modeValue": "Eighth Note",
+          "description": "Step timing: eighth note duration."
+        },
+        "Sixteenth Note": {
+          "modeValue": "Sixteenth Note",
+          "description": "Step timing: sixteenth note duration (fastest)."
+        }
       }
     },
     {
@@ -4249,6 +4852,56 @@
           "dataType": "Hash",
           "range": "CRC32",
           "description": "Custom name hash (if renamed)."
+        }
+      },
+      "modeDescriptions": {
+        "Red": {
+          "modeValue": "Red",
+          "description": "Accepts Red access cards only."
+        },
+        "Blue": {
+          "modeValue": "Blue",
+          "description": "Accepts Blue access cards only."
+        },
+        "Green": {
+          "modeValue": "Green",
+          "description": "Accepts Green access cards only."
+        },
+        "Yellow": {
+          "modeValue": "Yellow",
+          "description": "Accepts Yellow access cards only."
+        },
+        "Orange": {
+          "modeValue": "Orange",
+          "description": "Accepts Orange access cards only."
+        },
+        "Purple": {
+          "modeValue": "Purple",
+          "description": "Accepts Purple access cards only."
+        },
+        "Pink": {
+          "modeValue": "Pink",
+          "description": "Accepts Pink access cards only."
+        },
+        "White": {
+          "modeValue": "White",
+          "description": "Accepts White access cards only."
+        },
+        "Black": {
+          "modeValue": "Black",
+          "description": "Accepts Black access cards only."
+        },
+        "Brown": {
+          "modeValue": "Brown",
+          "description": "Accepts Brown access cards only."
+        },
+        "Gray": {
+          "modeValue": "Gray",
+          "description": "Accepts Gray access cards only."
+        },
+        "Khaki": {
+          "modeValue": "Khaki",
+          "description": "Accepts Khaki access cards only."
         }
       }
     },
@@ -4519,13 +5172,13 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingModularDeviceFlipSwitch",
-      "slotDescriptions": [],
+      "slotDescriptions": {},
       "displayName": "Flip Switch"
     },
     {
       "logicDescriptions": {},
       "deviceKey": "ThingModularDeviceGauge2x2",
-      "slotDescriptions": [],
+      "slotDescriptions": {},
       "displayName": "Gauge 2x2"
     },
     {
@@ -4603,13 +5256,60 @@
           "range": "CRC32",
           "description": "Custom name hash (if renamed)."
         }
-      }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Standard display - shows label with configured color."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Blinking mode - label blinks for attention/alerts."
+        }
+      },
+      "displayName": "Label Diode 2"
     },
     {
-      "logicDescriptions": {},
+      "logicDescriptions": {
+        "Power": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Returns 1 if diode is powered."
+        },
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "Display mode for the label."
+        },
+        "On": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Diode on/off state."
+        },
+        "Color": {
+          "dataType": "Integer",
+          "range": "0+",
+          "description": "RGB color value for display."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
       "deviceKey": "ThingModularDeviceLabelDiode3",
-      "slotDescriptions": [],
-      "displayName": "Label Diode 3"
+      "slotDescriptions": {},
+      "displayName": "Label Diode 3",
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Standard display - shows label with configured color."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Blinking mode - label blinks for attention/alerts."
+        }
+      }
     },
     {
       "deviceKey": "ThingModularDeviceLEDdisplay2",
@@ -4972,7 +5672,18 @@
           "access": "Read",
           "description": "Custom name hash."
         }
-      }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Input mode - numpad accepts digit input, Setting updates on confirm."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Display mode - numpad shows Setting value without accepting input."
+        }
+      },
+      "displayName": "Logic Num Pad"
     },
     {
       "deviceKey": "ThingModularDeviceRoundButton",
@@ -5323,13 +6034,7 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingPortableSolarPanel",
-      "slotDescriptions": [
-        {
-          "slotType": "Any",
-          "description": "Slot for Battery.",
-          "slotName": "Battery"
-        }
-      ],
+      "slotDescriptions": {},
       "displayName": "Portable Solar Panel"
     },
     {
@@ -5534,7 +6239,37 @@
           "name": "Ore",
           "type": "Ore"
         }
-      ]
+      ],
+      "modeDescriptions": {
+        "None": {
+          "modeValue": "None",
+          "description": "Robot is idle, awaiting commands."
+        },
+        "Follow": {
+          "modeValue": "Follow",
+          "description": "Robot follows the player who owns it."
+        },
+        "Roam": {
+          "modeValue": "Roam",
+          "description": "Robot roams the area autonomously."
+        },
+        "MoveToTarget": {
+          "modeValue": "MoveToTarget",
+          "description": "Robot moves directly to target coordinates."
+        },
+        "PathToTarget": {
+          "modeValue": "PathToTarget",
+          "description": "Robot pathfinds to target, avoiding obstacles."
+        },
+        "Mine": {
+          "modeValue": "Mine",
+          "description": "Robot mines ore from terrain."
+        },
+        "Unload": {
+          "modeValue": "Unload",
+          "description": "Robot unloads carried items to storage."
+        }
+      }
     },
     {
       "deviceKey": "ThingRover_MkI",
@@ -5831,6 +6566,16 @@
           "access": "Read",
           "description": "Whether combustion is occurring at output."
         }
+      },
+      "modeDescriptions": {
+        "Outward": {
+          "modeValue": "Outward",
+          "description": "Pushes atmosphere OUT of the connected pipe network into the room. Used to pressurize spaces or vent gases."
+        },
+        "Inward": {
+          "modeValue": "Inward",
+          "description": "Pulls atmosphere IN from the room to the connected pipe network. Used to evacuate or filter atmosphere."
+        }
       }
     },
     {
@@ -5936,6 +6681,16 @@
         "Export": {
           "slotType": "Export",
           "description": "Collect finished compost/soil."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Standard composting - processes organic matter into fertilizer at normal rate."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Enhanced composting - may use more power but processes faster or produces better output."
         }
       }
     },
@@ -6163,7 +6918,18 @@
           "name": "Export",
           "type": "Standard"
         }
-      ]
+      ],
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Smelting mode - combines multiple ore types into alloys according to recipes."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Refining mode - purifies single ore type, removing impurities for higher quality output."
+        }
+      },
+      "displayName": "Advanced Furnace"
     },
     {
       "deviceKey": "ThingStructureAdvancedPackagingMachine",
@@ -6627,6 +7393,16 @@
           "range": "Any",
           "description": "Hash of the device custom name if set."
         }
+      },
+      "modeDescriptions": {
+        "Outward": {
+          "modeValue": "Outward",
+          "description": "Outputs conditioned air to the connected pipe network."
+        },
+        "Inward": {
+          "modeValue": "Inward",
+          "description": "Takes air from the connected pipe network for conditioning."
+        }
       }
     },
     {
@@ -6836,18 +7612,7 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingStructureArcFurnace",
-      "slotDescriptions": [
-        {
-          "slotType": "Any",
-          "description": "Slot for Import.",
-          "slotName": "Import"
-        },
-        {
-          "slotType": "Any",
-          "description": "Slot for Export.",
-          "slotName": "Export"
-        }
-      ],
+      "slotDescriptions": {},
       "displayName": "Arc Furnace"
     },
     {
@@ -7108,18 +7873,7 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingStructureAutomatedOven",
-      "slotDescriptions": [
-        {
-          "slotType": "Any",
-          "description": "Slot for Import.",
-          "slotName": "Import"
-        },
-        {
-          "slotType": "Any",
-          "description": "Slot for Export.",
-          "slotName": "Export"
-        }
-      ],
+      "slotDescriptions": {},
       "displayName": "Automated Oven"
     },
     {
@@ -8257,7 +9011,18 @@
           "access": "Read",
           "description": "Hash of custom name set for this device."
         }
-      }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Standard view mode - normal camera feed."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Alternative view mode - may provide different visual filter or overlay."
+        }
+      },
+      "displayName": "Camera"
     },
     {
       "deviceKey": "ThingStructureCapsuleTankGas",
@@ -9064,7 +9829,17 @@
         }
       },
       "deviceKey": "ThingStructureChuteDigitalFlipFlopSplitterLeft",
-      "displayName": "Chute Digital Flip Flop Splitter Left"
+      "displayName": "Chute Digital Flip Flop Splitter Left",
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Count mode - routes Setting number of items left, then switches."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Alternate mode - alternates each item between outputs."
+        }
+      }
     },
     {
       "logicDescriptions": {
@@ -9120,7 +9895,17 @@
         }
       },
       "deviceKey": "ThingStructureChuteDigitalFlipFlopSplitterRight",
-      "displayName": "Chute Digital Flip Flop Splitter Right"
+      "displayName": "Chute Digital Flip Flop Splitter Right",
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Count mode - routes Setting number of items right, then switches."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Alternate mode - alternates each item between outputs."
+        }
+      }
     },
     {
       "logicDescriptions": {
@@ -10478,13 +11263,7 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingStructureConsole",
-      "slotDescriptions": [
-        {
-          "slotType": "Any",
-          "description": "Slot for Circuitboard.",
-          "slotName": "Circuitboard"
-        }
-      ],
+      "slotDescriptions": {},
       "displayName": "Console"
     },
     {
@@ -13897,24 +14676,18 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingStructureFiltration",
-      "slotDescriptions": [
-        {
-          "slotType": "Any",
-          "description": "Slot for Gas Filter.",
-          "slotName": "Gas Filter"
+      "slotDescriptions": {},
+      "displayName": "Filtration",
+      "modeDescriptions": {
+        "Inward": {
+          "modeValue": "Inward",
+          "description": "Filters gases from the input pipe network."
         },
-        {
-          "slotType": "Any",
-          "description": "Slot for Gas Filter.",
-          "slotName": "Gas Filter"
-        },
-        {
-          "slotType": "Any",
-          "description": "Slot for ProgrammableChip.",
-          "slotName": "ProgrammableChip"
+        "Outward": {
+          "modeValue": "Outward",
+          "description": "Outputs filtered gases to the pipe network."
         }
-      ],
-      "displayName": "Filtration"
+      }
     },
     {
       "deviceKey": "ThingStructureFiltrationLiquid",
@@ -14557,7 +15330,7 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingStructureFridgeSmall",
-      "slotDescriptions": [],
+      "slotDescriptions": {},
       "displayName": "Fridge Small"
     },
     {
@@ -14743,6 +15516,16 @@
           "dataType": "Integer",
           "range": "N/A",
           "description": "Hash of the device's custom name if set."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Smelting mode - combines multiple ore types into alloys. Requires correct ratios and temperature."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Refining mode - purifies single ore type into pure ingots. Higher temperature yields better purity."
         }
       }
     },
@@ -15549,6 +16332,16 @@
           "range": "0-1",
           "description": "Trigger to activate or toggle light."
         }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Normal mode - constant illumination when On."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Logic mode - responds to Activate signal for automated lighting control."
+        }
       }
     },
     {
@@ -15873,7 +16666,7 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingStructureGrowLight",
-      "slotDescriptions": [],
+      "slotDescriptions": {},
       "displayName": "Grow Light"
     },
     {
@@ -15947,6 +16740,16 @@
           "range": "CRC32",
           "description": "Custom name hash."
         }
+      },
+      "modeDescriptions": {
+        "Happy": {
+          "modeValue": "Happy",
+          "description": "Harvie is in happy mood - functioning well and content."
+        },
+        "UnHappy": {
+          "modeValue": "UnHappy",
+          "description": "Harvie is unhappy - may need attention or has encountered issues."
+        }
       }
     },
     {
@@ -16017,6 +16820,16 @@
           "dataType": "Hash",
           "range": "CRC32",
           "description": "Custom name hash."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Standard mining - OGRE mines forward horizontally, collecting all ore types."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Selective mining - OGRE may filter ore types or adjust mining behavior."
         }
       }
     },
@@ -16919,6 +17732,168 @@
           "dataType": "Hash",
           "range": "CRC32",
           "description": "Custom name hash."
+        }
+      },
+      "modeDescriptions": {
+        "Alert": {
+          "modeValue": "Alert",
+          "description": "General alert alarm sound."
+        },
+        "Alarm1": {
+          "modeValue": "Alarm1",
+          "description": "Alarm sound variant 1."
+        },
+        "Alarm2": {
+          "modeValue": "Alarm2",
+          "description": "Alarm sound variant 2."
+        },
+        "Alarm3": {
+          "modeValue": "Alarm3",
+          "description": "Alarm sound variant 3."
+        },
+        "Alarm4": {
+          "modeValue": "Alarm4",
+          "description": "Alarm sound variant 4."
+        },
+        "Alarm5": {
+          "modeValue": "Alarm5",
+          "description": "Alarm sound variant 5."
+        },
+        "Alarm6": {
+          "modeValue": "Alarm6",
+          "description": "Alarm sound variant 6."
+        },
+        "Alarm7": {
+          "modeValue": "Alarm7",
+          "description": "Alarm sound variant 7."
+        },
+        "Alarm8": {
+          "modeValue": "Alarm8",
+          "description": "Alarm sound variant 8."
+        },
+        "Alarm9": {
+          "modeValue": "Alarm9",
+          "description": "Alarm sound variant 9."
+        },
+        "Alarm10": {
+          "modeValue": "Alarm10",
+          "description": "Alarm sound variant 10."
+        },
+        "Alarm11": {
+          "modeValue": "Alarm11",
+          "description": "Alarm sound variant 11."
+        },
+        "Alarm12": {
+          "modeValue": "Alarm12",
+          "description": "Alarm sound variant 12."
+        },
+        "One": {
+          "modeValue": "One",
+          "description": "Countdown voice: \"One\"."
+        },
+        "Two": {
+          "modeValue": "Two",
+          "description": "Countdown voice: \"Two\"."
+        },
+        "Three": {
+          "modeValue": "Three",
+          "description": "Countdown voice: \"Three\"."
+        },
+        "Four": {
+          "modeValue": "Four",
+          "description": "Countdown voice: \"Four\"."
+        },
+        "Five": {
+          "modeValue": "Five",
+          "description": "Countdown voice: \"Five\"."
+        },
+        "Floor": {
+          "modeValue": "Floor",
+          "description": "Floor announcement sound."
+        },
+        "Welcome": {
+          "modeValue": "Welcome",
+          "description": "Welcome announcement sound."
+        },
+        "LiftOff": {
+          "modeValue": "LiftOff",
+          "description": "Rocket liftoff announcement."
+        },
+        "FireFireFire": {
+          "modeValue": "FireFireFire",
+          "description": "Fire alarm: \"Fire Fire Fire!\""
+        },
+        "IntruderAlert": {
+          "modeValue": "IntruderAlert",
+          "description": "Intruder alert warning sound."
+        },
+        "HaltWhoGoesThere": {
+          "modeValue": "HaltWhoGoesThere",
+          "description": "Security challenge: \"Halt! Who goes there?\""
+        },
+        "PressureHigh": {
+          "modeValue": "PressureHigh",
+          "description": "High pressure warning announcement."
+        },
+        "PressureLow": {
+          "modeValue": "PressureLow",
+          "description": "Low pressure warning announcement."
+        },
+        "TemperatureHigh": {
+          "modeValue": "TemperatureHigh",
+          "description": "High temperature warning announcement."
+        },
+        "TemperatureLow": {
+          "modeValue": "TemperatureLow",
+          "description": "Low temperature warning announcement."
+        },
+        "HighCarbonDioxide": {
+          "modeValue": "HighCarbonDioxide",
+          "description": "High CO2 level warning announcement."
+        },
+        "PollutantsDetected": {
+          "modeValue": "PollutantsDetected",
+          "description": "Pollutant detection warning announcement."
+        },
+        "PowerLow": {
+          "modeValue": "PowerLow",
+          "description": "Low power warning announcement."
+        },
+        "StormIncoming": {
+          "modeValue": "StormIncoming",
+          "description": "Incoming storm warning announcement."
+        },
+        "SystemFailure": {
+          "modeValue": "SystemFailure",
+          "description": "System failure warning announcement."
+        },
+        "MalfunctionDetected": {
+          "modeValue": "MalfunctionDetected",
+          "description": "Malfunction detection warning announcement."
+        },
+        "RocketLaunching": {
+          "modeValue": "RocketLaunching",
+          "description": "Rocket launching announcement."
+        },
+        "TraderIncoming": {
+          "modeValue": "TraderIncoming",
+          "description": "Incoming trader announcement."
+        },
+        "TraderLanded": {
+          "modeValue": "TraderLanded",
+          "description": "Trader landed announcement."
+        },
+        "Music1": {
+          "modeValue": "Music1",
+          "description": "Background music track 1."
+        },
+        "Music2": {
+          "modeValue": "Music2",
+          "description": "Background music track 2."
+        },
+        "Music3": {
+          "modeValue": "Music3",
+          "description": "Background music track 3."
         }
       }
     },
@@ -19195,13 +20170,7 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingStructureLiquidTankStorage",
-      "slotDescriptions": [
-        {
-          "slotType": "Any",
-          "description": "Slot for Liquid Canister.",
-          "slotName": "Liquid Canister"
-        }
-      ],
+      "slotDescriptions": {},
       "displayName": "Liquid Tank Storage"
     },
     {
@@ -19711,7 +20680,7 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingStructureLogicButton",
-      "slotDescriptions": [],
+      "slotDescriptions": {},
       "displayName": "Button"
     },
     {
@@ -19762,6 +20731,24 @@
           "dataType": "Hash",
           "range": "CRC32",
           "description": "Custom name hash."
+        }
+      },
+      "modeDescriptions": {
+        "Equals": {
+          "modeValue": "Equals",
+          "description": "Outputs 1 if Input1 equals Input2, else 0. Exact comparison."
+        },
+        "NotEquals": {
+          "modeValue": "NotEquals",
+          "description": "Outputs 1 if Input1 does NOT equal Input2, else 0. Difference check."
+        },
+        "Greater": {
+          "modeValue": "Greater",
+          "description": "Outputs 1 if Input1 > Input2, else 0. Greater than comparison."
+        },
+        "Less": {
+          "modeValue": "Less",
+          "description": "Outputs 1 if Input1 < Input2, else 0. Less than comparison."
         }
       }
     },
@@ -19857,6 +20844,32 @@
           "range": "CRC32",
           "description": "Custom name hash."
         }
+      },
+      "modeDescriptions": {
+        "AND": {
+          "modeValue": "AND",
+          "description": "Outputs 1 only if ALL inputs are 1 (true). Used for conditions requiring multiple factors."
+        },
+        "OR": {
+          "modeValue": "OR",
+          "description": "Outputs 1 if ANY input is 1 (true). Used for conditions where any single factor is sufficient."
+        },
+        "NAND": {
+          "modeValue": "NAND",
+          "description": "NOT-AND: Outputs 0 only if ALL inputs are 1. Inverse of AND operation."
+        },
+        "NOR": {
+          "modeValue": "NOR",
+          "description": "NOT-OR: Outputs 1 only if ALL inputs are 0. Inverse of OR operation."
+        },
+        "XOR": {
+          "modeValue": "XOR",
+          "description": "Exclusive OR: Outputs 1 if inputs are DIFFERENT. Used for toggle/flip-flop logic."
+        },
+        "XNOR": {
+          "modeValue": "XNOR",
+          "description": "Exclusive NOR: Outputs 1 if inputs are SAME. Used for equality checking."
+        }
       }
     },
     {
@@ -19934,6 +20947,40 @@
           "range": "CRC32",
           "description": "Custom name hash."
         }
+      },
+      "modeDescriptions": {
+        "Add": {
+          "modeValue": "Add",
+          "description": "Addition: Output = Input1 + Input2. Basic arithmetic sum."
+        },
+        "Subtract": {
+          "modeValue": "Subtract",
+          "description": "Subtraction: Output = Input1 - Input2. Basic arithmetic difference."
+        },
+        "Multiply": {
+          "modeValue": "Multiply",
+          "description": "Multiplication: Output = Input1 × Input2. Basic arithmetic product."
+        },
+        "Divide": {
+          "modeValue": "Divide",
+          "description": "Division: Output = Input1 ÷ Input2. Returns 0 if Input2 is 0."
+        },
+        "Mod": {
+          "modeValue": "Mod",
+          "description": "Modulo: Output = remainder of Input1 ÷ Input2. Useful for cycling values."
+        },
+        "Pow": {
+          "modeValue": "Pow",
+          "description": "Power: Output = Input1 raised to the power of Input2."
+        },
+        "Log": {
+          "modeValue": "Log",
+          "description": "Logarithm: Output = log base Input2 of Input1."
+        },
+        "Atan2": {
+          "modeValue": "Atan2",
+          "description": "Arctangent2: Output = angle in radians from coordinates (Input1, Input2)."
+        }
       }
     },
     {
@@ -19994,6 +21041,68 @@
           "access": "Read",
           "description": "Custom name hash."
         }
+      },
+      "modeDescriptions": {
+        "Abs": {
+          "modeValue": "Abs",
+          "description": "Absolute value: Output = |Input|. Removes negative sign."
+        },
+        "Sqrt": {
+          "modeValue": "Sqrt",
+          "description": "Square root: Output = √Input. Returns 0 for negative inputs."
+        },
+        "Sin": {
+          "modeValue": "Sin",
+          "description": "Sine: Output = sin(Input). Input in radians, output -1 to 1."
+        },
+        "Cos": {
+          "modeValue": "Cos",
+          "description": "Cosine: Output = cos(Input). Input in radians, output -1 to 1."
+        },
+        "Tan": {
+          "modeValue": "Tan",
+          "description": "Tangent: Output = tan(Input). Input in radians."
+        },
+        "Asin": {
+          "modeValue": "Asin",
+          "description": "Arc sine: Output = asin(Input). Input -1 to 1, output in radians."
+        },
+        "Acos": {
+          "modeValue": "Acos",
+          "description": "Arc cosine: Output = acos(Input). Input -1 to 1, output in radians."
+        },
+        "Atan": {
+          "modeValue": "Atan",
+          "description": "Arc tangent: Output = atan(Input). Output in radians."
+        },
+        "Exp": {
+          "modeValue": "Exp",
+          "description": "Exponential: Output = e^Input. Natural exponential function."
+        },
+        "Log": {
+          "modeValue": "Log",
+          "description": "Natural logarithm: Output = ln(Input). Base-e logarithm."
+        },
+        "Ceil": {
+          "modeValue": "Ceil",
+          "description": "Ceiling: Output = smallest integer ≥ Input. Rounds up."
+        },
+        "Floor": {
+          "modeValue": "Floor",
+          "description": "Floor: Output = largest integer ≤ Input. Rounds down."
+        },
+        "Round": {
+          "modeValue": "Round",
+          "description": "Round: Output = nearest integer to Input. Standard rounding."
+        },
+        "Rand": {
+          "modeValue": "Rand",
+          "description": "Random: Output = random value from 0 to Input. Generates randomness."
+        },
+        "Not": {
+          "modeValue": "Not",
+          "description": "Logical NOT: Output = 1 if Input is 0, else 0. Inverts boolean."
+        }
       }
     },
     {
@@ -20019,6 +21128,16 @@
           "dataType": "Float",
           "range": "Any",
           "description": "Stored value that persists and can be read/written by logic."
+        }
+      },
+      "modeDescriptions": {
+        "Logic": {
+          "modeValue": "Logic",
+          "description": "Stores a logic value that can be read/written by IC10."
+        },
+        "String": {
+          "modeValue": "String",
+          "description": "Stores a text string value for display or logic use."
         }
       }
     },
@@ -20218,7 +21337,7 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingStructureLogicReagentReader",
-      "slotDescriptions": [],
+      "slotDescriptions": {},
       "displayName": "Reagent Reader"
     },
     {
@@ -20343,6 +21462,24 @@
           "range": "CRC32",
           "description": "Custom name hash."
         }
+      },
+      "modeDescriptions": {
+        "Equals": {
+          "modeValue": "Equals",
+          "description": "Selects input where value equals comparison value."
+        },
+        "NotEquals": {
+          "modeValue": "NotEquals",
+          "description": "Selects input where value does not equal comparison value."
+        },
+        "Greater": {
+          "modeValue": "Greater",
+          "description": "Selects input with greater value."
+        },
+        "Less": {
+          "modeValue": "Less",
+          "description": "Selects input with lesser value."
+        }
       }
     },
     {
@@ -20460,6 +21597,16 @@
           "dataType": "Integer",
           "range": "32",
           "description": "Maximum instructions in memory stack (32)."
+        }
+      },
+      "modeDescriptions": {
+        "All": {
+          "modeValue": "All",
+          "description": "ALL mode - only passes items matching ALL specified criteria."
+        },
+        "Any": {
+          "modeValue": "Any",
+          "description": "ANY mode - passes items matching ANY of the specified criteria."
         }
       }
     },
@@ -21895,6 +23042,12 @@
           "range": "CRC32",
           "description": "Custom name hash."
         }
+      },
+      "modeDescriptions": {
+        "Auto": {
+          "modeValue": "Auto",
+          "description": "Automatic mode - packer operates automatically when items are available."
+        }
       }
     },
     {
@@ -22034,7 +23187,7 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingStructurePassthroughHeatExchangerGasToLiquid",
-      "slotDescriptions": [],
+      "slotDescriptions": {},
       "displayName": "CounterFlow Heat Exchanger - Gas + Liquid"
     },
     {
@@ -22878,6 +24031,16 @@
           "range": "Any",
           "description": "Hash of custom name if set."
         }
+      },
+      "modeDescriptions": {
+        "Linked": {
+          "modeValue": "Linked",
+          "description": "Transmitter is linked to a receiver and actively transmitting power."
+        },
+        "Unlinked": {
+          "modeValue": "Unlinked",
+          "description": "Transmitter has no active link to any receiver."
+        }
       }
     },
     {
@@ -23004,6 +24167,16 @@
           "dataType": "Integer",
           "range": "Any",
           "description": "Hash of custom name if set."
+        }
+      },
+      "modeDescriptions": {
+        "Linked": {
+          "modeValue": "Linked",
+          "description": "Receiver is linked to a transmitter and receiving power."
+        },
+        "Unlinked": {
+          "modeValue": "Unlinked",
+          "description": "Receiver has no active link to any transmitter."
         }
       }
     },
@@ -24972,7 +26145,29 @@
         }
       },
       "deviceKey": "ThingStructureRocketAvionics",
-      "displayName": "Rocket Avionics"
+      "displayName": "Rocket Avionics",
+      "modeDescriptions": {
+        "Survey": {
+          "modeValue": "Survey",
+          "description": "Survey mode - scans destination for landing sites and resources."
+        },
+        "Chart": {
+          "modeValue": "Chart",
+          "description": "Chart mode - maps the destination terrain and features."
+        },
+        "Deploy": {
+          "modeValue": "Deploy",
+          "description": "Deploy mode - releases payload or equipment at destination."
+        },
+        "Discover": {
+          "modeValue": "Discover",
+          "description": "Discover mode - searches for new locations or phenomena."
+        },
+        "Invalid": {
+          "modeValue": "Invalid",
+          "description": "Invalid mode - destination or configuration error."
+        }
+      }
     },
     {
       "logicDescriptions": {
@@ -26245,7 +27440,17 @@
         }
       },
       "deviceKey": "ThingStructureSDBSilo",
-      "displayName": "SDB Silo"
+      "displayName": "SDB Silo",
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Armed mode - SDB silo ready to launch on Activate signal."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Safe mode - SDB silo will not launch, safe for loading/maintenance."
+        }
+      }
     },
     {
       "deviceKey": "ThingStructureSecurityCameraFishEye",
@@ -26285,6 +27490,16 @@
           "dataType": "Integer",
           "range": "Any",
           "description": "Hash of the device custom name if set."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Standard fish-eye view - wide-angle surveillance with full room coverage."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Alternative mode - may adjust distortion correction or field of view."
         }
       }
     },
@@ -26327,6 +27542,16 @@
           "range": "Any",
           "description": "Hash of the device custom name if set."
         }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Standard left-angle view - fixed surveillance angled left."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Alternative mode - may provide different visual processing."
+        }
       }
     },
     {
@@ -26367,6 +27592,16 @@
           "dataType": "Integer",
           "range": "Any",
           "description": "Hash of the device custom name if set."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Auto-pan mode - camera automatically sweeps back and forth for wider coverage."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Manual/Fixed mode - camera stays at set position for focused surveillance."
         }
       }
     },
@@ -26409,6 +27644,16 @@
           "range": "Any",
           "description": "Hash of the device custom name if set."
         }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Standard right-angle view - fixed surveillance angled right."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Alternative mode - may provide different visual processing."
+        }
       }
     },
     {
@@ -26449,6 +27694,16 @@
           "dataType": "Integer",
           "range": "Any",
           "description": "Hash of the device custom name if set."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Standard forward view - fixed surveillance pointing straight ahead."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Alternative mode - may provide different visual processing."
         }
       }
     },
@@ -27592,7 +28847,7 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingStructureSolarPanelFlat",
-      "slotDescriptions": [],
+      "slotDescriptions": {},
       "displayName": "Solar Panel (Flat)"
     },
     {
@@ -27740,6 +28995,16 @@
           "access": "Read",
           "description": "Hash of custom name set for this device."
         }
+      },
+      "modeDescriptions": {
+        "Generating": {
+          "modeValue": "Generating",
+          "description": "Generator is actively burning fuel and producing power."
+        },
+        "Not Generating": {
+          "modeValue": "Not Generating",
+          "description": "Generator is idle, no fuel being consumed."
+        }
       }
     },
     {
@@ -27829,6 +29094,20 @@
           "slotType": "Data Disk",
           "description": "Data disk slot for filter configuration."
         }
+      },
+      "modeDescriptions": {
+        "Left": {
+          "modeValue": "Left",
+          "description": "Sorts items to the left output when filter matches."
+        },
+        "Right": {
+          "modeValue": "Right",
+          "description": "Sorts items to the right output when filter matches."
+        },
+        "Center": {
+          "modeValue": "Center",
+          "description": "Items pass straight through without sorting."
+        }
       }
     },
     {
@@ -27869,6 +29148,46 @@
           "dataType": "Hash",
           "range": "CRC32",
           "description": "Custom name hash."
+        },
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "Spotlight tracking mode."
+        },
+        "Horizontal": {
+          "dataType": "Float",
+          "range": "-180 to 180",
+          "description": "Horizontal rotation angle in degrees."
+        },
+        "Vertical": {
+          "dataType": "Float",
+          "range": "-90 to 90",
+          "description": "Vertical tilt angle in degrees."
+        },
+        "PositionX": {
+          "dataType": "Float",
+          "range": "Any",
+          "description": "X world position of spotlight."
+        },
+        "PositionY": {
+          "dataType": "Float",
+          "range": "Any",
+          "description": "Y world position of spotlight."
+        },
+        "PositionZ": {
+          "dataType": "Float",
+          "range": "Any",
+          "description": "Z world position of spotlight."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Manual mode - spotlight angle controlled by Horizontal/Vertical logic values."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Tracking mode - spotlight may automatically track movement or targets."
         }
       }
     },
@@ -28355,23 +29674,7 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingStructureSuitStorageLocker",
-      "slotDescriptions": [
-        {
-          "slotType": "Any",
-          "description": "Slot for Helmet.",
-          "slotName": "Helmet"
-        },
-        {
-          "slotType": "Any",
-          "description": "Slot for Suit.",
-          "slotName": "Suit"
-        },
-        {
-          "slotType": "Any",
-          "description": "Slot for Back.",
-          "slotName": "Back"
-        }
-      ],
+      "slotDescriptions": {},
       "displayName": "Suit Storage Locker"
     },
     {
@@ -30223,7 +31526,7 @@
     {
       "logicDescriptions": {},
       "deviceKey": "ThingStructureTransformerSmallReversed",
-      "slotDescriptions": [],
+      "slotDescriptions": {},
       "displayName": "Transformer Reversed (Small)"
     },
     {
@@ -31941,6 +33244,20 @@
           "access": "Read",
           "description": "Custom name hash."
         }
+      },
+      "modeDescriptions": {
+        "InStorm": {
+          "modeValue": "InStorm",
+          "description": "Weather station is currently within an active storm."
+        },
+        "NoStorm": {
+          "modeValue": "NoStorm",
+          "description": "Weather station detects clear weather, no storm present."
+        },
+        "StormIncoming": {
+          "modeValue": "StormIncoming",
+          "description": "Weather station detects a storm approaching."
+        }
       }
     },
     {
@@ -31966,6 +33283,536 @@
           "dataType": "Hash",
           "range": "CRC32",
           "description": "Custom name hash."
+        }
+      }
+    },
+    {
+      "deviceKey": "ThingItemMiningDrillPneumatic",
+      "displayName": "Pneumatic Mining Drill",
+      "logicDescriptions": {
+        "Power": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Returns 1 if device has air pressure to operate."
+        },
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "Drill mode: 0=Default (mine ore), 1=Flatten (level terrain)."
+        },
+        "Error": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Returns 1 if drill has an error (e.g., no air pressure)."
+        },
+        "Activate": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Returns 1 when drill is actively mining."
+        },
+        "On": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Drill on/off state."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
+      "modeDescriptions": {
+        "Default": {
+          "modeValue": "Default",
+          "description": "Normal mining mode - removes terrain and collects ore. Uses compressed air instead of battery."
+        },
+        "Flatten": {
+          "modeValue": "Flatten",
+          "description": "Flattening mode - levels terrain for construction without collecting ore. Uses compressed air."
+        }
+      }
+    },
+    {
+      "deviceKey": "ThingItemGasCanisterSmart",
+      "displayName": "Gas Canister (Smart)",
+      "logicDescriptions": {
+        "Pressure": {
+          "dataType": "Float",
+          "range": "0+ kPa",
+          "description": "Internal gas pressure in kPa."
+        },
+        "Temperature": {
+          "dataType": "Float",
+          "range": "0+ K",
+          "description": "Internal gas temperature in Kelvin."
+        },
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "0=Fill (accept gas), 1=Empty (release gas)."
+        },
+        "RatioOxygen": {
+          "dataType": "Float",
+          "range": "0-1",
+          "description": "Oxygen ratio in canister."
+        },
+        "RatioCarbonDioxide": {
+          "dataType": "Float",
+          "range": "0-1",
+          "description": "CO2 ratio in canister."
+        },
+        "RatioNitrogen": {
+          "dataType": "Float",
+          "range": "0-1",
+          "description": "Nitrogen ratio in canister."
+        },
+        "RatioVolatiles": {
+          "dataType": "Float",
+          "range": "0-1",
+          "description": "Volatiles ratio in canister."
+        },
+        "TotalMoles": {
+          "dataType": "Float",
+          "range": "0+",
+          "description": "Total gas moles in canister."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Fill mode - canister accepts gas from connected pipe network when pressure differential allows."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Empty mode - canister releases gas into connected pipe network when pressure differential allows."
+        }
+      }
+    },
+    {
+      "deviceKey": "ThingItemLiquidCanisterSmart",
+      "displayName": "Liquid Canister (Smart)",
+      "logicDescriptions": {
+        "Pressure": {
+          "dataType": "Float",
+          "range": "0+ kPa",
+          "description": "Internal liquid pressure in kPa."
+        },
+        "Temperature": {
+          "dataType": "Float",
+          "range": "0+ K",
+          "description": "Internal liquid temperature in Kelvin."
+        },
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "0=Fill (accept liquid), 1=Empty (release liquid)."
+        },
+        "TotalMoles": {
+          "dataType": "Float",
+          "range": "0+",
+          "description": "Total liquid moles in canister."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Fill mode - canister accepts liquid from connected pipe network."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Empty mode - canister releases liquid into connected pipe network."
+        }
+      }
+    },
+    {
+      "deviceKey": "ThingDynamicGasTankAdvanced",
+      "displayName": "Gas Tank Mk II",
+      "logicDescriptions": {
+        "Pressure": {
+          "dataType": "Float",
+          "range": "0+ kPa",
+          "description": "Internal gas pressure in kPa."
+        },
+        "Temperature": {
+          "dataType": "Float",
+          "range": "0+ K",
+          "description": "Internal gas temperature in Kelvin."
+        },
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "0=Fill (accept gas), 1=Empty (release gas)."
+        },
+        "TotalMoles": {
+          "dataType": "Float",
+          "range": "0+",
+          "description": "Total gas moles in tank."
+        },
+        "RatioOxygen": {
+          "dataType": "Float",
+          "range": "0-1",
+          "description": "Oxygen ratio in tank."
+        },
+        "RatioCarbonDioxide": {
+          "dataType": "Float",
+          "range": "0-1",
+          "description": "CO2 ratio in tank."
+        },
+        "RatioNitrogen": {
+          "dataType": "Float",
+          "range": "0-1",
+          "description": "Nitrogen ratio in tank."
+        },
+        "RatioVolatiles": {
+          "dataType": "Float",
+          "range": "0-1",
+          "description": "Volatiles ratio in tank."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Fill mode - tank accepts gas from connected pipe network."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Empty mode - tank releases gas into connected pipe network."
+        }
+      }
+    },
+    {
+      "deviceKey": "ThingDynamicAirConditioner",
+      "displayName": "Portable Air Conditioner",
+      "logicDescriptions": {
+        "Power": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Returns 1 if device has battery power."
+        },
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "0=Cold (cooling), 1=Hot (heating)."
+        },
+        "On": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Device on/off state."
+        },
+        "Temperature": {
+          "dataType": "Float",
+          "range": "0+ K",
+          "description": "Current ambient temperature reading."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
+      "modeDescriptions": {
+        "Cold": {
+          "modeValue": "Cold",
+          "description": "Cooling mode - removes heat from surrounding atmosphere, lowering temperature. Battery-powered portable unit."
+        },
+        "Hot": {
+          "modeValue": "Hot",
+          "description": "Heating mode - adds heat to surrounding atmosphere, raising temperature. Battery-powered portable unit."
+        }
+      }
+    },
+    {
+      "deviceKey": "ThingAppliancePlantGeneticStabilizer",
+      "displayName": "Plant Genetic Stabilizer",
+      "logicDescriptions": {
+        "Power": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Returns 1 if device is powered."
+        },
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "0=Stabilize (lock genetics), 1=Destabilize (unlock for mutation)."
+        },
+        "On": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Device on/off state."
+        },
+        "Activate": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Triggers genetic operation on target plant."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
+      "modeDescriptions": {
+        "Stabilize": {
+          "modeValue": "Stabilize",
+          "description": "Stabilize mode - locks plant genetics, preventing random mutation during harvest. Use to preserve desired traits."
+        },
+        "Destabilize": {
+          "modeValue": "Destabilize",
+          "description": "Destabilize mode - unlocks plant genetics, enabling mutation and cross-breeding. Use for genetic experimentation."
+        }
+      }
+    },
+    {
+      "deviceKey": "ThingCircuitboardHashDisplay",
+      "displayName": "Hash Display",
+      "logicDescriptions": {
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "0=Prefab (item type hash), 1=GasLiquid (contents type hash)."
+        },
+        "Setting": {
+          "dataType": "Hash",
+          "range": "Any",
+          "description": "The hash value being displayed."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
+      "modeDescriptions": {
+        "Prefab": {
+          "modeValue": "Prefab",
+          "description": "Displays PrefabHash - the item/structure type identifier. Useful for sorting systems."
+        },
+        "GasLiquid": {
+          "modeValue": "GasLiquid",
+          "description": "Displays the gas or liquid type hash of the contents. Useful for atmosphere monitoring."
+        }
+      }
+    },
+    {
+      "deviceKey": "ThingLandingpad_CenterPiece01",
+      "displayName": "Landingpad Center",
+      "logicDescriptions": {
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-4",
+          "description": "Landing status: 0=None, 1=NoContact, 2=Moving, 3=Holding, 4=Landed."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
+      "modeDescriptions": {
+        "None": {
+          "modeValue": "None",
+          "description": "No landing pad status - pad is inactive or not configured."
+        },
+        "NoContact": {
+          "modeValue": "NoContact",
+          "description": "No spacecraft contact - pad is ready but no ship is detected."
+        },
+        "Moving": {
+          "modeValue": "Moving",
+          "description": "Spacecraft is moving - ship is approaching, departing, or repositioning."
+        },
+        "Holding": {
+          "modeValue": "Holding",
+          "description": "Spacecraft is holding position - ship is hovering above pad awaiting landing clearance."
+        },
+        "Landed": {
+          "modeValue": "Landed",
+          "description": "Spacecraft has landed - ship is secured on pad, ready for cargo/fuel transfer."
+        }
+      }
+    },
+    {
+      "deviceKey": "ThingItemMiningCharge",
+      "displayName": "Mining Charge",
+      "logicDescriptions": {
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "0=Impact detonation, 1=Remote detonation."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Impact detonation - charge explodes on collision with terrain or objects."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Remote detonation - charge arms on placement and waits for remote trigger signal."
+        }
+      }
+    },
+    {
+      "deviceKey": "ThingStructureLogicTransmitter",
+      "displayName": "Logic Transmitter",
+      "logicDescriptions": {
+        "Power": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Returns 1 if device is powered."
+        },
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "0=Passive (receive only), 1=Active (transmit)."
+        },
+        "On": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Device on/off state."
+        },
+        "Setting": {
+          "dataType": "Float",
+          "range": "Any",
+          "description": "Value being transmitted/received."
+        },
+        "Channel": {
+          "dataType": "Integer",
+          "range": "0+",
+          "description": "Wireless channel for communication."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
+      "modeDescriptions": {
+        "Passive": {
+          "modeValue": "Passive",
+          "description": "Passive mode - device only receives signals on its channel, does not broadcast."
+        },
+        "Active": {
+          "modeValue": "Active",
+          "description": "Active mode - device broadcasts its Setting value on the configured channel."
+        }
+      }
+    },
+    {
+      "deviceKey": "ThingPortableComposter",
+      "displayName": "Portable Composter",
+      "logicDescriptions": {
+        "Power": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Returns 1 if device is powered."
+        },
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "Operating mode for composting process."
+        },
+        "On": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Device on/off state."
+        },
+        "Activate": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Returns 1 when actively composting."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Standard composting mode - processes organic matter into fertilizer."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Alternative composting mode - may affect output ratio or speed."
+        }
+      }
+    },
+    {
+      "deviceKey": "ThingStructureChuteFlipFlopSplitter",
+      "displayName": "Chute Flip Flop Splitter",
+      "logicDescriptions": {
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "Splitter direction mode."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Output left - next item routes to left output."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Output right - next item routes to right output."
+        }
+      }
+    },
+    {
+      "deviceKey": "ThingStructurePipeOrgan",
+      "displayName": "Pipe Organ",
+      "logicDescriptions": {
+        "Mode": {
+          "dataType": "Integer",
+          "range": "0-1",
+          "description": "Organ playback mode."
+        },
+        "On": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "Organ on/off state."
+        },
+        "ReferenceId": {
+          "dataType": "Hash",
+          "range": "Unique",
+          "description": "Unique reference ID."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "Mode0",
+          "description": "Manual mode - plays notes based on logic input signals."
+        },
+        "Mode1": {
+          "modeValue": "Mode1",
+          "description": "Sequence mode - plays pre-programmed musical sequence."
         }
       }
     }

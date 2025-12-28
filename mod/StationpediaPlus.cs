@@ -449,7 +449,7 @@ namespace StationpediaPlus
             return null;
         }
 
-        // Static helper for slot descriptions
+        // Static helper for slot descriptions (physical slot types like "Battery", "Plant")
         public static SlotDescription GetSlotDescription(string deviceKey, string slotName)
         {
             string cleanName = CleanLogicTypeName(slotName);
@@ -465,7 +465,17 @@ namespace StationpediaPlus
                 }
             }
             
-            // Fall back to generic description
+            // Fall back to generic slot type description (e.g., "Battery", "Gas Canister")
+            if (GenericDescriptions?.slotTypes != null && GenericDescriptions.slotTypes.TryGetValue(cleanName, out var slotTypeDesc))
+            {
+                return new SlotDescription
+                {
+                    slotType = cleanName,
+                    description = slotTypeDesc
+                };
+            }
+            
+            // Also check slots (for slot logic types like "Quantity", "Occupied")
             if (GenericDescriptions?.slots != null && GenericDescriptions.slots.TryGetValue(cleanName, out var genericDesc))
             {
                 return new SlotDescription
@@ -473,6 +483,68 @@ namespace StationpediaPlus
                     slotType = cleanName,
                     description = genericDesc
                 };
+            }
+            
+            return null;
+        }
+        
+        // Static helper for mode descriptions (mode VALUES like "Outward", "Inward", "Mode0")
+        public static ModeDescription GetModeDescription(string deviceKey, string modeValue)
+        {
+            string cleanName = CleanLogicTypeName(modeValue);
+            
+            // Try device-specific mode description first
+            if (!string.IsNullOrEmpty(deviceKey) && DeviceDatabase != null && 
+                DeviceDatabase.TryGetValue(deviceKey, out var device))
+            {
+                if (device.modeDescriptions != null && 
+                    device.modeDescriptions.TryGetValue(cleanName, out var desc))
+                {
+                    return desc;
+                }
+            }
+            
+            // Fall back to generic mode description
+            if (GenericDescriptions?.modes != null && GenericDescriptions.modes.TryGetValue(cleanName, out var genericDesc))
+            {
+                return new ModeDescription
+                {
+                    modeValue = cleanName,
+                    description = genericDesc
+                };
+            }
+            
+            return null;
+        }
+        
+        // Static helper for connection descriptions (connection types like "Data", "Power", "LiquidPipe")
+        public static LogicDescription GetConnectionDescription(string deviceKey, string connectionType)
+        {
+            string cleanName = CleanLogicTypeName(connectionType);
+            
+            // Fall back to generic connection description (connections are universal)
+            if (GenericDescriptions?.connections != null && GenericDescriptions.connections.TryGetValue(cleanName, out var genericDesc))
+            {
+                return new LogicDescription
+                {
+                    dataType = "Connection",
+                    range = "N/A",
+                    description = genericDesc
+                };
+            }
+            
+            return null;
+        }
+
+        // Static helper for slot logic descriptions (LogicSlot types like "Occupied", "Quantity", "OccupantHash")
+        public static string GetSlotLogicDescription(string slotLogicType)
+        {
+            string cleanName = CleanLogicTypeName(slotLogicType);
+            
+            // Check genericDescriptions.slots for slot logic types
+            if (GenericDescriptions?.slots != null && GenericDescriptions.slots.TryGetValue(cleanName, out var desc))
+            {
+                return desc;
             }
             
             return null;
@@ -522,15 +594,10 @@ namespace StationpediaPlus
                 }
             }
             
-            // Fall back to generic description
+            // Fall back to generic description (now with full MemoryDescription objects)
             if (GenericDescriptions?.memory != null && GenericDescriptions.memory.TryGetValue(cleanName, out var genericDesc))
             {
-                return new MemoryDescription
-                {
-                    opCode = cleanName,
-                    parameters = "",
-                    description = genericDesc
-                };
+                return genericDesc;
             }
             
             return null;
@@ -568,8 +635,10 @@ namespace StationpediaPlus
     {
         public string deviceKey;
         public string displayName;
-        // Logic, LogicSlot, Mode, Connection all use the same SPDALogic prefab
+        // Logic, LogicSlot, Connection all use the same SPDALogic prefab
         public Dictionary<string, LogicDescription> logicDescriptions;
+        // Mode value descriptions (e.g., "Outward", "Inward" for Active Vent)
+        public Dictionary<string, ModeDescription> modeDescriptions;
         // Slot descriptions for SPDASlot items
         public Dictionary<string, SlotDescription> slotDescriptions;
         // Version/Tier descriptions for SPDAVersion items
@@ -584,6 +653,13 @@ namespace StationpediaPlus
         public string dataType;
         public string range;
         public string description;
+    }
+
+    [Serializable]
+    public class ModeDescription
+    {
+        public string modeValue;     // e.g., "Outward", "Inward", "Mode0", "Mode1"
+        public string description;   // What this mode does on this device
     }
 
     [Serializable]
@@ -611,14 +687,20 @@ namespace StationpediaPlus
     [Serializable]
     public class GenericDescriptionsData
     {
-        // Generic logic type descriptions (for Logic, LogicSlot, Mode, Connection)
+        // Generic logic type descriptions (for Logic, LogicSlot, Connection)
         public Dictionary<string, string> logic;
-        // Generic slot type descriptions
+        // Generic slot type descriptions (for physical slot types like "Battery", "Plant")
+        public Dictionary<string, string> slotTypes;
+        // Generic slot logic descriptions (for reading slot values like "Quantity", "Occupied")
         public Dictionary<string, string> slots;
+        // Generic mode descriptions (for common mode values)
+        public Dictionary<string, string> modes;
         // Generic version descriptions
         public Dictionary<string, string> versions;
-        // Generic memory instruction descriptions
-        public Dictionary<string, string> memory;
+        // Generic connection descriptions
+        public Dictionary<string, string> connections;
+        // Generic memory instruction descriptions (with byte layout)
+        public Dictionary<string, MemoryDescription> memory;
     }
     
     #endregion
@@ -696,16 +778,61 @@ namespace StationpediaPlus
                 return _cachedTooltipText;
 
             string cleanName = CleanLogicTypeName(_logicTypeName);
-            var desc = StationpediaPlusMod.GetLogicDescription(_deviceKey, cleanName);
             
-            if (desc != null)
+            // Handle Mode category differently - it uses mode VALUES like "Outward", "Inward"
+            if (_categoryName == "Mode")
             {
-                ConsoleWindow.Print($"[StationpediaPlus] Found description for {cleanName} on {_deviceKey}");
-                _cachedTooltipText = FormatTooltip(cleanName, desc);
-                return _cachedTooltipText;
+                var modeDesc = StationpediaPlusMod.GetModeDescription(_deviceKey, cleanName);
+                if (modeDesc != null)
+                {
+                    ConsoleWindow.Print($"[StationpediaPlus] Found mode description for {cleanName} on {_deviceKey}");
+                    _cachedTooltipText = FormatModeTooltip(cleanName, modeDesc);
+                    return _cachedTooltipText;
+                }
+            }
+            else if (_categoryName == "Connection")
+            {
+                // Connection types like "Data", "Power", "LiquidPipe" use connection descriptions
+                var connDesc = StationpediaPlusMod.GetConnectionDescription(_deviceKey, cleanName);
+                if (connDesc != null)
+                {
+                    ConsoleWindow.Print($"[StationpediaPlus] Found connection description for {cleanName} on {_deviceKey}");
+                    _cachedTooltipText = FormatTooltip(cleanName, connDesc);
+                    return _cachedTooltipText;
+                }
+            }
+            else if (_categoryName == "LogicSlot")
+            {
+                // LogicSlot types like "Occupied", "OccupantHash", "Quantity" use slot logic descriptions
+                var slotLogicDesc = StationpediaPlusMod.GetSlotLogicDescription(cleanName);
+                if (slotLogicDesc != null)
+                {
+                    ConsoleWindow.Print($"[StationpediaPlus] Found slot logic description for {cleanName} on {_deviceKey}");
+                    _cachedTooltipText = FormatSlotLogicTooltip(cleanName, slotLogicDesc);
+                    return _cachedTooltipText;
+                }
+                // Also try regular logic descriptions as fallback
+                var desc = StationpediaPlusMod.GetLogicDescription(_deviceKey, cleanName);
+                if (desc != null)
+                {
+                    ConsoleWindow.Print($"[StationpediaPlus] Found logic description for {cleanName} on {_deviceKey}");
+                    _cachedTooltipText = FormatTooltip(cleanName, desc);
+                    return _cachedTooltipText;
+                }
+            }
+            else
+            {
+                // Logic types use logic descriptions
+                var desc = StationpediaPlusMod.GetLogicDescription(_deviceKey, cleanName);
+                if (desc != null)
+                {
+                    ConsoleWindow.Print($"[StationpediaPlus] Found description for {cleanName} on {_deviceKey}");
+                    _cachedTooltipText = FormatTooltip(cleanName, desc);
+                    return _cachedTooltipText;
+                }
             }
             
-            ConsoleWindow.Print($"[StationpediaPlus] No description for {cleanName} on {_deviceKey}");
+            ConsoleWindow.Print($"[StationpediaPlus] No description for {cleanName} ({_categoryName}) on {_deviceKey}");
             
             // Return a default message if no description found
             _cachedTooltipText = $"<color=#FFA500><b>{cleanName}</b></color>\n\n" +
@@ -721,6 +848,22 @@ namespace StationpediaPlus
                    $"<b>Type:</b> {desc.dataType}   <b>Range:</b> {desc.range}\n" +
                    $"<color=#888888>─────────────────────</color>\n" +
                    $"{desc.description}";
+        }
+        
+        private string FormatModeTooltip(string cleanName, ModeDescription desc)
+        {
+            return $"<color=#9932CC><b>Mode: {cleanName}</b></color>\n" +
+                   $"<color=#888888>─────────────────────</color>\n" +
+                   $"{desc.description}";
+        }
+
+        private string FormatSlotLogicTooltip(string cleanName, string description)
+        {
+            return $"<color=#FFA500><b>Slot: {cleanName}</b></color>\n" +
+                   $"<color=#888888>─────────────────────</color>\n" +
+                   $"<b>Type:</b> LogicSlot   <b>Slots:</b> All readable slots\n" +
+                   $"<color=#888888>─────────────────────</color>\n" +
+                   $"{description}";
         }
 
         private string CleanLogicTypeName(string name)
