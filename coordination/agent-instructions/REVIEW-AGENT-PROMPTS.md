@@ -24,8 +24,8 @@ Reference files:
 Your tasks:
 1. For each device in your batch, find ALL logic types from Stationpedia.json
 2. Add descriptions for every MISSING logic type
-3. VERIFY Mode/Setting/Ratio/Error/Lock/Activate descriptions against source code
-4. Use standard descriptions for generic types (Power, Temperature, RatioOxygen, etc)
+3. VERIFY Mode/Setting/Ratio/Error/Lock/Activate descriptions against the game's source code in the workspace
+4. Use standard descriptions ONLY for generic types that likely don't change per device (Power, Temperature, RatioOxygen, etc)
 
 Output your complete device entries to:
 ```
