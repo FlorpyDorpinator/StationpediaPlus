@@ -1,10 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetadata xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <Name>StationpediaPlus</Name>
+  <Name>Stationpedia Ascended</Name>
   <Author>FlorpyDorp</Author>
-  <Version>1.0.0</Version>
-  <Description>Adds context-specific hover tooltips to Stationpedia logic types, providing detailed descriptions of what each logic value means for specific devices.</Description>
-  <ChangeLog xsi:nil="true" />
-  <Tags />
-  <InGameDescription xsi:nil="true" />
+  <Version>0.2.0</Version>
+  <Description>This is a Plugin Mod. It requires BepInEx to be installed with the StationeersLaunchPad plugin.
+See: https://github.com/StationeersLaunchPad/StationeersLaunchPad
+
+An enhanced Stationpedia experience with comprehensive tooltips, bug fixes, and quality of life improvements.
+
+Features:
+- Enhanced Tooltips: Hover over logic types, slots, memory, modes, and connections to see detailed explanations
+- Operational Details: A dedicated section showing advanced device information and tips
+- Page Customization: Replace, append, or prepend descriptions to any Stationpedia page via JSON
+- Bug Fixes: Fixed scrollbar handle disappearing and window dragging crashes
+- Custom Branding: Phoenix logo and orange accent colors
+
+All tooltips and descriptions are customizable via descriptions.json.
+
+Discord: https://discord.gg/stationeers</Description>
+  <ChangeLog>v0.2.0: Public release preparation, conditional compilation
+v0.1.3: Fixed PDB symbol format for hot-reload, added code organization
+v0.1.2: Major code refactoring into multi-file architecture
+v0.1.0: Initial beta with tooltips, operational details, bug fixes</ChangeLog>
+  <Tags>
+    <Tag>StationeersLaunchPad</Tag>
+    <Tag>UI</Tag>
+    <Tag>Helper</Tag>
+    <Tag>QualityOfLife</Tag>
+    <Tag>BugFix</Tag>
+  </Tags>
+  <InGameDescription><![CDATA[<size=30><color=#ffa500>Stationpedia Ascended</color></size>
+<color=#ff0000>This is a Plugin Mod. It requires BepInEx to be installed with the StationeersLaunchPad plugin.</color>
+See: https://github.com/StationeersLaunchPad/StationeersLaunchPad
+
+An enhanced Stationpedia experience with comprehensive tooltips, bug fixes, and quality of life improvements.
+
+<color=#ffa500>Features:</color>
+- Hover tooltips for logic types, slots, memory, modes, and connections
+- Operational Details section for advanced device information
+- Page description customization via JSON
+- Fixes for scrollbar handle and window dragging bugs
+- Custom phoenix branding
+
+All tooltips and descriptions are customizable via descriptions.json.
+]]></InGameDescription>
 </ModMetadata>

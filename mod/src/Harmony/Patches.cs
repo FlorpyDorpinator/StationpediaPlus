@@ -308,26 +308,17 @@ namespace StationpediaAscended.Patches
             textComponent.margin = new Vector4(10, 10, 10, 10);
             textComponent.text = textContent;
             
-            // Set up RectTransform - anchor to stretch horizontally
+            // Set up RectTransform - stretch horizontally, auto-size vertically
             var rectTransform = textGO.GetComponent<RectTransform>();
             rectTransform.anchorMin = new Vector2(0, 1);
             rectTransform.anchorMax = new Vector2(1, 1);
             rectTransform.pivot = new Vector2(0.5f, 1);
+            rectTransform.sizeDelta = new Vector2(-20, 0); // Width with margins, height will be auto
             
-            // Calculate height based on text content
-            int explicitLineCount = textContent.Split('\n').Length;
-            int estimatedWrappedLines = textContent.Length / 40;
-            int totalLines = Math.Max(explicitLineCount, estimatedWrappedLines);
-            float estimatedHeight = (totalLines * 17f) + 25f;
-            
-            // Set the size
-            rectTransform.sizeDelta = new Vector2(-20, estimatedHeight);
-            
-            // Add LayoutElement with explicit preferred height
-            var layoutElement = textGO.AddComponent<UnityEngine.UI.LayoutElement>();
-            layoutElement.flexibleWidth = 1;
-            layoutElement.preferredHeight = estimatedHeight;
-            layoutElement.minHeight = estimatedHeight;
+            // Let ContentSizeFitter handle the height automatically
+            var fitter = textGO.AddComponent<UnityEngine.UI.ContentSizeFitter>();
+            fitter.horizontalFit = UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained;
+            fitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
         }
 
         private static void ConfigureCategoryLayout(StationpediaCategory category, UniversalPage page)

@@ -14,6 +14,16 @@
     <Optimize>false</Optimize>
   </PropertyGroup>
 
+  <!-- Embed resources in Release builds only -->
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <EmbeddedResource Include="descriptions.json">
+      <LogicalName>StationpediaAscended.descriptions.json</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="phoenix-icon.png">
+      <LogicalName>StationpediaAscended.phoenix-icon.png</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
   <!-- Reference the Stationeers game DLLs -->
   <PropertyGroup>
     <!-- Update this path to your Stationeers installation -->
@@ -104,6 +114,28 @@
     <Copy SourceFiles="$(OutputPath)StationpediaAscended.pdb" DestinationFolder="$(ScriptsFolder)" Condition="Exists('$(OutputPath)StationpediaAscended.pdb')" />
     <Copy SourceFiles="$(ProjectDir)descriptions.json" DestinationFolder="$(ScriptsFolder)" />
     <Message Text="Mod copied to $(ScriptsFolder) for hot-reload (F6)" Importance="high" />
+  </Target>
+
+  <!-- Package mod to SLP mods folder for testing as released mod -->
+  <Target Name="Package">
+    <PropertyGroup>
+      <ModsFolder>$(USERPROFILE)\Documents\My Games\Stationeers\mods\StationpediaAscended</ModsFolder>
+      <BuildOutputFolder>$(ProjectDir)build_release</BuildOutputFolder>
+    </PropertyGroup>
+    
+    <!-- Create mod folder structure -->
+    <MakeDir Directories="$(ModsFolder)" />
+    <MakeDir Directories="$(ModsFolder)\About" />
+    
+    <!-- Copy mod files -->
+    <Copy SourceFiles="$(BuildOutputFolder)\StationpediaAscended.dll" DestinationFolder="$(ModsFolder)" />
+    <Copy SourceFiles="$(ProjectDir)About\About.xml" DestinationFolder="$(ModsFolder)\About" />
+    <Copy SourceFiles="$(ProjectDir)thumb.png" DestinationFolder="$(ModsFolder)\About" />
+    
+    <Message Text="============================================" Importance="high" />
+    <Message Text="Mod packaged to: $(ModsFolder)" Importance="high" />
+    <Message Text="Ready for testing as SLP mod!" Importance="high" />
+    <Message Text="============================================" Importance="high" />
   </Target>
 
 </Project>

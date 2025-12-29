@@ -22,10 +22,15 @@ namespace StationpediaAscended
     /// Stationpedia Ascended - Enhanced Stationpedia with tooltips and operational details
     /// Per apro: BepInPlugin attribute + BaseUnityPlugin base class is required for ScriptEngine hot-reload
     /// </summary>
-    [BepInPlugin("StationpediaAscended", "Stationpedia Ascended", "1.0.0")]
+    [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public class StationpediaAscendedMod : BaseUnityPlugin
     {
         #region Constants & Static References
+        
+        // Plugin metadata
+        public const string PluginGuid = "com.florpydorp.stationpediaascended";
+        public const string PluginName = "Stationpedia Ascended";
+        public const string PluginVersion = "0.2.0";
         
         public const string HarmonyId = "com.stationpediaascended.mod";
         
@@ -115,7 +120,7 @@ namespace StationpediaAscended
             // Start monitoring coroutine
             host.StartCoroutine(MonitorStationpediaCoroutineStatic());
             
-            ConsoleWindow.Print("[Stationpedia Ascended] Initialized via ScriptEngine!");
+            ConsoleWindow.Print($"[Stationpedia Ascended] v{PluginVersion} initialized via ScriptEngine!");
         }
         
         /// <summary>
@@ -269,6 +274,9 @@ namespace StationpediaAscended
                 // Initialize BepInEx logger
                 Log = BepInEx.Logging.Logger.CreateLogSource("Stationpedia Ascended");
                 
+                // Log version on startup
+                ConsoleWindow.Print($"[Stationpedia Ascended] v{PluginVersion} loading...");
+                
                 // Clean up any existing tooltip components from previous loads (for ScriptEngine hot-reload)
                 CleanupExistingTooltips();
                 
@@ -306,7 +314,7 @@ namespace StationpediaAscended
             _monitorCoroutine = StartCoroutine(MonitorStationpediaCoroutine());
             
             _initialized = true;
-            ConsoleWindow.Print("[Stationpedia Ascended] Initialized successfully!");
+            ConsoleWindow.Print($"[Stationpedia Ascended] v{PluginVersion} initialized successfully!");
         }
 
         // Coroutine-based monitoring (more reliable than Update() for ModBehaviour)
@@ -518,40 +526,57 @@ namespace StationpediaAscended
         #region Resource Loading
         
         /// <summary>
-        /// Load the custom phoenix icon from file
+        /// Load the custom phoenix icon from file or embedded resource
         /// </summary>
         private void LoadCustomIcon()
         {
             try
             {
-                // Possible paths for the custom icon
-                string[] possiblePaths = new[]
-                {
-                    // Dev folder - hardcoded for hot-reload development
-                    @"C:\Dev\12-17-25 Stationeers Respawn Update Code\StationpediaPlus\mod\icon.png",
-                    // Next to the executing assembly
-                    Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "icon.png"),
-                    // BepInEx scripts folder
-                    Path.Combine(BepInEx.Paths.BepInExRootPath, "scripts", "icon.png"),
-                };
+                byte[] imageData = null;
                 
-                string iconPath = null;
-                foreach (var path in possiblePaths)
+#if !DEBUG
+                // In Release builds, try embedded resource first
+                var assembly = Assembly.GetExecutingAssembly();
+                using (var stream = assembly.GetManifestResourceStream("StationpediaAscended.phoenix-icon.png"))
                 {
-                    if (File.Exists(path))
+                    if (stream != null)
                     {
-                        iconPath = path;
-                        break;
+                        imageData = new byte[stream.Length];
+                        stream.Read(imageData, 0, imageData.Length);
+                    }
+                }
+#endif
+                
+                // If no embedded resource (Debug build or resource not found), try file paths
+                if (imageData == null)
+                {
+                    var possiblePaths = new List<string>();
+                    
+#if DEBUG
+                    // Dev folder - only included in Debug builds for hot-reload development
+                    possiblePaths.Add(@"C:\Dev\12-17-25 Stationeers Respawn Update Code\StationpediaAscended\mod\phoenix-icon.png");
+#endif
+                    // Next to the executing assembly (works for both SLP mods folder and BepInEx scripts)
+                    possiblePaths.Add(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "phoenix-icon.png"));
+                    // BepInEx scripts folder
+                    possiblePaths.Add(Path.Combine(BepInEx.Paths.BepInExRootPath, "scripts", "phoenix-icon.png"));
+                    
+                    foreach (var path in possiblePaths)
+                    {
+                        if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                        {
+                            imageData = File.ReadAllBytes(path);
+                            break;
+                        }
                     }
                 }
                 
-                if (iconPath == null)
+                if (imageData == null)
                 {
                     return;
                 }
                 
-                // Load the image from file
-                byte[] imageData = File.ReadAllBytes(iconPath);
+                // Load the image
                 Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
                 texture.filterMode = FilterMode.Bilinear;
                 
@@ -567,7 +592,7 @@ namespace StationpediaAscended
                 }
                 else
                 {
-                    Log?.LogWarning("Failed to load icon.png - invalid image format");
+                    Log?.LogWarning("Failed to load phoenix-icon.png - invalid image format");
                 }
             }
             catch (Exception ex)
@@ -577,7 +602,7 @@ namespace StationpediaAscended
         }
 
         /// <summary>
-        /// Load device and generic descriptions from JSON file
+        /// Load device and generic descriptions from JSON file or embedded resource
         /// </summary>
         private void LoadDescriptions()
         {
@@ -586,30 +611,49 @@ namespace StationpediaAscended
             
             try
             {
-                // HARDCODED PATH FOR DEVELOPMENT - always use the source file first
-                string[] possiblePaths = new[]
-                {
-                    // Dev folder - hardcoded for hot-reload development
-                    @"C:\Dev\12-17-25 Stationeers Respawn Update Code\StationpediaAscended\mod\descriptions.json",
-                    // Next to the executing assembly (BepInEx scripts folder)
-                    Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "descriptions.json"),
-                    // BepInEx scripts folder via Application.dataPath
-                    Path.Combine(Application.dataPath, "..", "BepInEx", "scripts", "descriptions.json"),
-                };
+                string json = null;
                 
-                string jsonPath = null;
-                foreach (var path in possiblePaths)
+#if !DEBUG
+                // In Release builds, try embedded resource first
+                var assembly = Assembly.GetExecutingAssembly();
+                using (var stream = assembly.GetManifestResourceStream("StationpediaAscended.descriptions.json"))
                 {
-                    if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                    if (stream != null)
                     {
-                        jsonPath = path;
-                        break;
+                        using (var reader = new StreamReader(stream))
+                        {
+                            json = reader.ReadToEnd();
+                        }
+                    }
+                }
+#endif
+                
+                // If no embedded resource (Debug build or resource not found), try file paths
+                if (json == null)
+                {
+                    var possiblePaths = new List<string>();
+                    
+#if DEBUG
+                    // Dev folder - only included in Debug builds for hot-reload development
+                    possiblePaths.Add(@"C:\Dev\12-17-25 Stationeers Respawn Update Code\StationpediaAscended\mod\descriptions.json");
+#endif
+                    // Next to the executing assembly (works for both SLP mods folder and BepInEx scripts)
+                    possiblePaths.Add(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "descriptions.json"));
+                    // BepInEx scripts folder via Application.dataPath
+                    possiblePaths.Add(Path.Combine(Application.dataPath, "..", "BepInEx", "scripts", "descriptions.json"));
+                    
+                    foreach (var path in possiblePaths)
+                    {
+                        if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                        {
+                            json = File.ReadAllText(path);
+                            break;
+                        }
                     }
                 }
                 
-                if (jsonPath != null && File.Exists(jsonPath))
+                if (json != null)
                 {
-                    string json = File.ReadAllText(jsonPath);
                     var data = JsonConvert.DeserializeObject<DescriptionsRoot>(json);
                     
                     if (data?.devices != null)
@@ -783,35 +827,54 @@ namespace StationpediaAscended
             
             try
             {
-                // HARDCODED PATH FOR DEVELOPMENT - always use the source file
-                string[] possiblePaths = new[]
-                {
-                    // Dev folder - hardcoded for hot-reload development
-                    @"C:\Dev\12-17-25 Stationeers Respawn Update Code\StationpediaAscended\mod\descriptions.json",
-                    // Scripts folder (where we deploy to)
-                    Path.Combine(Application.dataPath, "..", "BepInEx", "scripts", "descriptions.json"),
-                    // Next to the executing assembly
-                    Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "descriptions.json"),
-                    // Fallback - mod folder in My Games
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), 
-                        "My Games", "Stationeers", "mods", "StationpediaAscended", "descriptions.json")
-                };
+                string json = null;
                 
-                string jsonPath = null;
-                foreach (var path in possiblePaths)
+#if !DEBUG
+                // In Release builds, try embedded resource first
+                var assembly = Assembly.GetExecutingAssembly();
+                using (var stream = assembly.GetManifestResourceStream("StationpediaAscended.descriptions.json"))
                 {
-                    if (string.IsNullOrEmpty(path)) continue;
-                    string fullPath = Path.GetFullPath(path);
-                    if (File.Exists(fullPath))
+                    if (stream != null)
                     {
-                        jsonPath = fullPath;
-                        break;
+                        using (var reader = new StreamReader(stream))
+                        {
+                            json = reader.ReadToEnd();
+                        }
+                    }
+                }
+#endif
+                
+                // If no embedded resource (Debug build or resource not found), try file paths
+                if (json == null)
+                {
+                    var possiblePaths = new List<string>();
+                    
+#if DEBUG
+                    // Dev folder - only included in Debug builds for hot-reload development
+                    possiblePaths.Add(@"C:\Dev\12-17-25 Stationeers Respawn Update Code\StationpediaAscended\mod\descriptions.json");
+#endif
+                    // Scripts folder (where we deploy to)
+                    possiblePaths.Add(Path.Combine(Application.dataPath, "..", "BepInEx", "scripts", "descriptions.json"));
+                    // Next to the executing assembly
+                    possiblePaths.Add(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "descriptions.json"));
+                    // Fallback - mod folder in My Games
+                    possiblePaths.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), 
+                        "My Games", "Stationeers", "mods", "StationpediaAscended", "descriptions.json"));
+                    
+                    foreach (var path in possiblePaths)
+                    {
+                        if (string.IsNullOrEmpty(path)) continue;
+                        string fullPath = Path.GetFullPath(path);
+                        if (File.Exists(fullPath))
+                        {
+                            json = File.ReadAllText(fullPath);
+                            break;
+                        }
                     }
                 }
                 
-                if (jsonPath != null && File.Exists(jsonPath))
+                if (json != null)
                 {
-                    string json = File.ReadAllText(jsonPath);
                     var data = JsonConvert.DeserializeObject<DescriptionsRoot>(json);
                     
                     if (data?.devices != null)
@@ -829,7 +892,7 @@ namespace StationpediaAscended
                 }
                 else
                 {
-                    Log?.LogWarning($"descriptions.json not found at {jsonPath}");
+                    Log?.LogWarning($"descriptions.json not found");
                 }
             }
             catch (Exception ex)
