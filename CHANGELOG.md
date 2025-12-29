@@ -2,6 +2,32 @@
 
 All notable changes to Stationpedia Ascended will be documented in this file.
 
+## [0.1.3] - 2025-12-28
+
+### 🔧 Build & Development Fixes
+- **Fixed PDB symbol format** - Changed from `portable` to `embedded` format to resolve Mono.Cecil hot-reload exceptions (`SymbolsNotMatchingException` and `MarshalDirectiveException`)
+- **Updated build task** - Simplified deployment to only copy DLL and descriptions.json (PDB now embedded in DLL)
+
+### 🏗️ Code Organization
+- **Added region markers** - Organized main StationpediaAscended.cs file with 12 collapsible regions for easier navigation:
+  - Constants & Static References
+  - Instance Fields
+  - ScriptEngine Hot-Reload Support
+  - Unity Lifecycle Methods
+  - GUI Rendering
+  - Resource Loading
+  - Harmony Patching
+  - Console Commands
+  - Static ScriptEngine Methods
+  - Tooltip Adding
+  - Description Lookup Helpers
+  - Cleanup
+
+### 📝 Documentation
+- Added XML documentation comments to major methods
+
+---
+
 ## [0.1.2] - 2025-12-28
 
 ### 🏗️ Major Code Refactoring

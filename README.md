@@ -2,7 +2,7 @@
 
 **An enhanced Stationpedia experience for Stationeers with comprehensive tooltips, bug fixes, and quality of life improvements.**
 
-![Stationpedia Ascended Header](assets/header-screenshot.gif)
+![Stationpedia Ascended Header](assets/header-screenshot.png)
 *The new Stationpedia Ascended interface with custom phoenix branding*
 
 ## ✨ Features
@@ -40,10 +40,8 @@ Complete control over Stationpedia page descriptions:
 - **Prepend** important notes before existing descriptions
 - JSON-based configuration for easy management
 
-![Description Customization](assets/description-customization.gif)
-*Easily customize page descriptions via JSON configuration*
 
-### 🐛 Critical Bug Fixes
+### 🐛 Stationpedia Bug Fixes
 
 #### Scrollbar Handle Fix
 Resolves the frustrating scrollbar handle disappearance bug that affects the base game:
@@ -176,22 +174,14 @@ We welcome contributions! Areas where you can help:
 
 ## 📋 Requirements
 
-- **Stationeers** (Latest Version)
-- **BepInEx** or **ScriptEngine** mod loader
-- **.NET Framework 4.8** (usually pre-installed)
+- **Stationeers** (Latest Stable Version)
+- **StationeersLaunchPad** (Latest Version)
 
-## 🐛 Known Issues & Compatibility
-
-- ✅ Compatible with most other Stationpedia mods
-- ✅ Safe to install/uninstall without save corruption
-- ⚠️ Hot-reload may occasionally require game restart
-- 📝 Some complex device descriptions may need community input
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](../../issues)
-- **Discussions**: [GitHub Discussions](../../discussions)
-- **Discord**: [Stationeers Modding Community](discord-link-placeholder)
+- **Issues**: [GitHub Issues](https://github.com/FlorpyDorpinator/StationpediaAscended/issues)
+- **Discord**: [Stationeers Modding Community](https://discord.com/channels/1370137389837717545/1454566815903514625r)
 
 ## 📜 License
 
@@ -201,27 +191,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Stationeers Development Team** - For creating an amazing game with extensive modding support
 - **BepInEx Team** - For the excellent modding framework
-- **Stationeers Modding Community** - For inspiration, feedback, and collaboration
+- **Stationeers Modding Community** - For inspiration, feedback, and collaboration. In particular Aproprosmath and JoeDiertay for their incrediblly generous advice, support and help making this.
 - **Contributors** - Thank you to everyone who helps improve this mod
 
----
-
-### 📊 Statistics
-- **500+ Device Descriptions** loaded from JSON
-- **132 Logic Types** with detailed explanations  
-- **33 Slot Types** comprehensively documented
-- **45 Memory Addresses** clearly explained
-- **Zero Performance Impact** on game performance
-
-### 🔮 Roadmap
-- [ ] Multi-language support
-- [ ] Visual enhancement options
-- [ ] Integration with other popular Stationeers mods
-- [ ] Advanced filtering and search capabilities
-- [ ] Community-driven description database
-
----
 
 *Made with ❤️ for the Stationeers community*
 
-![Footer Image](assets/footer-banner.gif)

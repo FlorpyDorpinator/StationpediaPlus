@@ -7545,7 +7545,29 @@
           "modeValue": "Inward",
           "description": "Takes air from the connected pipe network for conditioning."
         }
-      }
+      },
+      "OperationalDetails": [
+        {
+          "title": "Heat Pump Operation",
+          "description": "The Air Conditioner is a heat pump that moves thermal energy between its 100L internal volume and the waste output. It heats or cools the internal atmosphere toward the Setting temperature (default 293.15K / 20°C)."
+        },
+        {
+          "title": "Idle Power Draw",
+          "description": "When powered on but not actively heating/cooling, draws 345W idle power. Maximum power consumption is 6000W when operating at full capacity."
+        },
+        {
+          "title": "Efficiency Factors",
+          "description": "Three factors affect efficiency: (1) Temperature Differential - larger differences between current and target temp reduce efficiency. (2) Operational Temperature - extreme temps reduce efficiency. (3) Pressure Efficiency - optimal at ~100kPa, reduced at very low or very high pressures."
+        },
+        {
+          "title": "Connections",
+          "description": "Input: Takes gas from pipe network. Output: Returns conditioned gas. Output2 (Waste): Outputs waste heat/cold - connect this to space or a heat exchanger to dissipate."
+        },
+        {
+          "title": "Heat Exchange",
+          "description": "Energy transferred = (TargetTemp - CurrentTemp) × HeatCapacity × EfficiencyFactors. The waste output receives the opposite thermal load - if cooling input, waste heats up; if heating input, waste cools down."
+        }
+      ]
     },
     {
       "deviceKey": "ThingStructureAirlock",
@@ -11359,7 +11381,29 @@
         }
       },
       "deviceKey": "ThingStructureCondensationChamber",
-      "displayName": "Condensation Chamber"
+      "displayName": "Condensation Chamber",
+      "OperationalDetails": [
+        {
+          "title": "Phase Change: Gas to Liquid",
+          "description": "Converts gases into their liquid form when temperature is below the gas's condensation point. Gas enters via Pipe Input, liquid exits via Liquid Output."
+        },
+        {
+          "title": "Liquid Drain Rate",
+          "description": "Drains liquid at 99% (0.99) ratio per tick. This high drain rate prevents liquid buildup and ensures continuous operation."
+        },
+        {
+          "title": "Regulated Gas Intake",
+          "description": "Takes in gas regulated by the OutputSetting pressure value. The Setting controls target intake pressure from the pipe network."
+        },
+        {
+          "title": "200L Internal Volume",
+          "description": "Same as Evaporation Chamber - 200L internal volume with 6000 max setting. Has heat exchanger area of 10 units for thermal calculations."
+        },
+        {
+          "title": "Temperature Requirements",
+          "description": "Condensation requires gas to be cooled below its phase transition temperature. Connect to cooling system or cold environment. Heat is released during condensation."
+        }
+      ]
     },
     {
       "logicDescriptions": {
@@ -13621,7 +13665,29 @@
           "description": "Vertical angle to the sun in degrees."
         }
       },
-      "slots": []
+      "slots": [],
+      "OperationalDetails": [
+        {
+          "title": "Three Operating Modes",
+          "description": "Mode 0 (Default): Reports angle between sensor's forward direction and sun. Mode 1 (Horizontal): Reports horizontal azimuth angle. Mode 2 (Vertical): Reports vertical elevation angle."
+        },
+        {
+          "title": "Light Detection",
+          "description": "HasLight property (read via Activate) returns 1 when sensor detects direct sunlight, 0 when in shadow. Used for automatic lighting control via linked motherboards."
+        },
+        {
+          "title": "Solar Tracking Data",
+          "description": "Horizontal: Azimuth angle to sun (-180° to 180°). Vertical: Elevation angle to sun. SolarAngle: Angle between sensor forward and sun direction. Use for solar panel tracking."
+        },
+        {
+          "title": "Solar Irradiance",
+          "description": "Returns current solar power (W/m²) accounting for weather events. Weather storms reduce this value via SolarRatio multiplier. Returns 0 when not in sunlight."
+        },
+        {
+          "title": "Motherboard Integration",
+          "description": "Can link to Circuitboards via RemoteToggle. When light state changes (HasLight), triggers linked boards if their parent computer is powered."
+        }
+      ]
     },
     {
       "deviceKey": "ThingStructureDeepMiner",
@@ -14772,7 +14838,25 @@
           "range": "CRC32",
           "description": "Custom name hash."
         }
-      }
+      },
+      "OperationalDetails": [
+        {
+          "title": "Phase Change: Liquid to Gas",
+          "description": "Converts liquid inputs into their gaseous form. Liquid enters via the Liquid Input connection and exits as gas through the Pipe Output."
+        },
+        {
+          "title": "Liquid Intake Rate",
+          "description": "Accepts up to 0.25L of liquid per game tick. The device tries to maintain liquid volume at 10% of its internal capacity for optimal operation."
+        },
+        {
+          "title": "Heat Connection",
+          "description": "Has a heat exchanger connection for thermal energy transfer. The evaporation process requires energy - connect to a heat source or the device will cool down during operation."
+        },
+        {
+          "title": "200L Internal Volume",
+          "description": "The chamber has 200L internal volume. Setting controls the output pressure target (max 6000 kPa). The heat exchanger area is 10 units for thermal calculations."
+        }
+      ]
     },
     {
       "deviceKey": "ThingStructureExpansionValve",
@@ -14829,7 +14913,29 @@
           "modeValue": "Outward",
           "description": "Outputs filtered gases to the pipe network."
         }
-      }
+      },
+      "OperationalDetails": [
+        {
+          "title": "Gas Filter Slots",
+          "description": "Accepts Gas Filter cartridges in its slots. Each filter type (Oxygen, Nitrogen, CO2, Pollutant, Volatiles, Water, N2O) captures its specific gas type. Filtered gas exits via the 'Filtered' output."
+        },
+        {
+          "title": "Three-Way Connection",
+          "description": "Input: Mixed gas enters. Filtered Output: Gas matching filter types exits here. Unfiltered Output: Gases NOT matching any filter exit here. This allows selective gas separation."
+        },
+        {
+          "title": "Power Consumption",
+          "description": "Uses 100W per atmosphere (per mole processed). Power consumption scales with how much gas flows through the device."
+        },
+        {
+          "title": "Minimum Filter Ratio",
+          "description": "Has a MinimumRatioToFilterAll threshold of 0.001 (0.1%). Gases below this ratio may not be fully captured by filters."
+        },
+        {
+          "title": "IC Slot",
+          "description": "Includes a ProgrammableChip slot for automated logic control. Use IC10 to dynamically control filtration based on gas ratios or pressures."
+        }
+      ]
     },
     {
       "deviceKey": "ThingStructureFiltrationLiquid",
@@ -18511,7 +18617,29 @@
           "range": "CRC32",
           "description": "Custom name hash."
         }
-      }
+      },
+      "OperationalDetails": [
+        {
+          "title": "Dish Movement",
+          "description": "Very slow movement with base speed of 0.002. Horizontal movement slows down at higher vertical angles. Rotation tolerance is extremely precise at 0.00001 degrees."
+        },
+        {
+          "title": "Rotation Range",
+          "description": "360° horizontal rotation (-180 to 180°), 90° vertical range (0 to 90°). Write Horizontal and Vertical logic values to aim the dish."
+        },
+        {
+          "title": "Power Requirements",
+          "description": "Setting controls wattage output. Higher power increases effective range and signal strength. Use MinimumWattsToContact to check if enough power is reaching the target."
+        },
+        {
+          "title": "Signal Strength vs Angle",
+          "description": "Narrower beam = more power: 2° beam = 100% efficiency, 5° = 90%, 22.5° = 10%, 45° = 5%, 90° = 1%, 180° = 0.1%. Tighter focus dramatically increases effective range."
+        },
+        {
+          "title": "Contact Acquisition",
+          "description": "Scans for trader contacts within its field of view. Use TargetPadIndex to select which landing pad traders should use. WattsReachingContact shows current signal strength at target."
+        }
+      ]
     },
     {
       "deviceKey": "ThingStructureLarreDockAtmos",
@@ -18532,7 +18660,33 @@
           "range": "CRC32",
           "description": "Custom name hash."
         }
-      }
+      },
+      "OperationalDetails": [
+        {
+          "title": "Internal Atmosphere",
+          "description": "Has a 500L internal atmosphere storage. Gas is pumped between internal storage and external environment (or docked PassiveVent pipe network). Pressure gauges show internal atmosphere state."
+        },
+        {
+          "title": "Vent Direction Mode",
+          "description": "Mode controls direction: 0=Outward (pump gas from internal to external), 1=Inward (pump gas from external to internal). PressureExternal/PressureInternal set target pressure thresholds."
+        },
+        {
+          "title": "Gas Filter Support",
+          "description": "Install a Gas Filter in slot 0 to selectively pump gases. Filter type determines which gas passes through. Empty or missing filter pumps all gases."
+        },
+        {
+          "title": "PassiveVent Docking",
+          "description": "When extended over a PassiveVent, the arm connects to the vent's pipe network for gas transfer. Without a docked vent, gas transfers to/from the world atmosphere at the arm position."
+        },
+        {
+          "title": "Over-Pressure Protection",
+          "description": "If pressure differential exceeds ~600 atm (60.6 MPa), the device takes damage. Sustained over-pressure for more than 5 ticks deals 5 brute damage per tick."
+        },
+        {
+          "title": "Atmospheric Logic Reads",
+          "description": "Supports all atmospheric logic reads (PressureInput, TemperatureInput, RatioOxygenInput, etc.) reading from the arm position or docked vent. CombustionInput returns 1 if atmosphere is inflamed."
+        }
+      ]
     },
     {
       "deviceKey": "ThingStructureLarreDockBypass",
@@ -18553,7 +18707,25 @@
           "range": "CRC32",
           "description": "Custom name hash."
         }
-      }
+      },
+      "OperationalDetails": [
+        {
+          "title": "Rail Junction Point",
+          "description": "Serves as a bypass junction on robotic arm rail networks. Arms can be diverted into the bypass position when the bypass is opened. Each bypass is assigned a JunctionIndex in the network."
+        },
+        {
+          "title": "Open/Close Control",
+          "description": "Write Open=1 to open the bypass allowing an arm to dock. Open=0 closes the bypass. CanOpen/CanClose check if operations are valid (requires Power, OnOff, and no arm blocking)."
+        },
+        {
+          "title": "Docking Arms",
+          "description": "When a robotic arm activates while stopped at this bypass position, it will dock into the bypass. This allows arms to exit the main rail loop for loading/unloading operations."
+        },
+        {
+          "title": "Network Integration",
+          "description": "The bypass connects to rail nodes and tracks junction index within the network. The info screen displays current open/closed state. Must be powered and on to operate."
+        }
+      ]
     },
     {
       "deviceKey": "ThingStructureLarreDockCargo",
@@ -18634,7 +18806,29 @@
           "range": "CRC32",
           "description": "Custom name hash (if renamed)."
         }
-      }
+      },
+      "OperationalDetails": [
+        {
+          "title": "Slot Manipulation",
+          "description": "The Cargo arm has a hand slot and targets other devices' slots. TargetSlotIndex (0-50) selects which slot to interact with on the target device below the arm."
+        },
+        {
+          "title": "Contextual Actions",
+          "description": "When activated and extended: if hand is empty, picks up from target slot; if hand has item and target slot is empty, places item; if both occupied and slot is swappable, swaps items."
+        },
+        {
+          "title": "Target Detection",
+          "description": "TargetPrefabHash returns the prefab hash of whatever device is at the arm's current position. Only interacts with accessible slots (not Plant slots, locked slots, or hidden slots)."
+        },
+        {
+          "title": "Slot Index Control",
+          "description": "Use Button4/Button5 to increment/decrement TargetSlotIndex manually, or write via logic. The dial knob on the device shows current index position."
+        },
+        {
+          "title": "Proxy Slot Access",
+          "description": "Supports IProxySlot interface - slot 255 represents the target device's slot, allowing external systems to interact with whatever the arm is targeting."
+        }
+      ]
     },
     {
       "deviceKey": "ThingStructureLarreDockCollector",
@@ -18720,7 +18914,33 @@
           "range": "0-1",
           "description": "Error state indicator."
         }
-      }
+      },
+      "OperationalDetails": [
+        {
+          "title": "Bulk Item Storage",
+          "description": "Has 20 internal storage slots for collecting or ejecting items. Ratio returns fill percentage (0.0 to 1.0). Quantity returns exact item count (0-20)."
+        },
+        {
+          "title": "Collection Mode",
+          "description": "Mode=0 (Inward): Arm applies magnetic/gravity force to pull nearby items toward the collection point. Items within ~1m are ingested into storage slots."
+        },
+        {
+          "title": "Ejection Mode",
+          "description": "Mode=1 (Outward): Arm ejects items from storage at random intervals (0.2-0.4s between ejections). Items are spawned at the arm end position with random rotation."
+        },
+        {
+          "title": "Chute Integration",
+          "description": "Can interact with ChuteBin/ChuteInlet (outward mode deposits items) and ChuteExportBin (inward mode collects items when open). Auto-retracts when full (inward) or empty (outward)."
+        },
+        {
+          "title": "Display State",
+          "description": "The arm display changes based on fill level: Off (unpowered), then 1-4 states showing fill progress. Changes at slots 5, 12, and 19 filled."
+        },
+        {
+          "title": "Physics Collection",
+          "description": "In inward mode, items within ~3m range have physics forces applied pulling them toward the collector. Force scales with distance (300-600N based on proximity)."
+        }
+      ]
     },
     {
       "deviceKey": "ThingStructureLarreDockHydroponics",
@@ -18825,6 +19045,32 @@
         {
           "name": "Hopper Slot",
           "type": "None"
+        }
+      ],
+      "OperationalDetails": [
+        {
+          "title": "Plant Automation",
+          "description": "Specialized arm for hydroponics. Has a hand slot and extra slot (hopper) for seeds/produce. Interacts with HydroponicTrays and devices implementing IHarvestable."
+        },
+        {
+          "title": "Hand Occupied Actions",
+          "description": "With plant/seed in hand: plants into empty tray. With fertilizer: adds to fertilizer slot. With produce: harvests if plant is mature and stacks if compatible."
+        },
+        {
+          "title": "Hand Empty Actions",
+          "description": "If plant is mature/seeding: harvests produce to hand slot. If plant is dead/immature: destroys plant. If only fertilizer present: destroys fertilizer."
+        },
+        {
+          "title": "Face Display",
+          "description": "The arm has a face display showing plant status: Idle (off/no plant), Happy (healthy growing plant), UnHappy (dehydrated/bad gas), Dead (plant died)."
+        },
+        {
+          "title": "Chute Integration",
+          "description": "Can deposit items into ChuteBin when open, or pick up items from ChuteExportBin. The extra slot serves as a buffer for harvested items."
+        },
+        {
+          "title": "Plant Logic Reads",
+          "description": "Supports plant slot logic reads on proxy slot (255): Efficiency, Health, Growth, Mature, Seeding, MaturityRatio, SeedingRatio, HarvestedHash for the target tray's plant."
         }
       ]
     },
@@ -21750,7 +21996,29 @@
           "modeValue": "Any",
           "description": "ANY mode - passes items matching ANY of the specified criteria."
         }
-      }
+      },
+      "OperationalDetails": [
+        {
+          "title": "Memory Stack",
+          "description": "Contains 32 instruction slots for filtering rules. Each instruction uses a 64-bit format with the opcode in the first 8 bits. Use the Memory Programmer to write instructions."
+        },
+        {
+          "title": "Filter Criteria",
+          "description": "Items can be filtered by: PrefabHash (exact match or not-equals), SortingClass (with comparison operators), SlotType (with comparison operators), or Quantity (with comparison operators). Comparison operators: 0=Equals, 1=Greater, 2=Less, 3=NotEquals."
+        },
+        {
+          "title": "Logic Modes",
+          "description": "Mode 0 (Any): Item passes to Export2 if ANY filter matches. Mode 1 (All): Item passes to Export2 only if ALL filters match. Mode 2 (None): Item passes to Export2 only if NO filters match. Non-matching items go to Export1."
+        },
+        {
+          "title": "Count Limiter Instruction",
+          "description": "The LimitNextExecutionByCount instruction limits how many items the NEXT filter instruction will match. The count decrements with each match. Useful for sorting exact quantities."
+        },
+        {
+          "title": "Slot Layout",
+          "description": "Slot 0 (Import): Items enter here. Slot 1 (Export): Non-matching items exit here. Slot 2 (Export2): Matching items exit here. Slot 3 (Chip): Accepts IC10 programmable chip for automation."
+        }
+      ]
     },
     {
       "deviceKey": "ThingStructureLogicSwitch",
@@ -25920,7 +26188,21 @@
           "range": "Any",
           "description": "Hash of custom name if set."
         }
-      }
+      },
+      "OperationalDetails": [
+        {
+          "title": "Rail Network Door",
+          "description": "A powered door designed for linear rail networks. Allows robotic arms to pass through when open. Integrates with the rail junction system."
+        },
+        {
+          "title": "Open/Close State",
+          "description": "Write Open=1 to open the door, Open=0 to close. The door must be powered to operate. Unpowered doors remain in their current state."
+        },
+        {
+          "title": "Power Requirements",
+          "description": "Requires 10W of power to operate. Power state can be read via Power logic. RequiredPower returns the power draw."
+        }
+      ]
     },
     {
       "logicDescriptions": {
@@ -25986,7 +26268,33 @@
         }
       },
       "deviceKey": "ThingStructureRoboticArmDock",
-      "displayName": null
+      "displayName": "LArRE Dock",
+      "OperationalDetails": [
+        {
+          "title": "Junction-Based Movement",
+          "description": "The arm moves along a rail network between junction points. Setting controls the target junction index (TargetJunctionIndex). PositionX returns current junction index. Supports looping networks."
+        },
+        {
+          "title": "Arm States",
+          "description": "ArmState cycles: Up (idle) → AnimatingDown → Down (interacting) → AnimatingUp → Up. Extended returns 1 when arm is Down. Idle returns 1 when arm is Up and not moving."
+        },
+        {
+          "title": "Obstruction Detection",
+          "description": "The arm checks for collisions via overlap box detection. Error state (1) indicates obstruction. Arm won't move while obstructed. IsFaceBlocked prevents arm extension if structure blocks the path."
+        },
+        {
+          "title": "Starting Dock",
+          "description": "One dock per network is the Starting Dock (affects junction index offset). Use the dedicated button to set which dock is the starting point for the rail network."
+        },
+        {
+          "title": "Bypass Points",
+          "description": "Docks can have bypass points - the arm can 'dock' at another device along the rail. Open logic controls bypass state. CanOpen/CanClose check if bypass operations are valid."
+        },
+        {
+          "title": "Contextual Actions",
+          "description": "When Activate triggers and arm extends, it performs contextual actions via RoboticArmActionHelper based on what's in the arm slot and what's below the arm position."
+        }
+      ]
     },
     {
       "logicDescriptions": {
@@ -27424,7 +27732,29 @@
           "range": "0+",
           "description": "Stack size for memory operations."
         }
-      }
+      },
+      "OperationalDetails": [
+        {
+          "title": "Memory Stack for Trading",
+          "description": "Contains a 32-slot LogicStack for trader data queries. Use WriteTraderData, WriteTraderBuyData, and WriteTraderSellData instructions to interact with traders."
+        },
+        {
+          "title": "Dish Movement",
+          "description": "360° horizontal rotation, 90° vertical range. Medium speed dish - faster than Large but slower than Small. Use Horizontal and Vertical logic values to aim."
+        },
+        {
+          "title": "Signal Strength vs Angle",
+          "description": "Same efficiency curve as all dishes: 2° = 100%, 5° = 90%, 22.5° = 10%, 45° = 5%, 90° = 1%, 180° = 0.1%. Narrower beam = stronger signal."
+        },
+        {
+          "title": "Contact Resolution",
+          "description": "InterrogationProgress shows trader contact resolution (0-100%). MinimumWattsToContact shows power needed, WattsReachingContact shows actual power delivered."
+        },
+        {
+          "title": "Landing Pad Assignment",
+          "description": "TargetPadIndex selects which landing pad incoming traders should use. SizeX and SizeZ indicate required pad dimensions for the trader's ship."
+        }
+      ]
     },
     {
       "logicDescriptions": {
@@ -28751,7 +29081,29 @@
           "range": "CRC32",
           "description": "Custom name hash."
         }
-      }
+      },
+      "OperationalDetails": [
+        {
+          "title": "Fastest Dish Movement",
+          "description": "Movement speed of 0.05 (25x faster than Large dish). Both horizontal and vertical speeds are equal, making it the quickest to reposition."
+        },
+        {
+          "title": "Rotation Range",
+          "description": "360° horizontal rotation (lerped from -90° to 270° internal), 90° vertical range (0 to 90°). Uses DishTransform.up for forward direction."
+        },
+        {
+          "title": "Signal Strength vs Angle",
+          "description": "Same efficiency curve: 2° = 100%, 5° = 90%, 22.5° = 10%, 45° = 5%, 90° = 1%, 180° = 0.1%. Setting controls output wattage (50-200W range)."
+        },
+        {
+          "title": "Contact Resolution",
+          "description": "SignalStrength shows angle offset to strongest contact (-1 if none). InterrogationProgress shows resolution progress (0-1). Returns -1 values while still resolving."
+        },
+        {
+          "title": "Best Contact Filter",
+          "description": "Set BestContactFilter to a specific contact ID to lock onto that trader. Set to -1 to auto-detect the strongest available signal."
+        }
+      ]
     },
     {
       "deviceKey": "ThingStructureSolarPanel",
@@ -33858,7 +34210,25 @@
           "modeValue": "Active",
           "description": "Active mode - device broadcasts its Setting value on the configured channel."
         }
-      }
+      },
+      "OperationalDetails": [
+        {
+          "title": "Passive Mode Operation",
+          "description": "In Passive mode, use screwdriver to select which device to mirror. The transmitter will read the Setting value from the linked device. Requires power to read values. Reading does NOT require line-of-sight."
+        },
+        {
+          "title": "Active Mode Operation",
+          "description": "In Active mode, the transmitter broadcasts its own Setting value. Other transmitters in Passive mode can receive this value if they link to this device via screwdriver."
+        },
+        {
+          "title": "Power Requirements",
+          "description": "The transmitter needs power to function. In Passive mode, power is required to read values from the linked device. Without power, the Setting value will not update."
+        },
+        {
+          "title": "Linking Process",
+          "description": "Use screwdriver on the transmitter to enter linking mode, then select the target device. The link persists across power cycles. The linked device must have a Setting value to read from."
+        }
+      ]
     },
     {
       "deviceKey": "ThingPortableComposter",

@@ -25,6 +25,8 @@ namespace StationpediaAscended
     [BepInPlugin("StationpediaAscended", "Stationpedia Ascended", "1.0.0")]
     public class StationpediaAscendedMod : BaseUnityPlugin
     {
+        #region Constants & Static References
+        
         public const string HarmonyId = "com.stationpediaascended.mod";
         
         // BepInEx logger - will show in BepInEx console
@@ -36,6 +38,10 @@ namespace StationpediaAscended
         // Description databases
         public static Dictionary<string, DeviceDescriptions> DeviceDatabase { get; private set; }
         public static GenericDescriptionsData GenericDescriptions { get; private set; }
+        
+        #endregion
+
+        #region Instance Fields
         
         // Page tracking
         private string _lastPageKey = "";
@@ -69,7 +75,11 @@ namespace StationpediaAscended
         
         // Reference to ScriptEngine loader's MonoBehaviour for coroutines when loaded via ScriptEngine
         private static MonoBehaviour _scriptEngineHost;
+        
+        #endregion
 
+        #region ScriptEngine Hot-Reload Support
+        
         /// <summary>
         /// Called by ScriptEngineLoader when mod is loaded via F6 hot-reload (no SLP instance)
         /// </summary>
@@ -271,8 +281,14 @@ namespace StationpediaAscended
             ShowTooltip = false;
             CurrentTooltipText = "";
         }
+        
+        #endregion
 
-        // Called by Unity/BepInEx when plugin loads (works for both SLP and ScriptEngine)
+        #region Unity Lifecycle Methods
+        
+        /// <summary>
+        /// Called by Unity/BepInEx when plugin loads (works for both SLP and ScriptEngine)
+        /// </summary>
         void Awake()
         {
             this.Logger.LogInfo(
@@ -503,13 +519,21 @@ namespace StationpediaAscended
             }
         }
 
-        // Unity lifecycle - called after Awake, when component is ready
+        /// <summary>
+        /// Unity lifecycle - called after Awake, when component is ready
+        /// </summary>
         void Start()
         {
             ConsoleWindow.Print("[Stationpedia Ascended] Start() called");
         }
         
-        // Initialize GUI styles (must be called from OnGUI)
+        #endregion
+
+        #region GUI Rendering
+        
+        /// <summary>
+        /// Initialize GUI styles (must be called from OnGUI)
+        /// </summary>
         private void InitializeStyles()
         {
             if (_stylesInitialized) return;
@@ -590,7 +614,14 @@ namespace StationpediaAscended
                 // Silently handle GUI errors
             }
         }
+        
+        #endregion
 
+        #region Resource Loading
+        
+        /// <summary>
+        /// Load the custom phoenix icon from file
+        /// </summary>
         private void LoadCustomIcon()
         {
             try
@@ -651,6 +682,9 @@ namespace StationpediaAscended
             }
         }
 
+        /// <summary>
+        /// Load device and generic descriptions from JSON file
+        /// </summary>
         private void LoadDescriptions()
         {
             DeviceDatabase = new Dictionary<string, DeviceDescriptions>();
@@ -715,7 +749,14 @@ namespace StationpediaAscended
                 ConsoleWindow.Print($"[Stationpedia Ascended] Error loading descriptions: {ex.Message}");
             }
         }
+        
+        #endregion
 
+        #region Harmony Patching
+        
+        /// <summary>
+        /// Apply all Harmony patches to the game
+        /// </summary>
         private void ApplyHarmonyPatches()
         {
             try
@@ -792,6 +833,13 @@ namespace StationpediaAscended
             }
         }
         
+        #endregion
+
+        #region Console Commands
+        
+        /// <summary>
+        /// Register custom console commands
+        /// </summary>
         private void RegisterConsoleCommands()
         {
             try
@@ -840,8 +888,14 @@ namespace StationpediaAscended
                 return $"Error centering Stationpedia: {ex.Message}";
             }
         }
+        
+        #endregion
 
-        // Static version of LoadDescriptions for ScriptEngine path
+        #region Static ScriptEngine Methods
+        
+        /// <summary>
+        /// Static version of LoadDescriptions for ScriptEngine path
+        /// </summary>
         private static void LoadDescriptionsStatic()
         {
             DeviceDatabase = new Dictionary<string, DeviceDescriptions>();
@@ -1059,7 +1113,14 @@ namespace StationpediaAscended
             }
             return added;
         }
+        
+        #endregion
 
+        #region Tooltip Adding
+        
+        /// <summary>
+        /// Add tooltips after UI has settled
+        /// </summary>
         private IEnumerator AddTooltipsAfterDelay(string pageKey)
         {
             // Wait for UI to settle
@@ -1214,8 +1275,14 @@ namespace StationpediaAscended
             }
             return added;
         }
+        
+        #endregion
 
-        // Static helper for tooltip component to get descriptions
+        #region Description Lookup Helpers
+        
+        /// <summary>
+        /// Get logic type description for a device
+        /// </summary>
         public static LogicDescription GetLogicDescription(string deviceKey, string logicTypeName)
         {
             // Clean up the logic type name (remove Unity rich text tags)
