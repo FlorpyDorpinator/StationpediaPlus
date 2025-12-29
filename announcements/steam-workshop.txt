@@ -1,0 +1,72 @@
+[h1]🔥 Stationpedia Ascended[/h1]
+
+[b]Enhance your Stationeers Stationpedia with detailed tooltips, operational insights, and custom descriptions![/b]
+
+[hr][/hr]
+
+[h2]✨ Features[/h2]
+
+[h3]📊 Enhanced Tooltips[/h3]
+[list]
+[*] Hover over any item to see detailed information
+[*] Operating temperatures, pressure ranges, and power requirements
+[*] Slot configurations and hash values for IC programming
+[/list]
+
+[h3]⚙️ Operational Details[/h3]
+[list]
+[*] Critical operational parameters at a glance
+[*] Temperature and pressure operating ranges
+[*] Power consumption and production values
+[/list]
+
+[h3]🐛 Bug Fixes[/h3]
+[list]
+[*] Fixes display issues with certain vanilla entries
+[*] Corrects formatting problems in the original Stationpedia
+[/list]
+
+[h3]🎨 Custom Branding[/h3]
+[list]
+[*] Customize the Stationpedia icon
+[*] Add your own item descriptions via descriptions.json
+[/list]
+
+[hr][/hr]
+
+[h2]📥 Installation[/h2]
+
+Simply subscribe to this mod! It will be installed automatically via StationeersLaunchPad (SLP).
+
+[b]Manual Installation:[/b]
+[olist]
+[*] Ensure BepInEx is installed
+[*] Copy [b]StationpediaAscended.dll[/b] to your [b]BepInEx/scripts/[/b] folder
+[*] Launch the game!
+[/olist]
+
+[hr][/hr]
+
+[h2]⚙️ Configuration[/h2]
+
+Optional: Create a [b]descriptions.json[/b] file in your scripts folder to add custom item descriptions:
+
+[code]
+{
+  "ItemKitWallLight": "A basic wall-mounted light fixture. Provides illumination for indoor spaces.",
+  "ItemKitSolarPanel": "Converts sunlight into electrical power. Most efficient when facing the sun."
+}
+[/code]
+
+[hr][/hr]
+
+[h2]🔗 Links[/h2]
+[list]
+[*] [url=https://github.com/YOUR_USERNAME/StationpediaAscended]GitHub Repository[/url]
+[/list]
+
+[hr][/hr]
+
+[i]Built with 🔥 by the community, for the community[/i]
+
+[b]Feedback and suggestions welcome![/b]

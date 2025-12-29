@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Assets.Scripts;
+using Assets.Scripts.Objects;
 using Assets.Scripts.UI;
 using BepInEx;
 using BepInEx.Logging;
@@ -30,7 +31,7 @@ namespace StationpediaAscended
         // Plugin metadata
         public const string PluginGuid = "com.florpydorp.stationpediaascended";
         public const string PluginName = "Stationpedia Ascended";
-        public const string PluginVersion = "0.2.0";
+        public const string PluginVersion = "0.2.1";
         
         public const string HarmonyId = "com.stationpediaascended.mod";
         
@@ -80,6 +81,9 @@ namespace StationpediaAscended
         
         // Reference to ScriptEngine loader's MonoBehaviour for coroutines when loaded via ScriptEngine
         private static MonoBehaviour _scriptEngineHost;
+        
+        // Track if we've already hidden unwanted items in Stationpedia
+        private static bool _hiddenItemsPopulated = false;
         
         #endregion
 
@@ -335,6 +339,9 @@ namespace StationpediaAscended
                     if (!_stationpediaFound)
                     {
                         _stationpediaFound = true;
+                        
+                        // Hide unwanted items from Stationpedia searches (burnt cables, wreckage, etc.)
+                        PopulateHiddenItems();
                         
                         // Change the window title to Stationpedia Ascended
                         try
@@ -749,12 +756,116 @@ namespace StationpediaAscended
                 // The base game has verticalScrollbarVisibility set to AutoHide and the content
                 // size isn't being calculated correctly. This is a base game bug we can't easily fix.
                 
+                // Patch ClearPreviousSearch to clean up our category headers
+                var clearPreviousSearch = stationpediaType.GetMethod("ClearPreviousSearch", 
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                if (clearPreviousSearch != null)
+                {
+                    var postfix = typeof(SearchPatches).GetMethod("ClearPreviousSearch_Postfix", 
+                        BindingFlags.Public | BindingFlags.Static);
+                    _harmony.Patch(clearPreviousSearch, postfix: new HarmonyMethod(postfix));
+                }
+                
                 // Register console command to center Stationpedia
                 RegisterConsoleCommands();
             }
             catch (Exception ex)
             {
                 Log?.LogError($"Error applying Harmony patches: {ex.Message}");
+            }
+        }
+        
+        #endregion
+
+        #region Hidden Items Population
+        
+        /// <summary>
+        /// Add burnt cables, wreckage, and other debris items to HiddenInPedia 
+        /// so vanilla search doesn't return them at all.
+        /// Also removes their pages from StationpediaPages since they were already registered.
+        /// </summary>
+        private static void PopulateHiddenItems()
+        {
+            if (_hiddenItemsPopulated) return;
+            _hiddenItemsPopulated = true;
+            
+            try
+            {
+                var hiddenPedia = Stationpedia.DataHandler?.HiddenInPedia;
+                if (hiddenPedia == null)
+                {
+                    Log?.LogWarning("HiddenInPedia dictionary not available");
+                    return;
+                }
+                
+                int hiddenCount = 0;
+                int prefabCount = 0;
+                var pagesToRemove = new List<string>();
+                
+                // Iterate through all prefabs and hide unwanted items
+                foreach (Thing thing in Prefab.AllPrefabs)
+                {
+                    if (thing == null) continue;
+                    prefabCount++;
+                    
+                    string prefabName = thing.PrefabName ?? "";
+                    string displayName = thing.DisplayName ?? "";
+                    string displayNameLower = displayName.ToLowerInvariant();
+                    string prefabNameLower = prefabName.ToLowerInvariant();
+                    
+                    bool shouldHide = false;
+                    
+                    // Hide burnt items
+                    if (displayNameLower.StartsWith("burnt") || prefabNameLower.Contains("burnt"))
+                        shouldHide = true;
+                    
+                    // Hide ruptured items
+                    if (displayNameLower.Contains("ruptured") || prefabNameLower.Contains("ruptured"))
+                        shouldHide = true;
+                    
+                    // Hide CableRuptured class items
+                    if (thing is Assets.Scripts.Objects.Electrical.CableRuptured)
+                        shouldHide = true;
+                    
+                    // Hide wreckage items
+                    if (displayNameLower.Contains("wreckage") || prefabNameLower.Contains("wreckage"))
+                        shouldHide = true;
+                    
+                    if (shouldHide)
+                    {
+                        // Debug: log what we're hiding
+                        if (hiddenCount < 10)
+                        {
+                            ConsoleWindow.Print($"[SLP] Hiding: '{prefabName}' / '{displayName}'");
+                        }
+                        
+                        hiddenPedia[prefabName] = true;
+                        thing.HideInStationpedia = true;
+                        hiddenCount++;
+                        
+                        // Track the page key to remove from StationpediaPages
+                        pagesToRemove.Add("Thing" + prefabName);
+                    }
+                }
+                
+                // Remove pages that were already registered
+                int pagesRemoved = 0;
+                foreach (string pageKey in pagesToRemove)
+                {
+                    // Find and remove the page from StationpediaPages
+                    var pageToRemove = Stationpedia.StationpediaPages.Find(p => p.Key == pageKey);
+                    if (pageToRemove != null)
+                    {
+                        Stationpedia.StationpediaPages.Remove(pageToRemove);
+                        pagesRemoved++;
+                    }
+                }
+                
+                ConsoleWindow.Print($"[Stationpedia Ascended] Hidden {hiddenCount} debris items, removed {pagesRemoved} pages from search (burnt cables, wreckage, etc.)");
+            }
+            catch (Exception ex)
+            {
+                Log?.LogError($"Error populating hidden items: {ex.Message}");
             }
         }
         
@@ -927,6 +1038,17 @@ namespace StationpediaAscended
                         BindingFlags.Public | BindingFlags.Static);
                     _harmonyStatic.Patch(changeDisplay, postfix: new HarmonyMethod(postfix));
                 }
+                
+                // Patch ClearPreviousSearch for search result reorganization
+                var stationpediaType = typeof(Stationpedia);
+                var clearPreviousSearch = stationpediaType.GetMethod("ClearPreviousSearch", 
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                if (clearPreviousSearch != null)
+                {
+                    var postfix = typeof(SearchPatches).GetMethod("ClearPreviousSearch_Postfix", 
+                        BindingFlags.Public | BindingFlags.Static);
+                    _harmonyStatic.Patch(clearPreviousSearch, postfix: new HarmonyMethod(postfix));
+                }
             }
             catch (Exception ex)
             {
@@ -952,6 +1074,9 @@ namespace StationpediaAscended
                     if (!_stationpediaFoundStatic)
                     {
                         _stationpediaFoundStatic = true;
+                        
+                        // Hide unwanted items from Stationpedia searches
+                        PopulateHiddenItems();
                     }
 
                     if (!Stationpedia.Instance.gameObject.activeInHierarchy)

@@ -19,6 +19,13 @@ Get detailed explanations for every aspect of your devices with our comprehensiv
 ![Tooltips Demo](assets/tooltips-demo.gif)
 *Comprehensive tooltips provide detailed information on hover*
 
+### 🔍 Vastly Improved Search Functionality
+- **Exact Match Prioritization** - Puts the word "Corn" up first if you type it
+- **Categorical Search** - Sorts by categories now
+- **Removed Wreckage/Ruptured/Burnt items** - Stuff that the devs forgot to hide in Stationpedia is now hidden
+![Tooltips Demo](assets/search-demo.gif)
+
+
 ### 🔧 Operational Details Section
 A dedicated section for device-specific operational details and advanced functionality:
 
@@ -67,17 +74,17 @@ Eliminates crashes when dragging the Stationpedia window in the main menu:
 ![Custom Branding](assets/custom-branding.gif)
 *Custom phoenix logo and Stationpedia Ascended branding*
 
-## 🚀 Installation
+## Installation
 
-### Option 1: BepInEx (Recommended)
-1. Download the latest release from [Releases](../../releases)
-2. Extract files to `Stationeers/BepInEx/scripts/`
-3. Launch the game
+### Method 1: Via StationeersLaunchPad (Recommended)
 
-### Option 2: ScriptEngine Hot-Reload (Development)
-1. Place files in your ScriptEngine scripts folder
-2. Use F6 to hot-reload during development
-3. Perfect for testing and customization
+1. Install [StationeersLaunchPad](https://github.com/StationeersLaunchPad/StationeersLaunchPad/releases)
+2. Copy the `IC10BatchLoaderMod` folder to:
+   ```
+   C:\Program Files (x86)\Steam\steamapps\common\Stationeers\rocketstation_Data\StreamingAssets\mods\
+   ```
+3. Launch Stationeers via StationeersLaunchPad
+4. Enable the mod in the mod manager
 
 ## ⚙️ Configuration
 

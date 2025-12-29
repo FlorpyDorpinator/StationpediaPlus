@@ -2,6 +2,29 @@
 
 All notable changes to Stationpedia Ascended will be documented in this file.
 
+## [0.2.1] - 2025-12-29
+
+### ✨ Enhanced Search Results
+- **Smart Search Organization** - Search results are now intelligently grouped by relevance:
+  - **Exact Matches** - Items where the title exactly matches your search (orange header)
+  - **Starts With** - Items where the title begins with your search term (gold header)
+  - **Category Groups** - Remaining results organized by their Stationpedia category (white headers)
+  
+- **Visual Header Styling**
+  - Beautiful blue-bordered header bars using the game's "special" UI sprite
+  - Darkened background for better contrast with colored text
+  - Headers are 54px tall with 19px bold text for clear visibility
+  
+- **Debris Filtering** - Automatically filters out burnt cables, wreckage, and ruptured variants from search results to reduce clutter
+
+- **Priority Scoring System** - Results are scored and sorted by:
+  1. Exact title match (highest priority)
+  2. Title starts with search term
+  3. Title contains search term
+  4. Description contains search term (lowest priority)
+
+---
+
 ## [0.1.3] - 2025-12-28
 
 ### 🔧 Build & Development Fixes

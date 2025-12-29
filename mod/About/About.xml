@@ -2,11 +2,11 @@
 <ModMetadata xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Name>Stationpedia Ascended</Name>
   <Author>FlorpyDorp</Author>
-  <Version>0.2.0</Version>
+  <Version>0.2.1</Version>
   <Description>This is a Plugin Mod. It requires BepInEx to be installed with the StationeersLaunchPad plugin.
 See: https://github.com/StationeersLaunchPad/StationeersLaunchPad
 
-An enhanced Stationpedia experience with comprehensive tooltips, bug fixes, and quality of life improvements.
+An enhanced Stationpedia experience with comprehensive tooltips, bug fixes, and quality of life improvements. Stationpedia on a new level. Save time searching through the outdated wiki with descriptions right from the game's source code.
 
 Features:
 - Enhanced Tooltips: Hover over logic types, slots, memory, modes, and connections to see detailed explanations
@@ -18,7 +18,9 @@ Features:
 All tooltips and descriptions are customizable via descriptions.json.
 
 Discord: https://discord.gg/stationeers</Description>
-  <ChangeLog>v0.2.0: Public release preparation, conditional compilation
+
+  <ChangeLog>v0.2.1: Enhanced search with smart grouping, visual headers, debris filtering
+v0.2.0: Public release preparation, conditional compilation
 v0.1.3: Fixed PDB symbol format for hot-reload, added code organization
 v0.1.2: Major code refactoring into multi-file architecture
 v0.1.0: Initial beta with tooltips, operational details, bug fixes</ChangeLog>
@@ -34,6 +36,14 @@ v0.1.0: Initial beta with tooltips, operational details, bug fixes</ChangeLog>
 See: https://github.com/StationeersLaunchPad/StationeersLaunchPad
 
 An enhanced Stationpedia experience with comprehensive tooltips, bug fixes, and quality of life improvements.
+
+ChangeLog:
+
+v0.2.1: Enhanced search with smart grouping, visual headers, debris filtering
+v0.2.0: Public release preparation, conditional compilation
+v0.1.3: Fixed PDB symbol format for hot-reload, added code organization
+v0.1.2: Major code refactoring into multi-file architecture
+v0.1.0: Initial beta with tooltips, operational details, bug fixes
 
 <color=#ffa500>Features:</color>
 - Hover tooltips for logic types, slots, memory, modes, and connections
