@@ -7,19 +7,13 @@
 
 ## ✨ Features
 
-### 🤖 AIMeE Robot Documentation
-Comprehensive guide for the AIMeE (Autonomous Integrated Mining and Exploration Entity) companion robot:
 
-- **All Mode Explanations** - Detailed documentation for None, Follow, MoveToTarget, Roam, Unload, PathToTarget, and StorageFull modes
-- **IC10 Programming Guide** - Complete examples for controlling AIMeE programmatically
-- **Navigation Behavior** - How AIMeE pathfinds, mines, and handles obstacles
-- **Coordinate Systems** - Understanding TargetX, TargetY, TargetZ for programming
-
-### 📑 Multi-Column Table of Contents
+### 📑 Multi-Column Table of Contents & Massive additions to the nested schema/formatting
 For guides with many sections, the TOC now automatically arranges into columns:
 - Maximum 8 entries per column
 - Automatically expands horizontally for large guides
-- Clickable links scroll to each section
+- Clickable links scroll to each sectio
+- Tons of new formatting options for adding guides and other things
 
 ### 🎯 Enhanced Tooltips System
 Get detailed explanations for every aspect of your devices with our comprehensive tooltip system:
@@ -102,70 +96,130 @@ Eliminates crashes when dragging the Stationpedia window in the main menu:
 
 ## ⚙️ Configuration
 
-### descriptions.json
-The mod uses a JSON configuration file for all customizations:
+### descriptions.json Schema
 
+The mod uses a powerful JSON configuration system for creating rich documentation.
+
+#### Device Entry Structure
+```json
+{
+  "deviceKey": "ThingStructureFurnace",
+  "displayName": "Furnace",
+  
+  "generateToc": true,
+  "tocTitle": "Furnace Guide",
+  
+  "pageDescription": "Replaces entire description",
+  "pageDescriptionAppend": "Added to end",
+  "pageDescriptionPrepend": "Added to beginning",
+  
+  "operationalDetailsTitleColor": "#FF7A18",
+  "operationalDetailsBackgroundColor": "#1A2B3C",
+  
+  "operationalDetails": [ ... ],
+  "logicDescriptions": { ... },
+  "modeDescriptions": { ... },
+  "slotDescriptions": { ... }
+}
+```
+
+#### Operational Details Properties
+Each section in `operationalDetails` supports:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `title` | string | Section heading |
+| `description` | string | Main text content (supports TMP rich text) |
+| `items` | array | Bullet list (• prefix) |
+| `steps` | array | Numbered list (1. 2. 3.) |
+| `children` | array | Nested sub-sections |
+| `collapsible` | boolean | Make section expandable/collapsible |
+| `tocId` | string | ID for Table of Contents linking |
+| `imageFile` | string | Image from mod/images/ folder |
+| `videoFile` | string | Embedded MP4 video player |
+| `youtubeUrl` | string | Clickable YouTube link |
+| `youtubeLabel` | string | Custom YouTube link text |
+| `backgroundColor` | string | Hex color for section background |
+
+#### Example: Full Device Entry
+```json
+{
+  "deviceKey": "ThingStructureFurnace",
+  "generateToc": true,
+  "tocTitle": "Furnace Guide",
+  "operationalDetails": [
+    {
+      "title": "Overview",
+      "tocId": "overview",
+      "collapsible": true,
+      "description": "The Furnace smelts ores into ingots.",
+      "imageFile": "furnace_diagram.png"
+    },
+    {
+      "title": "Steel Smelting",
+      "tocId": "steel",
+      "collapsible": true,
+      "children": [
+        {
+          "title": "Requirements",
+          "tocId": "steel-reqs",
+          "collapsible": true,
+          "items": [
+            "Iron Ore + Coal in 3:1 ratio",
+            "Temperature above 900K"
+          ]
+        },
+        {
+          "title": "Process",
+          "tocId": "steel-steps",
+          "collapsible": true,
+          "steps": [
+            "Load iron ore and coal",
+            "Add fuel ice",
+            "Close door and activate"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Video Tutorial",
+      "tocId": "video",
+      "collapsible": true,
+      "youtubeUrl": "https://www.youtube.com/watch?v=EXAMPLE",
+      "youtubeLabel": "Watch Tutorial"
+    }
+  ],
+  "logicDescriptions": {
+    "Temperature": {
+      "dataType": "Float",
+      "range": "0+",
+      "description": "Internal temperature in Kelvin."
+    }
+  }
+}
+```
+
+#### Generic Descriptions (Fallback)
 ```json
 {
   "genericDescriptions": {
     "logic": {
-      "Power": "Controls device power state - 1 for on, 0 for off",
-      "Setting": "Adjusts device operational parameters",
-      "Temperature": "Current temperature reading in Kelvin"
+      "Power": "Device power state (0=off, 1=on)",
+      "Setting": "Configurable parameter value"
     },
     "slots": {
-      "Power": "Electrical power connection - provides or consumes electricity",
-      "Atmosphere": "Gas input/output for atmospheric processing"
-    },
-    "memory": {
-      "Setting": "Stores device configuration values",
-      "Temperature": "Current temperature sensor reading"
+      "InputSlot": "Primary input for materials"
     },
     "modes": {
-      "0": "Device disabled/off state",
-      "1": "Standard operational mode"
-    },
-    "connections": {
-      "Power": "Electrical power delivery system",
-      "Data": "Digital communication channel"
-    }
-  },
-  "devices": {
-    "ThingAtmospherics": {
-      "operationalDetails": [
-        {"header": "Pressure Management", "body": "This device can process multiple gas types simultaneously and requires careful pressure management."}
-      ],
-      "operationalDetailsTitleColor": "#FF7A18",
-      "pageDescription": "Complete replacement of the original page description.",
-      "pageDescriptionAppend": "Additional information appended to the existing description.",
-      "pageDescriptionPrepend": "Important notice added before the existing description."
+      "0": "Idle state",
+      "1": "Active state"
     }
   }
 }
 ```
 
-### Customization Examples
-
-#### Adding Logic Tooltips
-```json
-"logic": {
-  "CustomValue": "Your explanation here",
-  "PowerConsumption": "Amount of power this device uses"
-}
-```
-
-#### Device-Specific Operational Details
-```json
-"devices": {
-  "YourDevicePageKey": {
-    "operationalDetails": [
-      {"header": "Special Mechanics", "body": "Explain unique mechanics, tips, or advanced usage patterns"}
-    ],
-    "operationalDetailsTitleColor": "#FFD700",
-    "pageDescriptionAppend": "Additional safety warnings or usage notes"
-  }
-}
-```
+### LLM Instructions
+For AI-assisted documentation writing, see `mod/LLM_INSTRUCTIONS.txt` which contains the complete schema reference and examples.
 
 ## 🔄 Hot-Reload Development
 

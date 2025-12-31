@@ -16,6 +16,23 @@ All notable changes to Stationpedia Ascended will be documented in this file.
 - **Dynamic Columns** - Automatically creates additional columns when entries exceed 8
 - **Improved Readability** - Better use of horizontal space for guides with many sections
 
+### 📋 New JSON Schema Features
+New properties for building rich, interactive documentation:
+
+**Device-Level Properties:**
+- `generateToc` - (boolean) Enable Table of Contents panel at top of Operational Details
+- `tocTitle` - (string) Custom title for TOC panel (default: "Contents")
+- `operationalDetailsBackgroundColor` - (string) Hex color for section backgrounds
+
+**OperationalDetail Properties:**
+- `collapsible` - (boolean) Render as expandable/collapsible section with header bar
+- `tocId` - (string) Unique ID for TOC linking; clicking scrolls to section
+- `imageFile` - (string) Display inline image from mod/images/ folder
+- `videoFile` - (string) Embed MP4 video player from mod/images/ folder
+- `youtubeUrl` - (string) Clickable YouTube link that opens in browser
+- `youtubeLabel` - (string) Custom label for YouTube link
+- `backgroundColor` - (string) Custom hex color for individual section
+
 ### 🎨 Vanilla Mode Default & Easter Egg Toggle
 - **Vanilla by Default** - Mod now starts in vanilla Stationpedia styling mode
 - **Header Toggle** - Click the "Stationpedia" header to toggle Ascended mode (easter egg)
@@ -30,6 +47,7 @@ All notable changes to Stationpedia Ascended will be documented in this file.
 ### 📝 New Files
 - `VanillaModeManager.cs` - Static manager for vanilla/ascended mode state
 - `CategoryHeaderHandler.cs` - Handler for category header interactions
+- `LLM_INSTRUCTIONS.txt` - Completely rewritten documentation for JSON schema
 
 ---
 
