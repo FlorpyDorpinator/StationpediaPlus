@@ -1,0 +1,355 @@
+================================================================================
+STATIONPEDIA ASCENDED - LLM INSTRUCTIONS FOR WRITING descriptions.json ENTRIES
+================================================================================
+
+You are helping write device documentation for the Stationeers game mod 
+"Stationpedia Ascended". This mod enhances the in-game encyclopedia with 
+custom tooltips and descriptions.
+
+--------------------------------------------------------------------------------
+FILE STRUCTURE
+--------------------------------------------------------------------------------
+
+The descriptions.json file has this top-level structure:
+
+{
+  "version": "1.0",
+  "devices": [ ... array of device entries ... ],
+  "genericDescriptions": { ... global fallback descriptions ... }
+}
+
+--------------------------------------------------------------------------------
+DEVICE ENTRY FORMAT
+--------------------------------------------------------------------------------
+
+Each device in the "devices" array follows this structure:
+
+{
+  "deviceKey": "ThingStructureDeviceName",    // REQUIRED - exact prefab name
+  "displayName": "Human Readable Name",        // Optional - for documentation only
+  
+  // Page description options (pick ONE or combine append/prepend):
+  "pageDescription": "Replaces entire description",
+  "pageDescriptionAppend": "Added to end of existing description",
+  "pageDescriptionPrepend": "Added to beginning of existing description",
+  
+  // Operational Details - MUST BE AN ARRAY:
+  "OperationalDetails": [
+    {
+      "title": "Section Title",
+      "description": "Section content goes here.",
+      "items": ["Bullet item 1", "Bullet item 2"],
+      "steps": ["Step one", "Step two", "Step three"],
+      "children": [ /* nested OperationalDetails */ ]
+    }
+  ],
+  "operationalDetailsTitleColor": "#FF7A18",   // Optional hex color
+  
+  // Logic tooltips - object with logic type names as keys:
+  "logicDescriptions": {
+    "Temperature": {
+      "dataType": "Float",
+      "range": "0+",
+      "description": "Internal temperature in Kelvin."
+    }
+  },
+  
+  // Mode tooltips - object with mode names as keys:
+  "modeDescriptions": {
+    "Mode0": {
+      "modeValue": "0",
+      "description": "What mode 0 does."
+    }
+  },
+  
+  // Slot tooltips:
+  "slotDescriptions": {
+    "InputSlot": {
+      "slotType": "Ore",
+      "description": "Accepts ore for processing."
+    }
+  }
+}
+
+--------------------------------------------------------------------------------
+OPERATIONALDETAILS - SUPPORTED PROPERTIES
+--------------------------------------------------------------------------------
+
+Each item in the OperationalDetails array can have:
+
+  "title"       - (string) Section heading, displayed in orange
+  "description" - (string) Main text content
+  "items"       - (array of strings) Bullet list, rendered with • prefix
+  "steps"       - (array of strings) Numbered list, rendered as 1. 2. 3.
+  "children"    - (array) Nested OperationalDetails for sub-sections
+
+All properties are OPTIONAL. Use what makes sense for your content.
+
+--------------------------------------------------------------------------------
+NESTING EXAMPLE
+--------------------------------------------------------------------------------
+
+"OperationalDetails": [
+  {
+    "title": "Steel Smelting",
+    "description": "The most common furnace recipe.",
+    "children": [
+      {
+        "title": "Requirements",
+        "items": [
+          "Iron Ore + Coal Ore in 3:1 ratio",
+          "Temperature above 900K",
+          "Pressure above 100 kPa"
+        ]
+      },
+      {
+        "title": "Process",
+        "steps": [
+          "Load iron ore and coal (3:1 ratio)",
+          "Add volatiles ice (fuel) and oxite ice (oxidizer)",
+          "Close the furnace door",
+          "Activate the furnace",
+          "Wait for Mode=1 or temperature 900K+",
+          "Collect ingots from export slot"
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Tips",
+    "items": [
+      "Furnace handles extreme pressures safely",
+      "On cold planets, use more fuel ice",
+      "Lock furnace via logic to prevent accidents"
+    ]
+  }
+]
+
+This renders as:
+
+  Steel Smelting
+  The most common furnace recipe.
+  
+    Requirements
+      • Iron Ore + Coal Ore in 3:1 ratio
+      • Temperature above 900K
+      • Pressure above 100 kPa
+    
+    Process
+      1. Load iron ore and coal (3:1 ratio)
+      2. Add volatiles ice (fuel) and oxite ice (oxidizer)
+      3. Close the furnace door
+      4. Activate the furnace
+      5. Wait for Mode=1 or temperature 900K+
+      6. Collect ingots from export slot
+  
+  Tips
+    • Furnace handles extreme pressures safely
+    • On cold planets, use more fuel ice
+    • Lock furnace via logic to prevent accidents
+
+--------------------------------------------------------------------------------
+TEXTMESHPRO RICH TEXT FORMATTING
+--------------------------------------------------------------------------------
+
+The mod uses TextMeshPro for rendering. These tags are supported:
+
+BASIC FORMATTING:
+  <b>bold text</b>
+  <i>italic text</i>
+  <u>underlined text</u>
+  <s>strikethrough</s>
+
+COLORS:
+  <color=#FF0000>red text</color>
+  <color=#00FF00>green text</color>
+  <color=#FFA500>orange text</color>
+  <color=red>named color</color>
+
+SIZE:
+  <size=150%>bigger text</size>
+  <size=80%>smaller text</size>
+  <size=24>24pt text</size>
+
+ALIGNMENT:
+  <align=center>centered text</align>
+  <align=right>right-aligned</align>
+
+INDENTATION:
+  <indent=10%>indented text</indent>
+  <indent=2em>indented by 2em</indent>
+
+SUPER/SUBSCRIPT:
+  H<sub>2</sub>O  →  H₂O
+  x<sup>2</sup>   →  x²
+
+OTHER:
+  <nobr>prevent line break</nobr>
+  <lowercase>MAKES LOWERCASE</lowercase>
+  <uppercase>makes uppercase</uppercase>
+  <smallcaps>Small Caps Text</smallcaps>
+
+LINE BREAKS:
+  Use \n in JSON strings for line breaks.
+
+--------------------------------------------------------------------------------
+BULLET AND LIST CHARACTERS
+--------------------------------------------------------------------------------
+
+When writing inline lists (in description strings), use these Unicode chars:
+
+  • (U+2022) - standard bullet
+  ‣ (U+2023) - triangular bullet
+  ○ (U+25CB) - hollow circle
+  ► (U+25BA) - triangle pointer
+  → (U+2192) - arrow
+
+Example in description:
+  "description": "• First point\n• Second point\n• Third point"
+
+NOTE: Prefer using the "items" or "steps" arrays instead of manual bullets
+in the description - they render more consistently.
+
+--------------------------------------------------------------------------------
+CRITICAL RULES
+--------------------------------------------------------------------------------
+
+1. OperationalDetails MUST be an ARRAY (square brackets [])
+   
+   WRONG:  "OperationalDetails": { "title": "..." }
+   CORRECT: "OperationalDetails": [ { "title": "..." } ]
+
+2. Use PascalCase "OperationalDetails" (capital O and D)
+
+3. All properties in each OperationalDetails item are OPTIONAL
+   - You can have just "title"
+   - You can have just "items" 
+   - You can have any combination
+
+4. Nesting depth: Keep it reasonable (2-3 levels max for readability)
+
+5. JSON escaping: Use \\n for newlines, \\" for quotes
+
+--------------------------------------------------------------------------------
+COMPLETE EXAMPLE: FURNACE WITH NESTING
+--------------------------------------------------------------------------------
+
+{
+  "deviceKey": "ThingStructureFurnace",
+  "displayName": "Furnace",
+  "logicDescriptions": {
+    "Temperature": {
+      "dataType": "Float",
+      "range": "0+",
+      "description": "Internal atmosphere temperature in Kelvin."
+    },
+    "Mode": {
+      "dataType": "Integer",
+      "range": "0-1",
+      "description": "0=Invalid recipe/conditions, 1=Valid recipe ready."
+    },
+    "Activate": {
+      "dataType": "Boolean",
+      "range": "0-1",
+      "description": "Set to 1 to ignite furnace and start smelting."
+    },
+    "ExportCount": {
+      "dataType": "Integer",
+      "range": "0+",
+      "description": "Number of items ready in export slot."
+    }
+  },
+  "OperationalDetails": [
+    {
+      "title": "Overview",
+      "description": "The Furnace smelts ores into ingots using combustion. Load ores and fuel (ice), close the door, then activate to ignite."
+    },
+    {
+      "title": "Steel Smelting",
+      "description": "The most common furnace recipe for early game.",
+      "children": [
+        {
+          "title": "Requirements",
+          "items": [
+            "Iron Ore (Fe) + Coal Ore in 3:1 ratio",
+            "Standard batch: 15 Iron + 5 Coal = 5 Steel ingots",
+            "Temperature above 900K (627°C)",
+            "Pressure above 100 kPa"
+          ]
+        },
+        {
+          "title": "Fuel Recipe",
+          "description": "Use Oxite + Volatiles ice to create combustion.",
+          "items": [
+            "Cold planets (Europa/Moon): 8 Volatiles + 4 Oxite",
+            "Hot planets (Vulcan/Venus): Less ice needed"
+          ]
+        },
+        {
+          "title": "Process",
+          "steps": [
+            "Load iron ore and coal (3:1 ratio) into furnace",
+            "Add volatiles ice (fuel) and oxite ice (oxidizer)",
+            "Close the furnace door",
+            "Activate - volatiles burn with oxygen, creating heat",
+            "Wait for Mode=1 or watch temperature reach 900K+",
+            "Smelting completes automatically when conditions met"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Common Problems",
+      "items": [
+        "<b>Won't activate:</b> Ensure door is closed. Need both fuel and oxidizer.",
+        "<b>Mode=0:</b> Invalid recipe or conditions not met. Check ore ratios.",
+        "<b>No output:</b> Ingots appear in export slot. Check ExportCount via logic."
+      ]
+    },
+    {
+      "title": "Logic Automation",
+      "items": [
+        "Read <color=#FFA500>Temperature</color> to track smelting progress",
+        "<color=#FFA500>Mode</color>=1 means ready to smelt",
+        "<color=#FFA500>Ratio</color> shows smelting progress (0 to 1)",
+        "Use <color=#FFA500>ExportCount</color> > 0 to trigger chute/arm pickup"
+      ]
+    },
+    {
+      "title": "Tips",
+      "items": [
+        "The furnace can handle extreme pressures - don't fear high MPa readings",
+        "On cold planets, you need more fuel ice for heat",
+        "On hot planets, ambient temperature helps - use less ice",
+        "Lock the furnace via logic to prevent accidental opening mid-smelt"
+      ]
+    }
+  ],
+  "modeDescriptions": {
+    "Mode0": {
+      "modeValue": "0",
+      "description": "Invalid recipe or conditions not met."
+    },
+    "Mode1": {
+      "modeValue": "1",
+      "description": "Valid recipe ready to smelt."
+    }
+  }
+}
+
+--------------------------------------------------------------------------------
+VALIDATION CHECKLIST
+--------------------------------------------------------------------------------
+
+Before submitting your JSON:
+
+[ ] deviceKey matches exact prefab name (e.g., "ThingStructureFurnace")
+[ ] OperationalDetails is an ARRAY with square brackets []
+[ ] Each item uses valid properties: title, description, items, steps, children
+[ ] Rich text tags are properly closed
+[ ] JSON is valid (no trailing commas, proper bracket matching)
+[ ] Nesting is not too deep (2-3 levels max recommended)
+
+--------------------------------------------------------------------------------
+END OF INSTRUCTIONS
+--------------------------------------------------------------------------------

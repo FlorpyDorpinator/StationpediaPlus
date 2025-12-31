@@ -1,4 +1,5 @@
 {
+  "$schema": "./descriptions.schema.json",
   "genericDescriptions": {
     "slots": {
       "SortingClass": "Sorting class for the item in slot.",
@@ -846,6 +847,122 @@
     }
   },
   "devices": [
+    {
+      "deviceKey": "ThingStructureSolidFuelGenerator",
+      "displayName": " EXAMPLE ENTRY  Solid Fuel Generator",
+      "pageDescriptionPrepend": "<color=#00FF00> THIS IS A TEST PAGE </color>\nThis page demonstrates ALL features of Stationpedia Ascended.\n\n",
+      "OperationalDetails": [
+        {
+          "title": "Overview",
+          "description": "This section shows a simple title + description combo. The Solid Fuel Generator burns coal or biomass to produce electricity."
+        },
+        {
+          "title": "Bullet List Example (items)",
+          "description": "Below is a bullet list using the 'items' property:",
+          "items": [
+            "First bullet point",
+            "Second bullet point with <b>bold text</b>",
+            "Third bullet with <color=#FF0000>red color</color>",
+            "Fourth bullet with <i>italic text</i>"
+          ]
+        },
+        {
+          "title": "Numbered List Example (steps)",
+          "description": "Below is a numbered list using the 'steps' property:",
+          "steps": [
+            "First step - place the generator",
+            "Second step - connect power cables",
+            "Third step - load coal or biomass",
+            "Fourth step - turn it on!"
+          ]
+        },
+        {
+          "title": "Nested Sections Example (children)",
+          "description": "This section has nested children. Notice the indentation and dimmer title colors:",
+          "children": [
+            {
+              "title": "Child Section 1",
+              "description": "This is a nested child section.",
+              "items": [
+                "Nested bullets work too!",
+                "See how they're indented"
+              ]
+            },
+            {
+              "title": "Child Section 2",
+              "description": "Another child section.",
+              "steps": [
+                "Nested steps also work",
+                "With proper numbering"
+              ]
+            },
+            {
+              "title": "Deep Nesting",
+              "description": "You can nest even deeper:",
+              "children": [
+                {
+                  "title": "Level 3 Section",
+                  "description": "This is three levels deep! Notice the title gets even dimmer.",
+                  "items": [
+                    "Deep nested bullets",
+                    "Maximum recommended depth"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Rich Text Formatting Examples",
+          "description": "<b>Bold text</b> | <i>Italic text</i> | <u>Underlined</u> | <s>Strikethrough</s>\n\n<color=#FF0000>Red</color> | <color=#00FF00>Green</color> | <color=#0088FF>Blue</color> | <color=#FFA500>Orange</color>\n\n<size=120%>Bigger text</size> | <size=80%>Smaller text</size>\n\nH<sub>2</sub>O (subscript) | x<sup>2</sup> (superscript)"
+        },
+        {
+          "title": "Combined Features",
+          "description": "You can combine description text with lists:",
+          "items": [
+            "<b>Power Output:</b> 5kW maximum",
+            "<b>Fuel Types:</b> Coal, Charcoal, Biomass",
+            "<b>Efficiency:</b> Varies by fuel type"
+          ],
+          "steps": [
+            "Check fuel level via <color=#FFA500>Ratio</color> logic",
+            "Monitor <color=#FFA500>PowerGeneration</color> output",
+            "Use <color=#FFA500>Activate</color> to turn on/off"
+          ]
+        },
+        {
+          "title": "Tips",
+          "items": [
+            " Manual bullets in items work too (just adds extra bullet)",
+            "Coal burns longer than biomass",
+            "Connect multiple generators for redundancy",
+            "Use logic to automate fuel loading"
+          ]
+        }
+      ],
+      "logicDescriptions": {
+        "Activate": {
+          "dataType": "Boolean",
+          "range": "0-1",
+          "description": "TEST TOOLTIP: Set to 1 to turn generator on, 0 to turn off."
+        },
+        "PowerGeneration": {
+          "dataType": "Float",
+          "range": "0-5000",
+          "description": "TEST TOOLTIP: Current power output in watts."
+        }
+      },
+      "modeDescriptions": {
+        "Mode0": {
+          "modeValue": "0",
+          "description": "TEST MODE: Generator is idle."
+        },
+        "Mode1": {
+          "modeValue": "1",
+          "description": "TEST MODE: Generator is running."
+        }
+      }
+    },
     {
       "deviceKey": "ThingBattery_Wireless_cell",
       "displayName": "Battery Wireless Cell",
@@ -15906,6 +16023,36 @@
           "description": "Hash of the device's custom name if set."
         }
       },
+      "OperationalDetails": [
+        {
+          "title": "Overview",
+          "description": "The Furnace smelts ores into ingots using combustion. Load ores and fuel (ice), close the door, then activate to ignite. The burning volatiles create the heat and pressure needed for smelting."
+        },
+        {
+          "title": "Steel Smelting (Most Common Use)",
+          "description": "Ores: Iron Ore (Fe) + Coal Ore in 3:1 ratio. Standard batch: 15 Iron + 5 Coal = 5 Steel ingots. Requires temperature above 900K (627°C) and pressure above ~100 kPa (can go very high, 100+ MPa is fine)."
+        },
+        {
+          "title": "Fuel Recipe",
+          "description": "Use Oxite + Volatiles ice to create combustion. Cold planet ratio: 8 Volatiles + 4 Oxite (typical for Europa/Moon). On Vulcan/Venus, less ice needed as ambient heat helps. More volatiles = more heat and pressure."
+        },
+        {
+          "title": "Smelting Process",
+          "description": "1) Load iron ore and coal (3:1 ratio) into furnace. /n2) Add volatiles ice (fuel) and oxite ice (oxidizer). 3) Close the furnace door. 4) Activate - volatiles burn with oxygen, creating heat. 5) Wait for Mode=1 or temperature 900K+. 6) Smelting completes automatically when conditions are met."
+        },
+        {
+          "title": "Common Problems",
+          "description": "Won't activate: Ensure door is closed and you have both fuel (volatiles) and oxidizer (oxite). Mode=0: Invalid recipe or conditions not met - check ore ratios and wait for temp/pressure. No output: Ingots appear in export slot - check ExportCount via logic or open door after completion."
+        },
+        {
+          "title": "Logic Automation",
+          "description": "Read Temperature to track smelting progress. Mode=1 means ready to smelt, Mode=0 means conditions not met. Ratio shows smelting progress (0 to 1). Use ExportCount > 0 to trigger chute/arm pickup."
+        },
+        {
+          "title": "Tips",
+          "description": "The furnace can handle extreme pressures - don't fear high MPa readings. On cold planets (Europa), you need more fuel ice for heat. On hot planets (Vulcan), ambient temperature helps - use less ice. Smelting releases gases that increase pressure - this is normal. Lock the furnace via logic to prevent accidental opening mid-smelt."
+        }
+      ],
       "modeDescriptions": {
         "Mode0": {
           "modeValue": "Mode0",
@@ -29588,70 +29735,6 @@
           "dataType": "Hash",
           "range": "CRC32",
           "description": "Custom name hash."
-        }
-      }
-    },
-    {
-      "deviceKey": "ThingStructureSolidFuelGenerator",
-      "title": "Generator (Solid Fuel)",
-      "logicDescriptions": {
-        "Lock": {
-          "dataType": "Boolean",
-          "range": "0-1",
-          "access": "Read Write",
-          "description": "When set to 1, locks generator preventing fuel loading. 0 unlocks."
-        },
-        "On": {
-          "dataType": "Boolean",
-          "range": "0-1",
-          "access": "Read Write",
-          "description": "Generator on/off state. 1 = on, 0 = off."
-        },
-        "ClearMemory": {
-          "dataType": "Boolean",
-          "range": "0-1",
-          "access": "Write",
-          "description": "Write 1 to clear device memory counters."
-        },
-        "ImportCount": {
-          "dataType": "Integer",
-          "range": "0+",
-          "access": "Read",
-          "description": "Number of fuel items in import slot."
-        },
-        "PowerGeneration": {
-          "dataType": "Float",
-          "range": "0+ W",
-          "access": "Read",
-          "description": "Current power generation in watts."
-        },
-        "PrefabHash": {
-          "dataType": "Hash",
-          "range": "CRC32",
-          "access": "Read",
-          "description": "Device type hash (unique identifier for this device type)."
-        },
-        "ReferenceId": {
-          "dataType": "Hash",
-          "range": "Unique",
-          "access": "Read",
-          "description": "Unique reference ID for this specific device instance."
-        },
-        "NameHash": {
-          "dataType": "Hash",
-          "range": "CRC32",
-          "access": "Read",
-          "description": "Hash of custom name set for this device."
-        }
-      },
-      "modeDescriptions": {
-        "Generating": {
-          "modeValue": "Generating",
-          "description": "Generator is actively burning fuel and producing power."
-        },
-        "Not Generating": {
-          "modeValue": "Not Generating",
-          "description": "Generator is idle, no fuel being consumed."
         }
       }
     },

@@ -77,6 +77,11 @@ namespace StationpediaAscended.Data
     {
         public string title;
         public string description;
+        
+        // Nested content support
+        public List<OperationalDetail> children;  // Nested subsections
+        public List<string> items;                 // Bullet list items
+        public List<string> steps;                 // Numbered step list
     }
 
     [Serializable]

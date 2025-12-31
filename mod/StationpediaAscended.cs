@@ -882,6 +882,16 @@ namespace StationpediaAscended
                 Util.Commands.CommandLine.AddCommand("stationpediacenter", 
                     new Util.Commands.BasicCommand(CenterStationpediaCommand, 
                         "Centers the Stationpedia window on screen", null, false));
+                
+                // Register "spda_dumpkeys" command to export all page keys
+                Util.Commands.CommandLine.AddCommand("spda_dumpkeys", 
+                    new Util.Commands.BasicCommand(DumpPageKeysCommand, 
+                        "Exports all Stationpedia page keys to a file for use in descriptions.json", null, false));
+                
+                // Register "spda_currentkey" command to show current page key
+                Util.Commands.CommandLine.AddCommand("spda_currentkey", 
+                    new Util.Commands.BasicCommand(CurrentPageKeyCommand, 
+                        "Shows the deviceKey of the currently open Stationpedia page", null, false));
             }
             catch (Exception ex)
             {
@@ -913,6 +923,68 @@ namespace StationpediaAscended
             catch (Exception ex)
             {
                 return $"Error centering Stationpedia: {ex.Message}";
+            }
+        }
+        
+        private static string CurrentPageKeyCommand(string[] args)
+        {
+            try
+            {
+                string currentKey = Stationpedia.CurrentPageKey;
+                if (string.IsNullOrEmpty(currentKey))
+                {
+                    return "No page currently open";
+                }
+                return $"Current page deviceKey: {currentKey}";
+            }
+            catch (Exception ex)
+            {
+                return $"Error: {ex.Message}";
+            }
+        }
+        
+        private static string DumpPageKeysCommand(string[] args)
+        {
+            try
+            {
+                var pages = Stationpedia.StationpediaPages;
+                if (pages == null || pages.Count == 0)
+                {
+                    return "No Stationpedia pages found. Open Stationpedia first.";
+                }
+                
+                // Build output
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("# Stationpedia Page Keys");
+                sb.AppendLine($"# Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                sb.AppendLine($"# Total pages: {pages.Count}");
+                sb.AppendLine("#");
+                sb.AppendLine("# Use these keys as 'deviceKey' in descriptions.json");
+                sb.AppendLine("# Format: deviceKey | Title");
+                sb.AppendLine("#");
+                sb.AppendLine();
+                
+                // Sort alphabetically by key
+                var sortedPages = new List<StationpediaPage>(pages);
+                sortedPages.Sort((a, b) => string.Compare(a.Key, b.Key, StringComparison.OrdinalIgnoreCase));
+                
+                foreach (var page in sortedPages)
+                {
+                    sb.AppendLine($"{page.Key} | {page.Title}");
+                }
+                
+                // Save to file
+                string outputPath = System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    "My Games", "Stationeers", "stationpedia_keys.txt");
+                
+                System.IO.File.WriteAllText(outputPath, sb.ToString());
+                
+                return $"Exported {pages.Count} page keys to:\n{outputPath}";
+            }
+            catch (Exception ex)
+            {
+                return $"Error dumping keys: {ex.Message}";
             }
         }
         

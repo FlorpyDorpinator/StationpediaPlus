@@ -335,14 +335,13 @@ namespace StationpediaAscended.Patches
             // Try to add our custom phoenix icon next to the category title
             AddCategoryIcon(category);
 
-            // Build combined text for all operational details
+            // Build combined text for all operational details with nesting support
             var sb = new System.Text.StringBuilder();
             bool first = true;
             foreach (var detail in deviceDesc.operationalDetails)
             {
                 if (!first) sb.AppendLine().AppendLine();
-                sb.AppendLine($"<color=#FF7A18>{detail.title}</color>");
-                sb.Append(detail.description);
+                RenderOperationalDetail(sb, detail, 0);
                 first = false;
             }
 
@@ -409,6 +408,70 @@ namespace StationpediaAscended.Patches
             catch (Exception ex)
             {
                 ConsoleWindow.Print($"[Stationpedia Ascended] Could not add icon to category: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Recursively renders an OperationalDetail with support for nested children, items, and steps
+        /// </summary>
+        private static void RenderOperationalDetail(System.Text.StringBuilder sb, Data.OperationalDetail detail, int depth)
+        {
+            // Calculate indentation based on depth
+            string indent = depth > 0 ? $"<indent={depth * 5}%>" : "";
+            string indentEnd = depth > 0 ? "</indent>" : "";
+            
+            // Title color gets slightly dimmer with depth for visual hierarchy
+            string titleColor = depth == 0 ? "#FF7A18" : (depth == 1 ? "#E06810" : "#C05808");
+            
+            // Render title if present
+            if (!string.IsNullOrEmpty(detail.title))
+            {
+                sb.Append(indent);
+                sb.AppendLine($"<color={titleColor}>{detail.title}</color>");
+                sb.Append(indentEnd);
+            }
+            
+            // Render description if present
+            if (!string.IsNullOrEmpty(detail.description))
+            {
+                sb.Append(indent);
+                sb.Append(detail.description);
+                sb.Append(indentEnd);
+                sb.AppendLine();
+            }
+            
+            // Render bullet items if present
+            if (detail.items != null && detail.items.Count > 0)
+            {
+                foreach (var item in detail.items)
+                {
+                    sb.Append(indent);
+                    sb.AppendLine($"  • {item}");
+                    sb.Append(indentEnd);
+                }
+            }
+            
+            // Render numbered steps if present
+            if (detail.steps != null && detail.steps.Count > 0)
+            {
+                int stepNum = 1;
+                foreach (var step in detail.steps)
+                {
+                    sb.Append(indent);
+                    sb.AppendLine($"  <color=#FFA500>{stepNum}.</color> {step}");
+                    sb.Append(indentEnd);
+                    stepNum++;
+                }
+            }
+            
+            // Recursively render nested children
+            if (detail.children != null && detail.children.Count > 0)
+            {
+                foreach (var child in detail.children)
+                {
+                    sb.AppendLine();
+                    RenderOperationalDetail(sb, child, depth + 1);
+                }
             }
         }
 

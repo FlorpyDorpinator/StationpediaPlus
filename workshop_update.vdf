@@ -1,8 +1,8 @@
 "workshopitem"
 {
   "appid" "544550"
-  "publishedfileid" "3634201807"
+  "publishedfileid" "3634225688"
   "contentfolder" "C:\\Users\\marka\\Documents\\My Games\\Stationeers\\mods\\StationpediaAscended"
   "previewfile" "C:\\Users\\marka\\Documents\\My Games\\Stationeers\\mods\\StationpediaAscended\\Preview.png"
-  "changenote" "v0.2.1: Enhanced search with smart grouping, visual headers, debris filtering"
+  "changenote" "v0.2.2: Search optimizations, 20+ property tooltips, IC10 helpers for Prefab Name/Hash"
 }

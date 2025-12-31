@@ -1,0 +1,447 @@
+{
+  "devices": [
+    {
+      "deviceKey": "ThingStructureFurnace",
+      "displayName": "Furnace",
+      "operationalDetails": {
+        "overview": "The Furnace smelts ores into ingots using combustion. Load ores and fuel (ice), close the door, then activate to ignite. The burning volatiles create the heat and pressure needed for smelting.",
+
+        "steelSmelting": {
+          "title": "Steel Smelting (Most Common Use)",
+          "requirements": {
+            "ores": "Iron Ore (Fe) + Coal Ore in 3:1 ratio",
+            "standardBatch": "15 Iron + 5 Coal = 5 Steel ingots",
+            "temperature": "Above 900K (627C)",
+            "pressure": "Above ~100 kPa, can go very high (100+ MPa is fine)"
+          },
+          "fuelRecipe": {
+            "description": "Use Oxite + Volatiles ice to create combustion",
+            "coldPlanetRatio": "8 Volatiles + 4 Oxite (typical for Europa/Moon)",
+            "hotPlanetNote": "On Vulcan/Venus, less ice needed - ambient heat helps",
+            "tip": "More volatiles = more heat and pressure. Adjust based on results."
+          },
+          "process": [
+            "1. Load iron ore and coal (3:1 ratio) into furnace",
+            "2. Add volatiles ice (fuel) and oxite ice (oxidizer)",
+            "3. Close the furnace door",
+            "4. Activate - volatiles burn with oxygen, creating heat",
+            "5. Wait for Mode=1 (recipe valid) or watch temperature reach 900K+",
+            "6. Smelting completes automatically when conditions are met"
+          ]
+        },
+
+        "commonProblems": {
+          "wontActivate": "Ensure door is closed. Check you have both fuel (volatiles) and oxidizer (oxite).",
+          "mode0": "Mode=0 means invalid recipe or conditions not met. Check ore ratios and wait for temp/pressure.",
+          "tooHot": "Some recipes fail if too hot. For steel this is rarely an issue, but super alloys have tight windows.",
+          "noOutput": "Ingots appear in export slot. Check ExportCount via logic or open door after completion."
+        },
+
+        "logicAutomation": {
+          "monitorTemperature": "Read Temperature to track smelting progress",
+          "checkMode": "Mode=1 means ready to smelt, Mode=0 means conditions not met",
+          "readProgress": "Ratio shows smelting progress (0 to 1)",
+          "automatedUnload": "Use ExportCount > 0 to trigger chute/arm pickup"
+        },
+
+        "tips": [
+          "The furnace can handle extreme pressures - don't fear high MPa readings",
+          "On cold planets (Europa), you need more fuel ice for heat",
+          "On hot planets (Vulcan), ambient temperature helps - use less ice",
+          "Smelting releases gases that increase pressure - this is normal",
+          "Lock the furnace via logic to prevent accidental opening mid-smelt"
+        ]
+      }
+    },
+    {
+      "deviceKey": "ThingStructureAirlock",
+      "displayName": "Airlock",
+      "operationalDetails": {
+        "overview": "A powered door that can be controlled manually or via logic. For vacuum planets (Moon, Europa, space stations), a simple airlock with an Active Vent can cycle between pressurized interior and vacuum exterior.",
+
+        "basicSetup": {
+          "title": "Simple Airlock (Vacuum Exterior)",
+          "components": [
+            "2 Airlock doors (interior and exterior)",
+            "1 Active Vent connected to pipes (for depressurization)",
+            "Power connection to all components"
+          ],
+          "operation": [
+            "1. Enter through exterior door (closes behind you)",
+            "2. Active Vent pressurizes from your base atmosphere",
+            "3. Interior door opens when pressure equalizes",
+            "4. Reverse process to exit (vent dumps air to vacuum)"
+          ],
+          "note": "This simple setup assumes vacuum outside. For atmospheric planets like Mars, use an Advanced Airlock setup with a Console."
+        },
+
+        "advancedAirlock": {
+          "title": "Advanced Airlock (Atmospheric Exterior)",
+          "description": "Required for planets with atmosphere (Mars, Venus) where exterior isn't vacuum.",
+          "components": [
+            "2 Airlock doors (labeled Interior/Exterior)",
+            "Console with Airlock motherboard",
+            "2 Active Vents (one connected to interior atmosphere, one to exterior)",
+            "Gas Sensor (optional, for pressure monitoring)"
+          ],
+          "setup": [
+            "1. Place doors, vents, and console",
+            "2. Insert Airlock motherboard into Console",
+            "3. Use Console to configure: select exterior components first, then interior",
+            "4. Set target pressures for each side (e.g., 5-10 kPa margin from actual pressures)",
+            "5. Label all components clearly for easier troubleshooting"
+          ],
+          "commonIssues": {
+            "configError": "Ensure all components are data-connected and labeled correctly. Select exterior first, then interior.",
+            "wontFinishCycle": "Check that vents can actually reach target pressure. Vents need pipe network on other side.",
+            "reversedCycle": "If pressurize/depressurize seem backwards, you may have interior/exterior assignments swapped."
+          }
+        },
+
+        "powerLossSafety": {
+          "title": "Avoiding Power Loss Traps",
+          "warning": "Losing power mid-cycle can trap you in the airlock!",
+          "solutions": [
+            "Dedicated APC with battery for airlock circuit only",
+            "Manual override: crowbar can open unpowered doors (if not locked)",
+            "Emergency suit: always carry a suit when using airlocks",
+            "Redundant power: connect airlock to multiple power sources"
+          ]
+        },
+
+        "logicAutomation": {
+          "readOpen": "Open returns 1 if door is open, 0 if closed",
+          "writeOpen": "Write 1 to open, 0 to close",
+          "checkIdle": "Idle=1 when door is fully open or closed (not moving)",
+          "modeControl": "Mode 0=Operate (manual+auto), Mode 1=Logic only",
+          "lockDoor": "Lock=1 prevents manual opening (crowbar won't work)"
+        },
+
+        "tips": [
+          "Always have backup power - getting trapped in an airlock is a common death",
+          "On Mars, your base pressure and exterior pressure are both non-zero - use Advanced Airlock",
+          "Speed up cycling by using larger pipe volumes connected to vents",
+          "Set Active Vent pressure slightly below your target to prevent overshooting",
+          "Lock exterior door via logic when interior is open to prevent accidents"
+        ]
+      }
+    },
+    {
+      "deviceKey": "ThingStructureSolarPanel",
+      "displayName": "Solar Panel",
+      "operationalDetails": {
+        "overview": "Solar Panels generate power from sunlight. Basic panels are fixed-angle, but panels can track the sun via IC10 automation for maximum efficiency throughout the day.",
+
+        "basicUsage": {
+          "title": "Fixed Panel Setup",
+          "description": "Without tracking, panels produce power based on how well they face the sun.",
+          "placement": [
+            "Place panel facing the sun's path across the sky",
+            "Vertical angle matters most - aim for midday sun position",
+            "Connect power cable to your electrical network",
+            "No programming required for basic operation"
+          ],
+          "limitations": "Fixed panels only reach peak efficiency when sun is directly aligned. Tracking greatly increases daily power output."
+        },
+
+        "sunTracking": {
+          "title": "Automated Sun Tracking",
+          "description": "Use a Daylight Sensor + IC10 to keep panels pointed at the sun all day.",
+          "components": [
+            "Daylight Sensor (provides SolarAngle)",
+            "IC Housing with IC10 chip",
+            "Data cable connecting sensor and panels to IC Housing"
+          ],
+          "basicScript": {
+            "description": "Simple tracking script for panels on the same network:",
+            "code": [
+              "# Simple Solar Tracker",
+              "alias sensor d0    # Daylight Sensor",
+              "start:",
+              "l r0 sensor SolarAngle",
+              "sb ThingStructureSolarPanel Horizontal r0",
+              "# For vertical, use Mode=0 on sensor",
+              "yield",
+              "j start"
+            ]
+          },
+          "sensorModes": {
+            "mode0": "Vertical tracking - SolarAngle gives vertical sun position",
+            "mode1": "Horizontal tracking - SolarAngle gives horizontal sun position"
+          },
+          "twoAxisTracking": "For full 2-axis tracking, use two Daylight Sensors (one Mode=0, one Mode=1) and write both Horizontal and Vertical to panels."
+        },
+
+        "chickenEggProblem": {
+          "title": "Bootstrap Power Problem",
+          "warning": "Panels need power to move! If batteries are dead, panels can't track.",
+          "solutions": [
+            "Keep a small battery reserve (never drain to 0%)",
+            "Use a Solid Fuel Generator for emergency bootstrap",
+            "Fixed panels (no tracking) as backup always work",
+            "Manually rotate panels when unpowered (wrench)"
+          ]
+        },
+
+        "logicAutomation": {
+          "readCharge": "Charge returns current power generation in watts",
+          "readMaximum": "Maximum shows potential output if perfectly aligned",
+          "readRatio": "Ratio = Charge/Maximum (1.0 = perfect alignment)",
+          "writeHorizontal": "Set horizontal rotation (0-360 degrees)",
+          "writeVertical": "Set vertical tilt (15-165 degrees typically)"
+        },
+
+        "tips": [
+          "Ratio of 1.0 means perfect sun alignment - use this to verify tracking works",
+          "Panel orientation when placed affects which direction 0 degrees faces",
+          "Night time: panels produce nothing - need batteries for overnight power",
+          "Storms/dust reduce solar output - have backup generation",
+          "Batch write (sb) updates all panels of same type at once - efficient for arrays"
+        ]
+      }
+    },
+    {
+      "deviceKey": "ThingStructurePressureRegulator",
+      "displayName": "Pressure Regulator",
+      "operationalDetails": {
+        "overview": "Limits OUTPUT (downstream) pressure. Gas flows through when output side is below the Setting pressure. Used to deliver gas at a specific pressure regardless of input pressure.",
+
+        "howItWorks": {
+          "title": "Key Concept: Limits Output Pressure",
+          "description": "The Pressure Regulator watches the OUTPUT side. When output pressure is below Setting, it allows gas to flow. When output reaches Setting, it stops.",
+          "example": "Set to 100 kPa: Gas flows until output side reaches 100 kPa, then stops regardless of how high input pressure is.",
+          "requirement": "Input pressure must be HIGHER than output pressure for any flow to occur. No pressure advantage = no flow."
+        },
+
+        "commonUses": [
+          "Filling canisters to specific pressure",
+          "Supplying rooms with controlled pressure",
+          "Stepping down high-pressure storage to usable levels",
+          "Feeding furnaces/machines at required pressure"
+        ],
+
+        "commonProblems": {
+          "noFlow": "Check pressure advantage - input must be higher than output. If output already at or above Setting, no flow occurs.",
+          "slowFlow": "Need larger pipe volumes on both sides. Regulator can only move what fits in the pipes.",
+          "wrongPressure": "Verify Setting value. Check you're reading from correct side (output, not input)."
+        },
+
+        "logicAutomation": {
+          "readSetting": "Setting shows current target pressure in kPa",
+          "writeSetting": "Set target output pressure (0 to Maximum)",
+          "readRatio": "Ratio shows current flow rate (0 = stopped, 1 = max flow)",
+          "lockControl": "Lock=1 prevents manual adjustment"
+        },
+
+        "vsBackPressure": "Pressure Regulator limits OUTPUT. Back Pressure Regulator limits INPUT (maintains upstream pressure). They serve opposite purposes."
+      }
+    },
+    {
+      "deviceKey": "ThingStructureBackPressureRegulator",
+      "displayName": "Back Pressure Regulator",
+      "operationalDetails": {
+        "overview": "Maintains INPUT (upstream) pressure by only allowing flow when input exceeds the Setting. Used to protect upstream systems or ensure minimum supply pressure.",
+
+        "howItWorks": {
+          "title": "Key Concept: Maintains Input Pressure",
+          "description": "The Back Pressure Regulator watches the INPUT side. It only opens when input pressure EXCEEDS the Setting, keeping upstream pressure above that threshold.",
+          "example": "Set to 500 kPa: Gas only flows when input pressure is above 500 kPa. This ensures your tank/source never drops below 500 kPa.",
+          "requirement": "Input pressure must exceed Setting for flow to start. Also needs pressure advantage (input > output)."
+        },
+
+        "commonUses": [
+          "Protecting high-pressure storage from over-drain",
+          "Ensuring minimum pressure in supply lines",
+          "Creating pressure-triggered overflow systems",
+          "Maintaining buffer pressure in distribution networks"
+        ],
+
+        "commonProblems": {
+          "noFlow": "Input pressure must be ABOVE Setting. If input is 400 kPa and Setting is 500 kPa, nothing flows.",
+          "drainsCompletely": "You may have confused this with Pressure Regulator. Back Pressure protects INPUT, not OUTPUT.",
+          "confusedBehavior": "Remember: opens when input exceeds threshold, not when output needs more."
+        },
+
+        "logicAutomation": {
+          "readSetting": "Setting shows threshold pressure in kPa",
+          "writeSetting": "Set minimum input pressure to maintain (0-20684 kPa)",
+          "readRatio": "Ratio shows current flow rate (0 = closed, 1 = max flow)",
+          "lockControl": "Lock=1 prevents manual adjustment"
+        },
+
+        "vsPressureRegulator": "Back Pressure Regulator protects INPUT (upstream). Regular Pressure Regulator limits OUTPUT (downstream). Opposite functions."
+      }
+    },
+    {
+      "deviceKey": "ThingStructureActiveVent",
+      "displayName": "Active Vent",
+      "operationalDetails": {
+        "overview": "Powered vent that actively pumps gas between a pipe network and the world/room. Can pressurize rooms (Outward mode) or fill pipes from atmosphere (Inward mode).",
+
+        "modes": {
+          "title": "Direction Modes",
+          "inward": {
+            "mode": 0,
+            "description": "Pumps gas FROM the world/room INTO the pipe network",
+            "use": "Collecting atmosphere, emptying rooms, gathering gases"
+          },
+          "outward": {
+            "mode": 1,
+            "description": "Pumps gas FROM the pipe network INTO the world/room",
+            "use": "Pressurizing rooms, venting gases, filling spaces"
+          }
+        },
+
+        "pressureLimits": {
+          "title": "Pressure Limit Settings",
+          "pressureExternal": {
+            "description": "Target room/world pressure. In Outward mode, vent stops when room reaches this pressure.",
+            "example": "Set to 101 kPa to pressurize room to 1 atmosphere"
+          },
+          "pressureInternal": {
+            "description": "Maximum pipe network pressure. In Inward mode, vent stops when pipes reach this pressure.",
+            "example": "Set to 5000 kPa to collect atmosphere into pipes up to 5 MPa"
+          },
+          "tip": "These limits prevent over-pressurization. Always set appropriate limits!"
+        },
+
+        "commonProblems": {
+          "overwhelmingPipes": "Pipes backing up or exploding? Lower PressureInternal. Vent is filling pipes faster than they drain.",
+          "notPressurizing": "Room not reaching target? Check pipe supply has enough gas. Check PressureExternal is set correctly.",
+          "wrongDirection": "Gas going wrong way? Check Mode setting. 0=Inward (to pipes), 1=Outward (to room).",
+          "errorState": "Error=1 means no pipe network connected or no world grid access. Check connections."
+        },
+
+        "airlockUsage": {
+          "description": "Active Vents are the heart of airlock cycling.",
+          "setup": [
+            "Inward vent: pulls air out of airlock (depressurizes)",
+            "Outward vent: pushes air into airlock (pressurizes)",
+            "Connect to appropriate gas sources/sinks",
+            "Set pressure limits to match interior/exterior pressures"
+          ]
+        },
+
+        "logicAutomation": {
+          "readMode": "Mode: 0=Inward, 1=Outward",
+          "writeMode": "Change pumping direction via logic",
+          "pressureExternal": "Read/Write external (room) pressure limit",
+          "pressureInternal": "Read/Write internal (pipe) pressure limit",
+          "readError": "Error=1 if missing pipe network or world access"
+        },
+
+        "tips": [
+          "PressureInternal controls pipe limit (Inward mode safety)",
+          "PressureExternal controls room limit (Outward mode target)",
+          "Setting is NOT used - use PressureInternal/PressureExternal instead",
+          "For airlocks, use separate vents for pressurize/depressurize",
+          "Connect to tanks with regulators for controlled room filling"
+        ]
+      }
+    },
+    {
+      "deviceKey": "ThingStructureBattery",
+      "displayName": "Station Battery",
+      "operationalDetails": {
+        "overview": "Large stationary battery that stores power for your electrical network. Charges when generation exceeds demand, discharges when demand exceeds generation.",
+
+        "chargeStates": {
+          "title": "Mode Values (Read-Only)",
+          "states": {
+            "0": "Empty - Battery fully depleted",
+            "1": "Critical - Very low charge, danger zone",
+            "2": "VeryLow - Low charge warning",
+            "3": "Low - Below half charge",
+            "4": "Medium - Around half charge",
+            "5": "High - Good charge level",
+            "6": "Full - Battery at maximum capacity"
+          }
+        },
+
+        "keyLogicValues": {
+          "charge": "Current stored energy in joules (Station Battery: 3.6 MJ max)",
+          "ratio": "Charge percentage as 0-1 (0.5 = 50% charge)",
+          "power": "Current flow: positive = charging, negative = discharging",
+          "powerActual": "How much power is actually being drawn right now"
+        },
+
+        "commonProblems": {
+          "notCharging": "Check if generation exceeds load. Battery only charges from surplus power.",
+          "drainingFast": "Load exceeds generation. Add more power sources or reduce consumption.",
+          "stuckAtZero": "If solar panels need power to track, and battery is dead, you have a bootstrap problem. Use generator."
+        },
+
+        "logicAutomation": {
+          "generatorControl": "Turn generator on when Ratio drops below threshold (e.g., 0.3), off when above (e.g., 0.8)",
+          "loadShedding": "Disable non-critical devices when Mode < 3 (low battery)",
+          "chargeMonitor": "Use Ratio for percentage-based logic, Mode for state-based logic"
+        },
+
+        "tips": [
+          "Multiple batteries share load and charge together on same network",
+          "Use Ratio for smooth automation, Mode for simple threshold checks",
+          "Keep batteries from fully draining - recovery can be tricky without backup power",
+          "Small/Medium/Large batteries differ in capacity but work the same way"
+        ]
+      }
+    },
+    {
+      "deviceKey": "ThingStructureAreaPowerControl",
+      "displayName": "Area Power Control (APC)",
+      "operationalDetails": {
+        "overview": "Isolates a sub-network from the main power grid. Devices on the output side run from a battery cell inside the APC, providing backup power if main grid fails.",
+
+        "howItWorks": {
+          "title": "Power Isolation",
+          "description": "The APC creates a separate power network. Devices plugged into the APC's output run from the internal battery cell, not directly from the main grid.",
+          "charging": "When main power is available, the APC charges its internal battery while powering connected devices.",
+          "backup": "When main power fails, the APC continues powering devices from its battery until depleted."
+        },
+
+        "batterySlot": {
+          "description": "Insert a Battery Cell into the APC slot",
+          "options": [
+            "Battery Cell - Standard capacity",
+            "Battery Cell (Large) - More capacity",
+            "Battery Cell (Nuclear) - Extended capacity"
+          ]
+        },
+
+        "modeStates": {
+          "title": "Mode Values (Read-Only)",
+          "states": {
+            "0": "Idle - No activity",
+            "1": "Discharged - Battery empty",
+            "2": "Discharging - Running on battery (main power lost)",
+            "3": "Charging - Battery charging from main power",
+            "4": "Charged - Battery full, running on main power"
+          }
+        },
+
+        "criticalUse": {
+          "title": "Recommended for Critical Systems",
+          "systems": [
+            "Airlocks - Prevent getting trapped during power outage",
+            "Life support - Keep atmosphere systems running",
+            "Emergency lighting - Maintain visibility",
+            "Security doors - Keep locks powered"
+          ]
+        },
+
+        "logicAutomation": {
+          "monitorMode": "Mode=2 means running on backup - trigger alerts or load shedding",
+          "checkRatio": "Ratio shows internal battery charge level",
+          "detectOutage": "Mode changing from 4 to 2 indicates main power failure"
+        },
+
+        "tips": [
+          "Always use APC for airlock circuits - this is the #1 recommendation",
+          "Larger battery cells = longer backup time",
+          "APC adds a small power overhead but worth it for critical systems",
+          "Place APC between main grid cable and the sub-network you want to protect",
+          "Check Ratio periodically to ensure backup battery stays charged"
+        ]
+      }
+    }
+  ]
+}

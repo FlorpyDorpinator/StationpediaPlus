@@ -1,0 +1,723 @@
+{{
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}  }    }      }        }          }            "$ref": "#/definitions/propertyDescription"          "additionalProperties": {          "description": "Global tooltips for material/gas properties. Key is the property name (e.g., 'Flashpoint', 'SpecificHeat').",          "type": "object",        "properties": {        },          }            "$ref": "#/definitions/memoryDescription"          "additionalProperties": {          "description": "Global tooltips for memory/IC instructions. Key is the instruction or register name.",          "type": "object",        "memory": {        },          }            "type": "string"          "additionalProperties": {          "description": "Global tooltips for connection types. Key is the connection type name.",          "type": "object",        "connections": {        },          }            "type": "string"          "additionalProperties": {          "description": "Global tooltips for version names. Key is the version name.",          "type": "object",        "versions": {        },          }            "type": "string"          "additionalProperties": {          "description": "Global tooltips for mode names. Key is the mode name.",          "type": "object",        "modes": {        },          }            "type": "string"          "additionalProperties": {          "description": "Global tooltips for named slots. Key is the slot name.",          "type": "object",        "slots": {        },          }            "type": "string"          "additionalProperties": {          "description": "Global tooltips for slot types. Key is the slot type name.",          "type": "object",        "slotTypes": {        },          "examples": [{"Temperature": "Current temperature in Kelvin", "Pressure": "Current pressure in kPa"}]          },            "description": "Simple text description for this logic type"            "type": "string",          "additionalProperties": {          "description": "Global tooltips for logic types. Key is the logic type name (e.g., 'Temperature', 'Pressure', 'Open').",          "type": "object",        "logic": {      "properties": {      "description": "Global descriptions that apply across ALL pages unless overridden by device-specific entries",      "type": "object",    "genericDescriptionsData": {    },      }        }          "examples": ["Q = mcΔT", "PV = nRT"]          "description": "Optional formula for calculated values",          "type": "string",        "formula": {        },          "description": "Explanation of what this property means"          "type": "string",        "description": {        },          "examples": ["> 0 to ignite", "101.325 kPa (1 atm)"]          "description": "Critical threshold or typical range",          "type": "string",        "threshold": {        },          "examples": ["Temperature (K)", "Pressure (kPa)", "Energy (J)"]          "description": "The measurement type/unit",          "type": "string",        "type": {      "properties": {      "description": "Tooltip content for material/gas properties (Flashpoint, SpecificHeat, etc.)",      "type": "object",    "propertyDescription": {    },      }        }          "description": "Memory layout diagram if applicable"          "type": "string",        "byteLayout": {        },          "description": "Explanation of what this instruction/register does"          "type": "string",        "description": {        },          "examples": ["dest src1 src2", "dest value"]          "description": "Parameter format",          "type": "string",        "parameters": {        },          "examples": ["add", "sub", "mov", "r0", "sp"]          "description": "The operation code or register name",          "type": "string",        "opCode": {      "properties": {      "description": "Tooltip content for a memory register or IC instruction",      "type": "object",    "memoryDescription": {    },      }        }          "description": "Explanation of this version's differences"          "type": "string",        "description": {      "properties": {      "description": "Tooltip content for a device version/variant",      "type": "object",    "versionDescription": {    },      }        }          "description": "Explanation of this slot's purpose"          "type": "string",        "description": {        },          "examples": ["Ore", "Ingot", "Gas Canister", "Battery"]          "description": "The type of items this slot accepts",          "type": "string",        "slotType": {      "properties": {      "description": "Tooltip content for an inventory slot",      "type": "object",    "slotDescription": {    },      }        }          "description": "Explanation of what this mode does"          "type": "string",        "description": {        },          "examples": ["0", "1", "2"]          "description": "The numeric value of this mode for IC10",          "type": "string",        "modeValue": {      "properties": {      "description": "Tooltip content for a device mode",      "type": "object",    "modeDescription": {    },      }        }          "description": "Explanation of what this logic type does"          "type": "string",        "description": {        },          "examples": ["0-100", "-273.15 to ∞", "0 or 1"]          "description": "Valid value range",          "type": "string",        "range": {        },          "examples": ["Float", "Integer", "Boolean (0/1)", "Enum"]          "description": "The data type of this logic value",          "type": "string",        "dataType": {      "properties": {      "description": "Tooltip content for a logic type (read/write property)",      "type": "object",    "logicDescription": {    },      }        }          }            "$ref": "#/definitions/operationalDetail"          "items": {          "description": "Nested subsections (indented and with dimmer title color)",          "type": "array",        "children": {        },          "examples": [["Load ores into furnace", "Add fuel ice", "Close door and activate"]]          },            "type": "string"          "items": {          "description": "Numbered step list (rendered with 1. 2. 3. etc.)",          "type": "array",        "steps": {        },          "examples": [["Item one", "Item two", "Item three"]]          },            "type": "string"          "items": {          "description": "Bullet list items (rendered with • prefix)",          "type": "array",        "items": {        },          "examples": ["This device consumes 500W when active.\\nStandby power: 10W"]          "description": "Section content. Supports rich text and \\n for line breaks.",          "type": "string",        "description": {        },          "examples": ["Power Requirements", "Temperature Ranges", "IC10 Integration"]          "description": "Section heading (displayed in orange, dimmer for nested levels)",          "type": "string",        "title": {      "properties": {      "description": "A single titled section within Operational Details. Supports nesting via children, bullet lists via items, and numbered lists via steps.",      "type": "object",    "operationalDetail": {    },      }        }          }            "$ref": "#/definitions/memoryDescription"          "additionalProperties": {          "description": "Device-specific overrides for memory/register tooltips. Key is the memory address or name.",          "type": "object",        "memoryDescriptions": {        },          }            "$ref": "#/definitions/versionDescription"          "additionalProperties": {          "description": "Device-specific overrides for version/variant tooltips. Key is the version name.",          "type": "object",        "versionDescriptions": {        },          }            "$ref": "#/definitions/slotDescription"          "additionalProperties": {          "description": "Device-specific overrides for slot tooltips. Key is the slot name.",          "type": "object",        "slotDescriptions": {        },          }            "$ref": "#/definitions/modeDescription"          "additionalProperties": {          "description": "Device-specific overrides for mode tooltips. Key is the mode name.",          "type": "object",        "modeDescriptions": {        },          }            "$ref": "#/definitions/logicDescription"          "additionalProperties": {          "description": "Device-specific overrides for logic type tooltips (e.g., Temperature, Pressure). Key is the logic type name.",          "type": "object",        "logicDescriptions": {        },          "examples": ["#FF7A18", "#00FF00", "#FF0000"]          "default": "#FF7A18",          "pattern": "^#[0-9A-Fa-f]{6}$",          "description": "Hex color for the 'Operational Details' category title",          "type": "string",        "operationalDetailsTitleColor": {        },          }            "$ref": "#/definitions/operationalDetail"          "items": {          "description": "Creates a collapsible 'Operational Details' section with titled subsections. Great for advanced tips, formulas, and usage guides.",          "type": "array",        "OperationalDetails": {        },          "examples": ["<color=#FF0000>Warning:</color> This device requires...\\n\\n"]          "description": "PREPENDS text to the BEGINNING of the existing description. Automatically adds spacing.",          "type": "string",        "pageDescriptionPrepend": {        },          "examples": ["\\n\\n<color=#FFA500>Pro Tip:</color> This device works best when..."]          "description": "APPENDS text to the END of the existing description. Automatically adds spacing.",          "type": "string",        "pageDescriptionAppend": {        },          "examples": ["This is a complete replacement description.\\n\\nWith multiple paragraphs."]          "description": "REPLACES the entire page description. Use \\n for line breaks. Supports rich text tags like <color=#FF0000>red</color>.",          "type": "string",        "pageDescription": {        },          "examples": ["Arc Furnace", "Pipe Kit"]          "description": "Optional friendly name for documentation purposes (not displayed in-game)",          "type": "string",        "displayName": {        },          "examples": ["StructureArcFurnace", "ItemKitPipe", "ItemGasCanisterOxygen", "StructureSolarPanel"]          "description": "The unique page identifier - usually the PrefabName (e.g., 'StructureArcFurnace', 'ItemKitPipe'). Find this by looking at the Prefab Name field in Stationpedia or using the spda_dumpkeys console command.",          "type": "string",        "deviceKey": {      "properties": {      "required": ["deviceKey"],      "description": "Customizations for a specific Stationpedia page",      "type": "object",    "deviceDescriptions": {  "definitions": {  },    }      "description": "Global descriptions that apply across all pages (logic types, slot types, modes, etc.)"      "$ref": "#/definitions/genericDescriptionsData",    "genericDescriptions": {    },      }        "$ref": "#/definitions/deviceDescriptions"      "items": {      "description": "Array of device-specific customizations. Each entry targets a specific Stationpedia page by its deviceKey (usually the PrefabName).",      "type": "array",    "devices": {    },      "examples": ["1.0", "2.0"]      "description": "Schema version for compatibility checking",      "type": "string",    "version": {  "properties": {  "type": "object",  "description": "Schema for descriptions.json - customizes tooltips and page content in Stationpedia Ascended mod",  "title": "Stationpedia Ascended Configuration",  "$id": "https://github.com/StationpediaAscended/descriptions.schema.json",  "$schema": "http://json-schema.org/draft-07/schema#",    "$schema":  "http://json-schema.org/draft-07/schema#",
+    "$id":  "https://github.com/StationpediaAscended/descriptions.schema.json",
+    "title":  "Stationpedia Ascended Configuration",
+    "description":  "Schema for descriptions.json - customizes tooltips and page content in Stationpedia Ascended mod",
+    "type":  "object",
+    "properties":  {
+                       "version":  {
+                                       "type":  "string",
+                                       "description":  "Schema version for compatibility checking",
+                                       "examples":  [
+                                                        "1.0",
+                                                        "2.0"
+                                                    ]
+                                   },
+                       "devices":  {
+                                       "type":  "array",
+                                       "description":  "Array of device-specific customizations. Each entry targets a specific Stationpedia page by its deviceKey (usually the PrefabName).",
+                                       "items":  {
+                                                     "$ref":  "#/definitions/deviceDescriptions"
+                                                 }
+                                   },
+                       "genericDescriptions":  {
+                                                   "$ref":  "#/definitions/genericDescriptionsData",
+                                                   "description":  "Global descriptions that apply across all pages (logic types, slot types, modes, etc.)"
+                                               }
+                   },
+    "definitions":  {
+                        "deviceDescriptions":  {
+                                                   "type":  "object",
+                                                   "description":  "Customizations for a specific Stationpedia page",
+                                                   "required":  [
+                                                                    "deviceKey"
+                                                                ],
+                                                   "properties":  {
+                                                                      "deviceKey":  {
+                                                                                        "type":  "string",
+                                                                                        "description":  "The unique page identifier - usually the PrefabName (e.g., \u0027StructureArcFurnace\u0027, \u0027ItemKitPipe\u0027). Find this by looking at the Prefab Name field in Stationpedia or using the spda_dumpkeys console command.",
+                                                                                        "examples":  [
+                                                                                                         "StructureArcFurnace",
+                                                                                                         "ItemKitPipe",
+                                                                                                         "ItemGasCanisterOxygen",
+                                                                                                         "StructureSolarPanel"
+                                                                                                     ]
+                                                                                    },
+                                                                      "displayName":  {
+                                                                                          "type":  "string",
+                                                                                          "description":  "Optional friendly name for documentation purposes (not displayed in-game)",
+                                                                                          "examples":  [
+                                                                                                           "Arc Furnace",
+                                                                                                           "Pipe Kit"
+                                                                                                       ]
+                                                                                      },
+                                                                      "pageDescription":  {
+                                                                                              "type":  "string",
+                                                                                              "description":  "REPLACES the entire page description. Use \\n for line breaks. Supports rich text tags like \u003ccolor=#FF0000\u003ered\u003c/color\u003e.",
+                                                                                              "examples":  [
+                                                                                                               "This is a complete replacement description.\\n\\nWith multiple paragraphs."
+                                                                                                           ]
+                                                                                          },
+                                                                      "pageDescriptionAppend":  {
+                                                                                                    "type":  "string",
+                                                                                                    "description":  "APPENDS text to the END of the existing description. Automatically adds spacing.",
+                                                                                                    "examples":  [
+                                                                                                                     "\\n\\n\u003ccolor=#FFA500\u003ePro Tip:\u003c/color\u003e This device works best when..."
+                                                                                                                 ]
+                                                                                                },
+                                                                      "pageDescriptionPrepend":  {
+                                                                                                     "type":  "string",
+                                                                                                     "description":  "PREPENDS text to the BEGINNING of the existing description. Automatically adds spacing.",
+                                                                                                     "examples":  [
+                                                                                                                      "\u003ccolor=#FF0000\u003eWarning:\u003c/color\u003e This device requires...\\n\\n"
+                                                                                                                  ]
+                                                                                                 },
+                                                                      "OperationalDetails":  {
+                                                                                                 "type":  "array",
+                                                                                                 "description":  "Creates a collapsible \u0027Operational Details\u0027 section with titled subsections. Great for advanced tips, formulas, and usage guides.",
+                                                                                                 "items":  {
+                                                                                                               "$ref":  "#/definitions/operationalDetail"
+                                                                                                           }
+                                                                                             },
+                                                                      "operationalDetailsTitleColor":  {
+                                                                                                           "type":  "string",
+                                                                                                           "description":  "Hex color for the \u0027Operational Details\u0027 category title",
+                                                                                                           "pattern":  "^#[0-9A-Fa-f]{6}$",
+                                                                                                           "default":  "#FF7A18",
+                                                                                                           "examples":  [
+                                                                                                                            "#FF7A18",
+                                                                                                                            "#00FF00",
+                                                                                                                            "#FF0000"
+                                                                                                                        ]
+                                                                                                       },
+                                                                      "logicDescriptions":  {
+                                                                                                "type":  "object",
+                                                                                                "description":  "Device-specific overrides for logic type tooltips (e.g., Temperature, Pressure). Key is the logic type name.",
+                                                                                                "additionalProperties":  {
+                                                                                                                             "$ref":  "#/definitions/logicDescription"
+                                                                                                                         }
+                                                                                            },
+                                                                      "modeDescriptions":  {
+                                                                                               "type":  "object",
+                                                                                               "description":  "Device-specific overrides for mode tooltips. Key is the mode name.",
+                                                                                               "additionalProperties":  {
+                                                                                                                            "$ref":  "#/definitions/modeDescription"
+                                                                                                                        }
+                                                                                           },
+                                                                      "slotDescriptions":  {
+                                                                                               "type":  "object",
+                                                                                               "description":  "Device-specific overrides for slot tooltips. Key is the slot name.",
+                                                                                               "additionalProperties":  {
+                                                                                                                            "$ref":  "#/definitions/slotDescription"
+                                                                                                                        }
+                                                                                           },
+                                                                      "versionDescriptions":  {
+                                                                                                  "type":  "object",
+                                                                                                  "description":  "Device-specific overrides for version/variant tooltips. Key is the version name.",
+                                                                                                  "additionalProperties":  {
+                                                                                                                               "$ref":  "#/definitions/versionDescription"
+                                                                                                                           }
+                                                                                              },
+                                                                      "memoryDescriptions":  {
+                                                                                                 "type":  "object",
+                                                                                                 "description":  "Device-specific overrides for memory/register tooltips. Key is the memory address or name.",
+                                                                                                 "additionalProperties":  {
+                                                                                                                              "$ref":  "#/definitions/memoryDescription"
+                                                                                                                          }
+                                                                                             }
+                                                                  }
+                                               },
+                        "operationalDetail":  {
+                                                  "properties":  {
+                                                                     "title":  {
+                                                                                   "description":  "Section heading (displayed in orange, dimmer for nested levels)",
+                                                                                   "examples":  [
+                                                                                                    "Power Requirements",
+                                                                                                    "Temperature Ranges",
+                                                                                                    "IC10 Integration"
+                                                                                                ],
+                                                                                   "type":  "string"
+                                                                               },
+                                                                     "description":  {
+                                                                                         "description":  "Section content. Supports rich text and \\n for line breaks.",
+                                                                                         "examples":  [
+                                                                                                          "This device consumes 500W when active.\\nStandby power: 10W"
+                                                                                                      ],
+                                                                                         "type":  "string"
+                                                                                     },
+                                                                     "steps":  {
+                                                                                   "description":  "Numbered step list (rendered with 1. 2. 3. etc.)",
+                                                                                   "examples":  [
+                                                                                                    [
+                                                                                                        "Load ores into furnace",
+                                                                                                        "Add fuel ice",
+                                                                                                        "Close door and activate"
+                                                                                                    ]
+                                                                                                ],
+                                                                                   "items":  {
+                                                                                                 "type":  "string"
+                                                                                             },
+                                                                                   "type":  "array"
+                                                                               },
+                                                                     "items":  {
+                                                                                   "description":  "Bullet list items (rendered with bullet prefix)",
+                                                                                   "examples":  [
+                                                                                                    [
+                                                                                                        "Item one",
+                                                                                                        "Item two",
+                                                                                                        "Item three"
+                                                                                                    ]
+                                                                                                ],
+                                                                                   "items":  {
+                                                                                                 "type":  "string"
+                                                                                             },
+                                                                                   "type":  "array"
+                                                                               },
+                                                                     "children":  {
+                                                                                      "description":  "Nested subsections (indented and with dimmer title color)",
+                                                                                      "items":  {
+                                                                                                    "$ref":  "#/definitions/operationalDetail"
+                                                                                                },
+                                                                                      "type":  "array"
+                                                                                  }
+                                                                 },
+                                                  "description":  "A single titled section within Operational Details. Supports nesting via children, bullet lists via items, and numbered lists via steps.",
+                                                  "type":  "object"
+                                              },
+                        "logicDescription":  {
+                                                 "type":  "object",
+                                                 "description":  "Tooltip content for a logic type (read/write property)",
+                                                 "properties":  {
+                                                                    "dataType":  {
+                                                                                     "type":  "string",
+                                                                                     "description":  "The data type of this logic value",
+                                                                                     "examples":  [
+                                                                                                      "Float",
+                                                                                                      "Integer",
+                                                                                                      "Boolean (0/1)",
+                                                                                                      "Enum"
+                                                                                                  ]
+                                                                                 },
+                                                                    "range":  {
+                                                                                  "type":  "string",
+                                                                                  "description":  "Valid value range",
+                                                                                  "examples":  [
+                                                                                                   "0-100",
+                                                                                                   "-273.15 to ∞",
+                                                                                                   "0 or 1"
+                                                                                               ]
+                                                                              },
+                                                                    "description":  {
+                                                                                        "type":  "string",
+                                                                                        "description":  "Explanation of what this logic type does"
+                                                                                    }
+                                                                }
+                                             },
+                        "modeDescription":  {
+                                                "type":  "object",
+                                                "description":  "Tooltip content for a device mode",
+                                                "properties":  {
+                                                                   "modeValue":  {
+                                                                                     "type":  "string",
+                                                                                     "description":  "The numeric value of this mode for IC10",
+                                                                                     "examples":  [
+                                                                                                      "0",
+                                                                                                      "1",
+                                                                                                      "2"
+                                                                                                  ]
+                                                                                 },
+                                                                   "description":  {
+                                                                                       "type":  "string",
+                                                                                       "description":  "Explanation of what this mode does"
+                                                                                   }
+                                                               }
+                                            },
+                        "slotDescription":  {
+                                                "type":  "object",
+                                                "description":  "Tooltip content for an inventory slot",
+                                                "properties":  {
+                                                                   "slotType":  {
+                                                                                    "type":  "string",
+                                                                                    "description":  "The type of items this slot accepts",
+                                                                                    "examples":  [
+                                                                                                     "Ore",
+                                                                                                     "Ingot",
+                                                                                                     "Gas Canister",
+                                                                                                     "Battery"
+                                                                                                 ]
+                                                                                },
+                                                                   "description":  {
+                                                                                       "type":  "string",
+                                                                                       "description":  "Explanation of this slot\u0027s purpose"
+                                                                                   }
+                                                               }
+                                            },
+                        "versionDescription":  {
+                                                   "type":  "object",
+                                                   "description":  "Tooltip content for a device version/variant",
+                                                   "properties":  {
+                                                                      "description":  {
+                                                                                          "type":  "string",
+                                                                                          "description":  "Explanation of this version\u0027s differences"
+                                                                                      }
+                                                                  }
+                                               },
+                        "memoryDescription":  {
+                                                  "type":  "object",
+                                                  "description":  "Tooltip content for a memory register or IC instruction",
+                                                  "properties":  {
+                                                                     "opCode":  {
+                                                                                    "type":  "string",
+                                                                                    "description":  "The operation code or register name",
+                                                                                    "examples":  [
+                                                                                                     "add",
+                                                                                                     "sub",
+                                                                                                     "mov",
+                                                                                                     "r0",
+                                                                                                     "sp"
+                                                                                                 ]
+                                                                                },
+                                                                     "parameters":  {
+                                                                                        "type":  "string",
+                                                                                        "description":  "Parameter format",
+                                                                                        "examples":  [
+                                                                                                         "dest src1 src2",
+                                                                                                         "dest value"
+                                                                                                     ]
+                                                                                    },
+                                                                     "description":  {
+                                                                                         "type":  "string",
+                                                                                         "description":  "Explanation of what this instruction/register does"
+                                                                                     },
+                                                                     "byteLayout":  {
+                                                                                        "type":  "string",
+                                                                                        "description":  "Memory layout diagram if applicable"
+                                                                                    }
+                                                                 }
+                                              },
+                        "propertyDescription":  {
+                                                    "type":  "object",
+                                                    "description":  "Tooltip content for material/gas properties (Flashpoint, SpecificHeat, etc.)",
+                                                    "properties":  {
+                                                                       "type":  {
+                                                                                    "type":  "string",
+                                                                                    "description":  "The measurement type/unit",
+                                                                                    "examples":  [
+                                                                                                     "Temperature (K)",
+                                                                                                     "Pressure (kPa)",
+                                                                                                     "Energy (J)"
+                                                                                                 ]
+                                                                                },
+                                                                       "threshold":  {
+                                                                                         "type":  "string",
+                                                                                         "description":  "Critical threshold or typical range",
+                                                                                         "examples":  [
+                                                                                                          "\u003e 0 to ignite",
+                                                                                                          "101.325 kPa (1 atm)"
+                                                                                                      ]
+                                                                                     },
+                                                                       "description":  {
+                                                                                           "type":  "string",
+                                                                                           "description":  "Explanation of what this property means"
+                                                                                       },
+                                                                       "formula":  {
+                                                                                       "type":  "string",
+                                                                                       "description":  "Optional formula for calculated values",
+                                                                                       "examples":  [
+                                                                                                        "Q = mcΔT",
+                                                                                                        "PV = nRT"
+                                                                                                    ]
+                                                                                   }
+                                                                   }
+                                                },
+                        "genericDescriptionsData":  {
+                                                        "type":  "object",
+                                                        "description":  "Global descriptions that apply across ALL pages unless overridden by device-specific entries",
+                                                        "properties":  {
+                                                                           "logic":  {
+                                                                                         "type":  "object",
+                                                                                         "description":  "Global tooltips for logic types. Key is the logic type name (e.g., \u0027Temperature\u0027, \u0027Pressure\u0027, \u0027Open\u0027).",
+                                                                                         "additionalProperties":  {
+                                                                                                                      "type":  "string",
+                                                                                                                      "description":  "Simple text description for this logic type"
+                                                                                                                  },
+                                                                                         "examples":  [
+                                                                                                          {
+                                                                                                              "Temperature":  "Current temperature in Kelvin",
+                                                                                                              "Pressure":  "Current pressure in kPa"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     },
+                                                                           "slotTypes":  {
+                                                                                             "type":  "object",
+                                                                                             "description":  "Global tooltips for slot types. Key is the slot type name.",
+                                                                                             "additionalProperties":  {
+                                                                                                                          "type":  "string"
+                                                                                                                      }
+                                                                                         },
+                                                                           "slots":  {
+                                                                                         "type":  "object",
+                                                                                         "description":  "Global tooltips for named slots. Key is the slot name.",
+                                                                                         "additionalProperties":  {
+                                                                                                                      "type":  "string"
+                                                                                                                  }
+                                                                                     },
+                                                                           "modes":  {
+                                                                                         "type":  "object",
+                                                                                         "description":  "Global tooltips for mode names. Key is the mode name.",
+                                                                                         "additionalProperties":  {
+                                                                                                                      "type":  "string"
+                                                                                                                  }
+                                                                                     },
+                                                                           "versions":  {
+                                                                                            "type":  "object",
+                                                                                            "description":  "Global tooltips for version names. Key is the version name.",
+                                                                                            "additionalProperties":  {
+                                                                                                                         "type":  "string"
+                                                                                                                     }
+                                                                                        },
+                                                                           "connections":  {
+                                                                                               "type":  "object",
+                                                                                               "description":  "Global tooltips for connection types. Key is the connection type name.",
+                                                                                               "additionalProperties":  {
+                                                                                                                            "type":  "string"
+                                                                                                                        }
+                                                                                           },
+                                                                           "memory":  {
+                                                                                          "type":  "object",
+                                                                                          "description":  "Global tooltips for memory/IC instructions. Key is the instruction or register name.",
+                                                                                          "additionalProperties":  {
+                                                                                                                       "$ref":  "#/definitions/memoryDescription"
+                                                                                                                   }
+                                                                                      },
+                                                                           "properties":  {
+                                                                                              "type":  "object",
+                                                                                              "description":  "Global tooltips for material/gas properties. Key is the property name (e.g., \u0027Flashpoint\u0027, \u0027SpecificHeat\u0027).",
+                                                                                              "additionalProperties":  {
+                                                                                                                           "$ref":  "#/definitions/propertyDescription"
+                                                                                                                       }
+                                                                                          }
+                                                                       }
+                                                    }
+                    }
+}
