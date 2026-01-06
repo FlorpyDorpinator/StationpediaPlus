@@ -78,13 +78,11 @@ Eliminates crashes when dragging the Stationpedia window in the main menu:
 
 ### Method 1: Via StationeersLaunchPad (Recommended)
 
-1. Install [StationeersLaunchPad](https://github.com/StationeersLaunchPad/StationeersLaunchPad/releases)
-2. Copy the `IC10BatchLoaderMod` folder to:
-   ```
-   C:\Program Files (x86)\Steam\steamapps\common\Stationeers\rocketstation_Data\StreamingAssets\mods\
-   ```
-3. Launch Stationeers via StationeersLaunchPad
-4. Enable the mod in the mod manager
+1. Install [StationeersLaunchPad](https://github.com/StationeersLaunchPad/StationeersLaunchPad/releases) (follow the instructions on that GitHub to install Bepinex etc.)
+2. Go to Steam Workshop and subscribe to Stationpedia Ascended 
+3. Start the game and make sure you see the StationeersLaunchPad black window during load
+4. If you hit f1 you should see Stationpedia Ascended & our logo at the top of your Stationpedia!
+
 
 ## ⚙️ Configuration
 
@@ -153,17 +151,6 @@ The mod uses a JSON configuration file for all customizations:
 }
 ```
 
-## 🔄 Hot-Reload Development
-
-For modders and advanced users:
-1. Place mod files in ScriptEngine scripts folder
-2. Edit `descriptions.json` or code files
-3. Press F6 in-game to reload instantly
-4. No game restart required for configuration changes
-
-![Hot Reload](assets/hot-reload-demo.gif)
-*Live editing and testing with hot-reload support*
-
 ## 🤝 Contributing
 
 We welcome contributions! Areas where you can help:
@@ -183,6 +170,7 @@ We welcome contributions! Areas where you can help:
 
 - **Stationeers** (Latest Stable Version)
 - **StationeersLaunchPad** (Latest Version)
+- **Bepinex** 
 
 
 ## 📞 Support
