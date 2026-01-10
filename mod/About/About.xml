@@ -19,7 +19,9 @@ All tooltips and descriptions are customizable via descriptions.json.
 
 Discord: https://discord.gg/stationeers</Description>
 
-  <ChangeLog>v0.2.2: Major update - Search optimizations, property tooltips, IC10 helpers
+  <ChangeLog>
+v0.2.3: TBD
+v0.2.2: Major update - Search optimizations, property tooltips, IC10 helpers
 - Search Performance: Cached title/word indexes for O(1) lookups, reduced wait time from 1s to 2 frames
 - New Property Tooltips: Hover over gas/material properties (Flashpoint, Autoignition, Specific Heat, etc.)
 - IC10 Tooltips: Prefab Name/Hash now show click-to-copy and IC10 usage examples
@@ -46,6 +48,7 @@ See: https://github.com/StationeersLaunchPad/StationeersLaunchPad
 An enhanced Stationpedia experience with comprehensive tooltips, bug fixes, and quality of life improvements.
 
 ChangeLog:
+v0.2.3: TBD
 v0.2.2: Search optimizations, 20+ property tooltips, IC10 helpers for Prefab Name/Hash
 v0.2.1: Enhanced search with smart grouping, visual headers, debris filtering
 v0.2.0: Public release preparation, conditional compilation

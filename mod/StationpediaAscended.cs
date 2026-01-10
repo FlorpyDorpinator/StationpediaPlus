@@ -17,6 +17,8 @@ using StationpediaAscended.Data;
 using StationpediaAscended.Tooltips;
 using StationpediaAscended.Patches;
 using StationpediaAscended.UI;
+using StationpediaAscended.UI.StationPlanner;
+using StationpediaAscended.Diagnostics;
 
 namespace StationpediaAscended
 {
@@ -89,6 +91,10 @@ namespace StationpediaAscended
         
         // Track if we've already hidden unwanted items in Stationpedia
         private static bool _hiddenItemsPopulated = false;
+        
+        // Station Planner button reference
+        private static UnityEngine.UI.Button _stationPlannerButton = null;
+        private static Sprite _stationPlannerIconSprite = null;
         
         #endregion
 
@@ -325,6 +331,9 @@ namespace StationpediaAscended
             // Start the monitoring coroutine
             _monitorCoroutine = StartCoroutine(MonitorStationpediaCoroutine());
             
+            // Initialize UI Asset Inspector (debug tool)
+            UIAssetInspector.Initialize();
+            
             _initialized = true;
             ConsoleWindow.Print($"[Stationpedia Ascended] v{PluginVersion} initialized successfully!");
         }
@@ -437,6 +446,26 @@ namespace StationpediaAscended
                         catch (Exception ex)
                         {
                             Log?.LogWarning($"Error setting up header toggle: {ex.Message}");
+                        }
+                        
+                        // Add Station Planner button to Stationpedia header
+                        try
+                        {
+                            SetupStationPlannerButton();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log?.LogWarning($"Error setting up Station Planner button: {ex.Message}");
+                        }
+                        
+                        // Initialize Station Planner
+                        try
+                        {
+                            StationPlannerWindow.Initialize();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log?.LogWarning($"Error initializing Station Planner: {ex.Message}");
                         }
                         
                         // Initialize search system early for instant first search
@@ -789,40 +818,128 @@ namespace StationpediaAscended
         {
             if (_headerTitleText != null)
             {
-                if (UI.VanillaModeManager.IsVanillaMode)
-                {
-                    // Vanilla mode - just "Stationpedia"
-                    _headerTitleText.text = "Stationpedia";
-                }
-                else
-                {
-                    // Ascended mode - "Stationpedia Ascended" with orange styling
-                    _headerTitleText.text = "Stationpedia <color=#FF7A18>Ascended</color>";
-                }
+                // Always show "Ascended" in orange for both modes
+                _headerTitleText.text = "Stationpedia <color=#FF7A18>Ascended</color>";
             }
             
-            if (_headerIconImage != null)
+            if (_headerIconImage != null && _customIconSprite != null)
             {
+                // Always use custom icon, just different tint colors
+                _headerIconImage.sprite = _customIconSprite;
+                _headerIconImage.preserveAspect = true;
+                
+                // Make icon 20% larger
+                _headerIconImage.transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+                
                 if (UI.VanillaModeManager.IsVanillaMode)
                 {
-                    // Restore original sprite and color in vanilla mode
-                    if (_originalHeaderIconSprite != null)
-                    {
-                        _headerIconImage.sprite = _originalHeaderIconSprite;
-                    }
+                    // Vanilla mode - white/normal color
                     _headerIconImage.color = Color.white;
                 }
                 else
                 {
-                    // Custom sprite with orange tint in Ascended mode
-                    if (_customIconSprite != null)
-                    {
-                        _headerIconImage.sprite = _customIconSprite;
-                        _headerIconImage.preserveAspect = true;
-                    }
+                    // Ascended mode - orange tint
                     _headerIconImage.color = new Color(1f, 0.6f, 0.2f, 1f);
                 }
             }
+        }
+        
+        // Track if we've already created the button (persistent across hot reloads)
+        private static bool _stationPlannerButtonCreated = false;
+        
+        /// <summary>
+        /// Setup the Station Planner button next to the ToggleMouse button
+        /// </summary>
+        private void SetupStationPlannerButton()
+        {
+            var stationpedia = Stationpedia.Instance;
+            if (stationpedia == null) return;
+            
+            // Find the ToggleMouse to position our button next to it
+            var toggleMouse = stationpedia.ToggleMouse;
+            if (toggleMouse == null)
+            {
+                Log?.LogWarning("ToggleMouse not found, cannot create Station Planner button");
+                return;
+            }
+            
+            // Get the parent of the toggle to add our button as a sibling
+            var parent = toggleMouse.transform.parent;
+            if (parent == null) return;
+            
+            // Check if button already exists by searching in hierarchy
+            var existingButton = parent.Find("StationPlannerButton");
+            if (existingButton != null)
+            {
+                _stationPlannerButton = existingButton.GetComponent<UnityEngine.UI.Button>();
+                _stationPlannerButtonCreated = true;
+                return;
+            }
+            
+            // Also check our tracked state
+            if (_stationPlannerButton != null && _stationPlannerButtonCreated) return;
+            
+            // Load the Station Planner icon (Book-ClosedONE.png)
+            if (_stationPlannerIconSprite == null)
+            {
+                _stationPlannerIconSprite = LoadImageFromModFolder("Book-ClosedONE.png");
+            }
+            
+            // Create button GameObject
+            var buttonGO = new GameObject("StationPlannerButton");
+            buttonGO.transform.SetParent(parent, false);
+            
+            // Position to LEFT of mouse toggle
+            // The header layout appears to use higher index = further LEFT
+            // So we set our index to mouseIndex + 1 to appear LEFT of the mouse icon
+            int mouseIndex = toggleMouse.transform.GetSiblingIndex();
+            buttonGO.transform.SetSiblingIndex(mouseIndex + 1);
+            Log?.LogInfo($"Station Planner button: mouseIndex={mouseIndex}, set to {mouseIndex + 1}");
+            
+            // Add RectTransform with same size as mouse toggle
+            var rt = buttonGO.AddComponent<RectTransform>();
+            var mouseToggleRect = toggleMouse.GetComponent<RectTransform>();
+            if (mouseToggleRect != null)
+            {
+                rt.sizeDelta = mouseToggleRect.sizeDelta;
+            }
+            else
+            {
+                rt.sizeDelta = new Vector2(32, 32);
+            }
+            
+            // Add Image for button icon
+            var image = buttonGO.AddComponent<UnityEngine.UI.Image>();
+            if (_stationPlannerIconSprite != null)
+            {
+                image.sprite = _stationPlannerIconSprite;
+                image.preserveAspect = true;
+            }
+            else
+            {
+                // Fallback if icon not found - use a simple book emoji/color
+                image.color = new Color(0.9f, 0.8f, 0.6f, 1f);
+            }
+            
+            // Add Button component
+            _stationPlannerButton = buttonGO.AddComponent<UnityEngine.UI.Button>();
+            _stationPlannerButton.targetGraphic = image;
+            
+            // Setup button colors
+            var colors = _stationPlannerButton.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1f, 0.9f, 0.7f, 1f);  // Warm highlight
+            colors.pressedColor = new Color(0.9f, 0.7f, 0.5f, 1f);
+            colors.selectedColor = Color.white;
+            _stationPlannerButton.colors = colors;
+            
+            // Add click handler to toggle Station Planner
+            _stationPlannerButton.onClick.AddListener(() => {
+                StationPlannerWindow.Toggle();
+            });
+            
+            _stationPlannerButtonCreated = true;
+            Log?.LogInfo("Station Planner button added to Stationpedia header (to LEFT of mouse toggle)");
         }
         
         /// <summary>
@@ -1293,26 +1410,39 @@ namespace StationpediaAscended
         {
             try
             {
-                // Check if command already exists (for F6 reload)
-                if (Util.Commands.CommandLine.CommandsMap.ContainsKey("stationpediacenter"))
-                {
-                    return; // Already registered
-                }
+                var commandsMap = Util.Commands.CommandLine.CommandsMap;
                 
                 // Register "stationpediacenter" command to center the Stationpedia window
-                Util.Commands.CommandLine.AddCommand("stationpediacenter", 
-                    new Util.Commands.BasicCommand(CenterStationpediaCommand, 
-                        "Centers the Stationpedia window on screen", null, false));
+                if (!commandsMap.ContainsKey("stationpediacenter"))
+                {
+                    Util.Commands.CommandLine.AddCommand("stationpediacenter", 
+                        new Util.Commands.BasicCommand(CenterStationpediaCommand, 
+                            "Centers the Stationpedia window on screen", null, false));
+                }
                 
                 // Register "spda_dumpkeys" command to export all page keys
-                Util.Commands.CommandLine.AddCommand("spda_dumpkeys", 
-                    new Util.Commands.BasicCommand(DumpPageKeysCommand, 
-                        "Exports all Stationpedia page keys to a file for use in descriptions.json", null, false));
+                if (!commandsMap.ContainsKey("spda_dumpkeys"))
+                {
+                    Util.Commands.CommandLine.AddCommand("spda_dumpkeys", 
+                        new Util.Commands.BasicCommand(DumpPageKeysCommand, 
+                            "Exports all Stationpedia page keys to a file for use in descriptions.json", null, false));
+                }
                 
                 // Register "spda_currentkey" command to show current page key
-                Util.Commands.CommandLine.AddCommand("spda_currentkey", 
-                    new Util.Commands.BasicCommand(CurrentPageKeyCommand, 
-                        "Shows the deviceKey of the currently open Stationpedia page", null, false));
+                if (!commandsMap.ContainsKey("spda_currentkey"))
+                {
+                    Util.Commands.CommandLine.AddCommand("spda_currentkey", 
+                        new Util.Commands.BasicCommand(CurrentPageKeyCommand, 
+                            "Shows the deviceKey of the currently open Stationpedia page", null, false));
+                }
+                
+                // Register "assetdisplay" command to toggle the UI Asset Inspector (debug tool)
+                if (!commandsMap.ContainsKey("assetdisplay"))
+                {
+                    Util.Commands.CommandLine.AddCommand("assetdisplay", 
+                        new Util.Commands.BasicCommand(AssetDisplayCommand, 
+                            "Toggles the UI Asset Inspector to show asset names under mouse cursor", null, false));
+                }
             }
             catch (Exception ex)
             {
@@ -1361,6 +1491,20 @@ namespace StationpediaAscended
             catch (Exception ex)
             {
                 return $"Error: {ex.Message}";
+            }
+        }
+        
+        private static string AssetDisplayCommand(string[] args)
+        {
+            try
+            {
+                UIAssetInspector.Toggle();
+                bool isEnabled = UIAssetInspector.IsEnabled;
+                return $"UI Asset Inspector: {(isEnabled ? "ENABLED - hover over UI elements to see asset names" : "DISABLED")}";
+            }
+            catch (Exception ex)
+            {
+                return $"Error toggling UI Asset Inspector: {ex.Message}";
             }
         }
         
@@ -2167,10 +2311,49 @@ namespace StationpediaAscended
         
         #endregion
 
+        #region Update Loop
+        
+        /// <summary>
+        /// Unity Update - handles F2 hotkey for Station Planner
+        /// </summary>
+        void Update()
+        {
+            // F2 hotkey to toggle Station Planner
+            if (UnityEngine.Input.GetKeyDown(KeyCode.F2))
+            {
+                StationPlannerWindow.Toggle();
+            }
+            
+            // Let Station Planner update its state
+            StationPlannerWindow.UpdateWindow();
+        }
+        
+        #endregion
+
         #region Cleanup
         
         void OnDestroy()
         {
+            // Cleanup Station Planner
+            try
+            {
+                StationPlannerWindow.Cleanup();
+            }
+            catch (Exception ex)
+            {
+                Log?.LogWarning($"Error cleaning up Station Planner: {ex.Message}");
+            }
+            
+            // Cleanup UI Asset Inspector
+            try
+            {
+                UIAssetInspector.Cleanup();
+            }
+            catch (Exception ex)
+            {
+                Log?.LogWarning($"Error cleaning up UI Asset Inspector: {ex.Message}");
+            }
+            
             // Stop all coroutines on this MonoBehaviour
             StopAllCoroutines();
             _monitorCoroutine = null;
