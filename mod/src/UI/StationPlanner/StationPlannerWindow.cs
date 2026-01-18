@@ -1161,19 +1161,59 @@ namespace StationpediaAscended.UI.StationPlanner
             else
             {
                 _fileSystem = new PlannerFileSystem();
-                // Welcome file - make it global so it shows everywhere
-                _fileSystem.RootFolder.PersistAcrossSaves = true;
-                _fileSystem.RootFolder.Files.Add(new PlannerFile
+                // Create a Global folder for welcome content
+                var globalFolder = new PlannerFolder
                 {
                     Id = Guid.NewGuid().ToString(),
-                    Name = "Welcome",
-                    Content = "Welcome to Station Notepad!\n\n" +
-                             "Your personal note-taking space.\n\n" +
-                             "Shortcuts:\n" +
-                             "- F2 = Toggle window\n" +
-                             "- Escape = Close\n\n" +
-                             "Click 'Note' to create a note!"
+                    Name = "Global Notes",
+                    PersistAcrossSaves = true,
+                    IsExpanded = true
+                };
+                
+                // Welcome file with formatting examples
+                globalFolder.Files.Add(new PlannerFile
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = "Welcome to Station Notepad",
+                    Content = "THANK YOU FOR SUBSCRIBING!\n" +
+                             "=========================\n\n" +
+                             "Thank you for using Stationpedia Ascended!\n\n" +
+                             "This notepad is your personal space for notes,\n" +
+                             "recipes, and plans. Feel free to delete this\n" +
+                             "note once you've read it.\n\n" +
+                             "-------------------------------------------\n\n" +
+                             "HOW TO USE STATION NOTEPAD\n" +
+                             "--------------------------\n\n" +
+                             "Creating Notes & Folders:\n" +
+                             "  * Click NOTE to create a new note\n" +
+                             "  * Click FOLDER to create a new folder\n" +
+                             "  * Right-click items to rename or delete\n" +
+                             "  * Drag and drop to reorganize\n\n" +
+                             "Saving:\n" +
+                             "  * Notes auto-save when you switch files\n" +
+                             "  * Notes auto-save when you close the window\n\n" +
+                             "-------------------------------------------\n\n" +
+                             "FOLDER TYPES\n" +
+                             "------------\n\n" +
+                             "Global Notes (marked with G):\n" +
+                             "  * Visible in ALL save files\n" +
+                             "  * Great for recipes and reference info\n\n" +
+                             "Per-Save Folders:\n" +
+                             "  * Only visible in that specific save\n" +
+                             "  * Perfect for base plans and to-do lists\n" +
+                             "  * Right-click a folder to make it per-save\n\n" +
+                             "-------------------------------------------\n\n" +
+                             "KEYBOARD SHORTCUTS\n" +
+                             "------------------\n\n" +
+                             "  F2      - Toggle notepad window\n" +
+                             "  Escape  - Close window\n\n" +
+                             "-------------------------------------------\n\n" +
+                             "Happy note-taking, Stationeer!\n\n" +
+                             "Report bugs or suggestions on the\n" +
+                             "Stationpedia Discord or to FlorpyDorp."
                 });
+                
+                _fileSystem.RootFolder.SubFolders.Add(globalFolder);
                 Debug.Log("[Station Notepad] Created new file system with welcome note");
             }
             
@@ -1589,7 +1629,8 @@ namespace StationpediaAscended.UI.StationPlanner
             if (_blockEditor != null && _blockEditor.IsInitialized && file != null)
             {
                 // Try to load as block editor format first, fall back to plain text
-                if (!string.IsNullOrEmpty(file.Content) && file.Content.TrimStart().StartsWith("{"))
+                // Check for JSON object start ({"lines":...) not just any { which could be formatting tags like {HEADER:...}
+                if (!string.IsNullOrEmpty(file.Content) && file.Content.TrimStart().StartsWith("{\""))
                 {
                     // Looks like JSON - try to load as block editor format
                     _blockEditor.DeserializeDocument(file.Content);

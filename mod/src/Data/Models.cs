@@ -10,6 +10,7 @@ namespace StationpediaAscended.Data
         public string version;
         public List<DeviceDescriptions> devices;
         public List<GuideDescription> guides;  // Custom guides that appear under the Guides button
+        public List<GuideDescription> mechanics;  // Game mechanics that appear under the Game Mechanics button
         public GenericDescriptionsData genericDescriptions;
     }
 
@@ -140,6 +141,17 @@ namespace StationpediaAscended.Data
         public string byteLayout;
     }
 
+    /// <summary>
+    /// Represents a single row in a markdown-style table.
+    /// The first row is treated as the header row with bold text.
+    /// </summary>
+    [Serializable]
+    public class TableRow
+    {
+        /// <summary>Cell contents for this row. Column count is determined by the first row.</summary>
+        public List<string> cells;
+    }
+
     [Serializable]
     public class OperationalDetail
     {
@@ -172,6 +184,9 @@ namespace StationpediaAscended.Data
         
         /// <summary>If set, displays an embedded video player for this MP4/video file (relative to mod images folder)</summary>
         public string videoFile { get; set; }
+        
+        /// <summary>If set, displays a markdown-style table. First row is headers (bold), cells are center-aligned.</summary>
+        public List<TableRow> table { get; set; }
     }
 
     [Serializable]
@@ -194,5 +209,10 @@ namespace StationpediaAscended.Data
         public Dictionary<string, string> connections;
         public Dictionary<string, MemoryDescription> memory;
         public Dictionary<string, PropertyDescription> properties;
+        
+        // Flat dictionary to capture any top-level string values not in nested categories
+        // This is populated during deserialization for properties like Flashpoint, Autoignition, etc.
+        [Newtonsoft.Json.JsonExtensionData]
+        public Dictionary<string, Newtonsoft.Json.Linq.JToken> AdditionalData { get; set; }
     }
 }

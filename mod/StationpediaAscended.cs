@@ -1249,6 +1249,12 @@ namespace StationpediaAscended
                     {
                         Data.JsonGuideLoader.LoadGuides(data);
                     }
+                    
+                    // Load game mechanics from JSON
+                    if (data?.mechanics != null && data.mechanics.Count > 0)
+                    {
+                        Data.JsonMechanicsLoader.LoadMechanics(data);
+                    }
                 }
                 else
                 {
@@ -1360,14 +1366,16 @@ namespace StationpediaAscended
                     _harmony.Patch(setPageGuides, postfix: new HarmonyMethod(postfix));
                 }
                 
-                // Patch SetPageLore to modify button layout
+                // Patch SetPageLore to clear orphaned items and modify button layout
                 var setPageLore = stationpediaType.GetMethod("SetPageLore", 
                     BindingFlags.Public | BindingFlags.Instance);
                 if (setPageLore != null)
                 {
+                    var prefix = typeof(HarmonyPatches).GetMethod("Stationpedia_SetPageLore_Prefix", 
+                        BindingFlags.Public | BindingFlags.Static);
                     var postfix = typeof(HarmonyPatches).GetMethod("Stationpedia_SetPageLore_Postfix", 
                         BindingFlags.Public | BindingFlags.Static);
-                    _harmony.Patch(setPageLore, postfix: new HarmonyMethod(postfix));
+                    _harmony.Patch(setPageLore, prefix: new HarmonyMethod(prefix), postfix: new HarmonyMethod(postfix));
                 }
                 
                 // Register console command to center Stationpedia
@@ -1700,6 +1708,12 @@ namespace StationpediaAscended
                     if (data?.guides != null && data.guides.Count > 0)
                     {
                         Data.JsonGuideLoader.LoadGuides(data);
+                    }
+                    
+                    // Load game mechanics from JSON
+                    if (data?.mechanics != null && data.mechanics.Count > 0)
+                    {
+                        Data.JsonMechanicsLoader.LoadMechanics(data);
                     }
                 }
                 else
@@ -2312,10 +2326,20 @@ namespace StationpediaAscended
         {
             string cleanName = CleanLogicTypeName(propertyName);
 
-            // Check genericDescriptions.properties for property descriptions
+            // Check genericDescriptions.properties for structured property descriptions
             if (GenericDescriptions?.properties != null && GenericDescriptions.properties.TryGetValue(cleanName, out var desc))
             {
                 return desc;
+            }
+            
+            // Also check AdditionalData for flat string tooltips (Flashpoint, Autoignition, etc.)
+            if (GenericDescriptions?.AdditionalData != null && GenericDescriptions.AdditionalData.TryGetValue(cleanName, out var token))
+            {
+                var stringValue = token?.ToString();
+                if (!string.IsNullOrEmpty(stringValue))
+                {
+                    return new PropertyDescription { description = stringValue };
+                }
             }
 
             return null;

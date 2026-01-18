@@ -19,7 +19,7 @@
     <EmbeddedResource Include="descriptions.json">
       <LogicalName>StationpediaAscended.descriptions.json</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="phoenix-icon.png">
+    <EmbeddedResource Include="images\toc_bullet.png">
       <LogicalName>StationpediaAscended.phoenix-icon.png</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
@@ -139,20 +139,28 @@
     <!-- Create mod folder structure -->
     <MakeDir Directories="$(ModsFolder)" />
     <MakeDir Directories="$(ModsFolder)\About" />
+    <MakeDir Directories="$(ModsFolder)\images" />
     <MakeDir Directories="$(LocalModsFolder)" />
     <MakeDir Directories="$(LocalModsFolder)\About" />
+    <MakeDir Directories="$(LocalModsFolder)\images" />
     
     <!-- Copy mod files to Documents mods folder -->
     <Copy SourceFiles="$(BuildOutputFolder)\StationpediaAscended.dll" DestinationFolder="$(ModsFolder)" />
+    <Copy SourceFiles="$(ProjectDir)descriptions.json" DestinationFolder="$(ModsFolder)" />
     <Copy SourceFiles="$(ProjectDir)stationpediaascended_ui" DestinationFolder="$(ModsFolder)" />
     <Copy SourceFiles="$(ProjectDir)About\About.xml" DestinationFolder="$(ModsFolder)\About" />
     <Copy SourceFiles="$(ProjectDir)About\Preview.png" DestinationFolder="$(ModsFolder)\About" />
     
     <!-- Also copy to Stationeers local mods folder for Workshop uploads -->
     <Copy SourceFiles="$(BuildOutputFolder)\StationpediaAscended.dll" DestinationFolder="$(LocalModsFolder)" />
+    <Copy SourceFiles="$(ProjectDir)descriptions.json" DestinationFolder="$(LocalModsFolder)" />
     <Copy SourceFiles="$(ProjectDir)stationpediaascended_ui" DestinationFolder="$(LocalModsFolder)" />
     <Copy SourceFiles="$(ProjectDir)About\About.xml" DestinationFolder="$(LocalModsFolder)\About" />
     <Copy SourceFiles="$(ProjectDir)About\Preview.png" DestinationFolder="$(LocalModsFolder)\About" />
+    
+    <!-- Copy images folder using Exec -->
+    <Exec Command="xcopy /Y /E /I &quot;$(ProjectDir)images&quot; &quot;$(ModsFolder)\images&quot;" />
+    <Exec Command="xcopy /Y /E /I &quot;$(ProjectDir)images&quot; &quot;$(LocalModsFolder)\images&quot;" />
     
     <Message Text="============================================" Importance="high" />
     <Message Text="Mod packaged to: $(ModsFolder)" Importance="high" />

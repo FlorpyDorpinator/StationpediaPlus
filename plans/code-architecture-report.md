@@ -390,9 +390,36 @@ All three current TOC functions become one-liner wrappers calling this with diff
 
 1. ✅ **DONE**: Fix image sizing (300px, no stretch)
 2. ✅ **DONE**: Fix device TOC spacing (lineSpacing=8, preferredWidth=200)
-3. **NEXT**: Unify TOC functions (15-30 min, low risk)
-4. **AFTER**: Unify section rendering (30-45 min, medium risk)
-5. **OPTIONAL**: Unify page rendering entry points (lower priority, less duplication)
+3. ✅ **DONE**: Unify TOC functions - Created `CreateUnifiedTableOfContents`
+4. ✅ **DONE**: Unify section rendering - Created `CreateUnifiedCollapsibleSection` and `CreateUnifiedInlineContent`
+5. **OPTIONAL**: Remove deprecated old functions (marked but not deleted)
+
+---
+
+## Unified Functions Created
+
+### `CreateUnifiedTableOfContents`
+Based on Survival Manual styling:
+- Centered columns with `childAlignment = UpperCenter`
+- 3 columns max, 8 rows per column
+- 30px spacing between columns
+- 200px fixed column width
+- 8px line spacing to prevent overlap
+- Word wrapping and ellipsis overflow
+- Semi-transparent background panel
+
+### `CreateUnifiedCollapsibleSection`
+Handles all collapsible section types:
+- Takes `Action<RectTransform, OperationalDetail, int, string>` callback for recursion
+- Supports all content types: imageFile, description, items, steps, youtubeUrl, videoFile
+- Proper TOC registration with parent hierarchy
+- Depth-based title coloring via VanillaModeManager
+
+### `CreateUnifiedInlineContent`
+For non-collapsible content:
+- Same feature support as collapsible sections
+- Inline header styling with title color
+- Proper container layout
 
 ---
 

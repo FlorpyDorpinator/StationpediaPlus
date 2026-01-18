@@ -178,6 +178,13 @@ namespace StationpediaAscended.Patches
                     return; // Don't continue to normal device processing
                 }
                 
+                // Check for JSON-defined game mechanics pages
+                if (Data.JsonMechanicsLoader.HasMechanic(pageKey))
+                {
+                    RenderJsonMechanicPage(__instance, contentTransform, pageKey);
+                    return; // Don't continue to normal device processing
+                }
+                
                 // Check for Daylight Sensor Guide page - use special rendering with operational details
                 if (pageKey == "DaylightSensorGuide")
                 {
@@ -355,8 +362,8 @@ namespace StationpediaAscended.Patches
         }
 
         /// <summary>
-        /// Render the Survival Manual page with Part 1/2/3 as major collapsible sections.
-        /// Each Part has its own Table of Contents box, then nested sections.
+        /// Render the Survival Manual page - special handling with per-Part TOCs
+        /// Unlike other guides, the Survival Manual has nested TOCs within each Part section
         /// </summary>
         private static void RenderSurvivalManualPage(UniversalPage page, Transform contentTransform)
         {
@@ -379,27 +386,22 @@ namespace StationpediaAscended.Patches
             var sourceText = page.PageDescription;
             if (sourceText == null) return;
             
-            // Check for custom data from guides in descriptions.json
-            var guideData = Data.JsonGuideLoader.GetGuide("SurvivalManual");
-            DeviceDescriptions customDesc = null;
-            if (guideData != null)
+            // Load guide data from JSON (not markdown)
+            var guide = Data.JsonGuideLoader.GetGuide("SurvivalManual");
+            if (guide == null)
             {
-                customDesc = Data.JsonGuideLoader.ToDeviceDescriptions(guideData);
+                ConsoleWindow.Print("[Stationpedia Ascended] SurvivalManual guide not found in descriptions.json");
+                return;
             }
             
-            // Also check DeviceDatabase (in case it's also defined there)
-            if (customDesc == null)
+            var guideData = Data.JsonGuideLoader.ToDeviceDescriptions(guide);
+            if (guideData?.operationalDetails == null || guideData.operationalDetails.Count == 0)
             {
-                StationpediaAscendedMod.DeviceDatabase.TryGetValue("SurvivalManual", out customDesc);
+                ConsoleWindow.Print("[Stationpedia Ascended] SurvivalManual has no sections");
+                return;
             }
             
-            // Apply page description modifications from descriptions.json (prepend/append/replace)
-            if (customDesc != null)
-            {
-                HandlePageDescriptionModifications(page, customDesc);
-            }
-            
-            // Cache native panel sprite if not already cached (for vanilla mode backgrounds)
+            // Cache native panel sprite if not already cached
             if (_nativePanelSprite == null)
             {
                 var sourceImage = page.LogicSlotContents?.Contents?.GetComponent<UnityEngine.UI.Image>();
@@ -411,18 +413,10 @@ namespace StationpediaAscended.Patches
                 }
             }
 
-            // Get the survival manual data
-            var manualData = SurvivalManualLoader.GetSurvivalManualDescriptions();
-            if (manualData?.operationalDetails == null || manualData.operationalDetails.Count == 0)
-            {
-                ConsoleWindow.Print("[Stationpedia Ascended] No survival manual data found");
-                return;
-            }
-
             // Create a container for all manual content
             var containerGO = new GameObject("SurvivalManualContent");
             containerGO.transform.SetParent(contentTransform, false);
-            containerGO.transform.SetSiblingIndex(20); // Position after standard content
+            containerGO.transform.SetSiblingIndex(20);
             
             var containerRT = containerGO.AddComponent<RectTransform>();
             containerRT.anchorMin = new Vector2(0, 1);
@@ -440,14 +434,29 @@ namespace StationpediaAscended.Patches
             containerFitter.horizontalFit = UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained;
             containerFitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
 
-            // Render page image at the top if specified in descriptions.json
-            if (customDesc != null && !string.IsNullOrEmpty(customDesc.pageImage))
+            // Render page image at the top if specified
+            if (!string.IsNullOrEmpty(guideData.pageImage))
             {
-                CreateGuideTopImage(containerRT, customDesc.pageImage);
+                CreateGuideTopImage(containerRT, guideData.pageImage);
+            }
+            
+            // Render page description
+            string pageDescText = guideData.pageDescription ?? "";
+            if (!string.IsNullOrEmpty(guideData.pageDescriptionPrepend))
+            {
+                pageDescText = guideData.pageDescriptionPrepend + "\n\n" + pageDescText;
+            }
+            if (!string.IsNullOrEmpty(guideData.pageDescriptionAppend))
+            {
+                pageDescText = pageDescText + "\n\n" + guideData.pageDescriptionAppend;
+            }
+            if (!string.IsNullOrEmpty(pageDescText.Trim()))
+            {
+                CreateTextElement(containerRT, sourceText, pageDescText.Trim());
             }
 
-            // Render each Part (Part 1, Part 2, Part 3) as a major collapsible section
-            foreach (var partDetail in manualData.operationalDetails)
+            // Render each Part (Part 1, Part 2, Part 3) with its OWN nested TOC
+            foreach (var partDetail in guideData.operationalDetails)
             {
                 CreateSurvivalManualPart(containerRT, partDetail, categoryPrefab, sourceText, page);
             }
@@ -457,6 +466,8 @@ namespace StationpediaAscended.Patches
             {
                 UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(Stationpedia.Instance.ContentRectTransform);
             }
+            
+            ConsoleWindow.Print("[Stationpedia Ascended] Rendered Survival Manual from JSON with per-Part TOCs");
         }
 
         /// <summary>
@@ -498,6 +509,47 @@ namespace StationpediaAscended.Patches
             catch (Exception ex)
             {
                 ConsoleWindow.Print($"[Stationpedia Ascended] Error rendering JSON guide {guideKey}: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Render a JSON-defined game mechanic page - sections appear directly without wrapper
+        /// </summary>
+        private static void RenderJsonMechanicPage(UniversalPage page, Transform contentTransform, string mechanicKey)
+        {
+            try
+            {
+                var stationpedia = Stationpedia.Instance;
+                if (stationpedia == null) return;
+
+                var categoryPrefab = stationpedia.CategoryPrefab;
+                if (categoryPrefab == null) return;
+
+                // Get the mechanic data
+                var mechanic = Data.JsonMechanicsLoader.GetMechanic(mechanicKey);
+                if (mechanic == null)
+                {
+                    ConsoleWindow.Print($"[Stationpedia Ascended] Mechanic not found: {mechanicKey}");
+                    return;
+                }
+
+                // Convert to DeviceDescriptions for rendering
+                var mechanicData = Data.JsonMechanicsLoader.ToDeviceDescriptions(mechanic);
+                if (mechanicData?.operationalDetails == null || mechanicData.operationalDetails.Count == 0)
+                {
+                    // If no sections, just show the page description
+                    ConsoleWindow.Print($"[Stationpedia Ascended] Mechanic {mechanicKey} has no sections");
+                    return;
+                }
+
+                // Render sections directly without "Operational Details" wrapper
+                RenderGuideSections(page, contentTransform, mechanicData, mechanic.generateToc, mechanic.tocTitle);
+                
+                ConsoleWindow.Print($"[Stationpedia Ascended] Rendered JSON mechanic: {mechanicKey}");
+            }
+            catch (Exception ex)
+            {
+                ConsoleWindow.Print($"[Stationpedia Ascended] Error rendering JSON mechanic {mechanicKey}: {ex.Message}");
             }
         }
 
@@ -616,11 +668,17 @@ namespace StationpediaAscended.Patches
                     CreateTextElement(containerRT, sourceText, pageDescText.Trim());
                 }
 
-                // Generate Table of Contents if enabled (using existing TOC infrastructure)
+                // Generate Table of Contents if enabled (using unified TOC)
                 if (generateToc && guideData.operationalDetails != null && guideData.operationalDetails.Count > 0)
                 {
-                    // Create a temporary category to hold the TOC (reusing existing TOC code)
-                    CreateGuideTableOfContents(containerRT, sourceText, guideData);
+                    var tocEntries = new List<(string tocId, string title, int depth)>();
+                    foreach (var detail in guideData.operationalDetails)
+                    {
+                        CollectTocEntries(tocEntries, detail, 0, guideData.tocFlat);
+                    }
+                    string effectiveTocTitle = string.IsNullOrEmpty(guideData.tocTitle) ? "Contents" : guideData.tocTitle;
+                    // For guides: TOC goes AFTER image and description, not at the top
+                    CreateUnifiedTableOfContents(containerRT, sourceText, tocEntries, effectiveTocTitle, centerColumns: true, placeAtTop: false);
                 }
 
                 // Render each top-level section using the SAME infrastructure as Operational Details
@@ -669,8 +727,8 @@ namespace StationpediaAscended.Patches
                 rectTransform.anchorMax = new Vector2(1, 1);
                 rectTransform.pivot = new Vector2(0.5f, 1);
                 
-                // Match vanilla Stationpedia image sizing
-                float maxWidth = 300f;  // Same as inline images
+                // Match vanilla Stationpedia image sizing (smaller, like device thumbnails)
+                float maxWidth = 100f;  // Smaller to match vanilla style
                 float aspectRatio = (float)sprite.texture.width / sprite.texture.height;
                 float height = maxWidth / aspectRatio;
                 
@@ -695,23 +753,27 @@ namespace StationpediaAscended.Patches
         private static void RenderGuideSectionElement(RectTransform parent, TMPro.TextMeshProUGUI sourceText,
             OperationalDetail detail, StationpediaCategory categoryPrefab, UniversalPage page, int depth, string parentTocId)
         {
+            // Recursive callback for children
+            Action<RectTransform, OperationalDetail, int, string> recurse = (p, d, dep, pid) => 
+                RenderGuideSectionElement(p, sourceText, d, categoryPrefab, page, dep, pid);
+            
             // Only make collapsible if explicitly set to true
-            // This allows inline headers (title + flat text below) when collapsible=false
             bool shouldBeCollapsible = detail.collapsible;
             
             if (shouldBeCollapsible && !string.IsNullOrEmpty(detail.title))
             {
-                // Create a nested collapsible category (reuses the existing infrastructure)
-                CreateGuideCollapsibleSection(parent, sourceText, detail, categoryPrefab, page, depth, parentTocId);
+                // Use unified collapsible section
+                CreateUnifiedCollapsibleSection(parent, sourceText, detail, categoryPrefab, page, depth, parentTocId, recurse);
             }
             else
             {
-                // Create inline content (non-collapsible text/items with optional header)
-                CreateGuideInlineContent(parent, sourceText, detail, categoryPrefab, page, depth, parentTocId);
+                // Use unified inline content
+                CreateUnifiedInlineContent(parent, sourceText, detail, categoryPrefab, page, depth, parentTocId, recurse);
             }
         }
 
         /// <summary>
+        /// DEPRECATED - Use CreateUnifiedCollapsibleSection instead
         /// Create a collapsible guide section - mirrors CreateNestedCollapsibleCategory
         /// </summary>
         private static void CreateGuideCollapsibleSection(RectTransform parent, TMPro.TextMeshProUGUI sourceText,
@@ -1113,10 +1175,17 @@ namespace StationpediaAscended.Patches
                 TocLinkHandler.RegisterSection(partDetail.tocId, partCategory.GetComponent<RectTransform>(), partCategory, null);
             }
 
-            // Create Table of Contents box FIRST within the Part
+            // Create Table of Contents box FIRST within the Part (using unified TOC)
             if (partDetail.children != null && partDetail.children.Count > 0)
             {
-                CreatePartTableOfContents(partCategory.Contents, partDetail, sourceText);
+                // Collect TOC entries from children (sections within this Part)
+                var tocEntries = new List<(string tocId, string title, int depth)>();
+                foreach (var child in partDetail.children)
+                {
+                    if (child.tocId?.EndsWith("_toc") == true) continue;
+                    CollectTocEntries(tocEntries, child, 0, false);
+                }
+                CreateUnifiedTableOfContents(partCategory.Contents, sourceText, tocEntries, "Table Of Contents", centerColumns: true);
             }
             
             // Create nested sections within this Part
@@ -1323,9 +1392,31 @@ namespace StationpediaAscended.Patches
         }
 
         /// <summary>
-        /// Create a nested section within a Part
+        /// Create a nested section within a Part - now uses unified section renderer
         /// </summary>
         private static void CreateSurvivalManualSection(RectTransform parent, OperationalDetail sectionDetail,
+            StationpediaCategory categoryPrefab, TMPro.TextMeshProUGUI sourceText, UniversalPage page, string parentTocId)
+        {
+            // Recursive callback for children
+            Action<RectTransform, OperationalDetail, int, string> recurse = (p, d, dep, pid) => 
+                CreateSurvivalManualSection(p, d, categoryPrefab, sourceText, page, pid);
+            
+            if (!sectionDetail.collapsible || string.IsNullOrEmpty(sectionDetail.title))
+            {
+                // Non-collapsible content - use unified inline renderer
+                CreateUnifiedInlineContent(parent, sourceText, sectionDetail, categoryPrefab, page, 1, parentTocId, recurse);
+                return;
+            }
+            
+            // Use unified collapsible section (depth 1 for Manual sections)
+            CreateUnifiedCollapsibleSection(parent, sourceText, sectionDetail, categoryPrefab, page, 1, parentTocId, recurse);
+        }
+
+        /// <summary>
+        /// DEPRECATED - kept for reference, but CreateSurvivalManualSection now uses unified renderer
+        /// Create collapsible section - old implementation
+        /// </summary>
+        private static void CreateSurvivalManualSectionOld(RectTransform parent, OperationalDetail sectionDetail,
             StationpediaCategory categoryPrefab, TMPro.TextMeshProUGUI sourceText, UniversalPage page, string parentTocId)
         {
             if (!sectionDetail.collapsible || string.IsNullOrEmpty(sectionDetail.title))
@@ -1533,10 +1624,16 @@ namespace StationpediaAscended.Patches
             // Configure category layout FIRST before adding content
             ConfigureCategoryLayout(category, page, deviceDesc);
 
-            // Create Table of Contents if enabled
-            if (deviceDesc.generateToc)
+            // Create Table of Contents if enabled (using unified TOC)
+            if (deviceDesc.generateToc && deviceDesc.operationalDetails != null && deviceDesc.operationalDetails.Count > 0)
             {
-                CreateTableOfContents(category, sourceText, deviceDesc);
+                var tocEntries = new List<(string tocId, string title, int depth)>();
+                foreach (var detail in deviceDesc.operationalDetails)
+                {
+                    CollectTocEntries(tocEntries, detail, 0, deviceDesc.tocFlat);
+                }
+                string tocTitle = string.IsNullOrEmpty(deviceDesc.tocTitle) ? "Contents" : deviceDesc.tocTitle;
+                CreateUnifiedTableOfContents(category.Contents, sourceText, tocEntries, tocTitle, centerColumns: true);
             }
 
             // Render operational details - either as nested collapsibles or text
@@ -1916,6 +2013,399 @@ namespace StationpediaAscended.Patches
         }
 
         /// <summary>
+        /// Unified Table of Contents rendering - based on Survival Manual styling (centered, 3 columns max, proper padding)
+        /// </summary>
+        private static void CreateUnifiedTableOfContents(
+            RectTransform parent,
+            TMPro.TextMeshProUGUI sourceText,
+            List<(string tocId, string title, int depth)> tocEntries,
+            string title = "Contents",
+            bool centerColumns = true,
+            bool placeAtTop = true)
+        {
+            try
+            {
+                if (tocEntries == null || tocEntries.Count == 0) return;
+
+                // Create TOC container with background
+                var tocContainerGO = new GameObject("TableOfContents");
+                tocContainerGO.transform.SetParent(parent, false);
+                if (placeAtTop) tocContainerGO.transform.SetAsFirstSibling();
+                
+                // Add background - semi-transparent panel
+                var tocBg = tocContainerGO.AddComponent<UnityEngine.UI.Image>();
+                var windowSprite = StationpediaAscendedMod.GetWindowBackgroundSprite();
+                if (windowSprite != null)
+                {
+                    tocBg.sprite = windowSprite;
+                    tocBg.type = UnityEngine.UI.Image.Type.Sliced;
+                }
+                tocBg.color = new Color(0.3f, 0.3f, 0.3f, 0.15f);
+                
+                // Vertical layout for title + columns
+                var tocLayout = tocContainerGO.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
+                tocLayout.padding = new RectOffset(16, 16, 12, 12);
+                tocLayout.spacing = 8;
+                tocLayout.childForceExpandWidth = true;
+                tocLayout.childForceExpandHeight = false;
+                tocLayout.childControlWidth = true;
+                tocLayout.childControlHeight = true;
+                
+                var tocFitter = tocContainerGO.AddComponent<UnityEngine.UI.ContentSizeFitter>();
+                tocFitter.horizontalFit = UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained;
+                tocFitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+                
+                // Create centered title
+                var titleGO = new GameObject("TOCTitle");
+                titleGO.transform.SetParent(tocContainerGO.transform, false);
+                var titleText = titleGO.AddComponent<TMPro.TextMeshProUGUI>();
+                titleText.font = sourceText.font;
+                titleText.fontSharedMaterial = sourceText.fontSharedMaterial;
+                titleText.fontSize = sourceText.fontSize * 0.95f;
+                titleText.color = VanillaModeManager.IsVanillaMode ? Color.white : new Color(1f, 0.6f, 0.2f, 1f);
+                titleText.text = $"<b>{title}</b>";
+                titleText.alignment = centerColumns ? TMPro.TextAlignmentOptions.Center : TMPro.TextAlignmentOptions.Left;
+                titleText.enableWordWrapping = false;
+                
+                var titleFitter = titleGO.AddComponent<UnityEngine.UI.ContentSizeFitter>();
+                titleFitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+                
+                // Create columns container
+                var columnsGO = new GameObject("TOCColumns");
+                columnsGO.transform.SetParent(tocContainerGO.transform, false);
+                
+                var columnsLayout = columnsGO.AddComponent<UnityEngine.UI.HorizontalLayoutGroup>();
+                columnsLayout.spacing = 30;  // Survival Manual spacing
+                columnsLayout.childForceExpandWidth = false;
+                columnsLayout.childForceExpandHeight = false;
+                columnsLayout.childControlWidth = true;
+                columnsLayout.childControlHeight = true;
+                columnsLayout.childAlignment = centerColumns ? UnityEngine.TextAnchor.UpperCenter : UnityEngine.TextAnchor.UpperLeft;
+                
+                var columnsFitter = columnsGO.AddComponent<UnityEngine.UI.ContentSizeFitter>();
+                columnsFitter.horizontalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+                columnsFitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+                
+                // Add layout element to center columns horizontally
+                var columnsLE = columnsGO.AddComponent<UnityEngine.UI.LayoutElement>();
+                columnsLE.flexibleWidth = 1;
+
+                // Calculate columns (max 8 items per column, up to 3 columns)
+                const int MAX_ROWS = 8;
+                const int MAX_COLUMNS = 3;
+                int totalEntries = tocEntries.Count;
+                int numColumns = Math.Min(MAX_COLUMNS, (totalEntries + MAX_ROWS - 1) / MAX_ROWS);
+                numColumns = Math.Max(1, numColumns);
+                int entriesPerColumn = (totalEntries + numColumns - 1) / numColumns;
+                
+                // Create columns
+                int entryIndex = 0;
+                for (int col = 0; col < numColumns && entryIndex < totalEntries; col++)
+                {
+                    var columnGO = new GameObject($"TOCColumn{col}");
+                    columnGO.transform.SetParent(columnsGO.transform, false);
+                    
+                    var columnText = columnGO.AddComponent<TMPro.TextMeshProUGUI>();
+                    columnText.font = sourceText.font;
+                    columnText.fontSharedMaterial = sourceText.fontSharedMaterial;
+                    columnText.fontSize = sourceText.fontSize * 0.8f;
+                    columnText.color = sourceText.color;
+                    columnText.enableWordWrapping = true;
+                    columnText.overflowMode = TMPro.TextOverflowModes.Ellipsis;
+                    columnText.richText = true;
+                    columnText.lineSpacing = 8;  // Prevent overlap
+                    
+                    // Fixed column width for consistency
+                    var columnLE = columnGO.AddComponent<UnityEngine.UI.LayoutElement>();
+                    columnLE.preferredWidth = 200;
+                    columnLE.flexibleWidth = 0;
+                    
+                    var sb = new System.Text.StringBuilder();
+                    int rowsInColumn = 0;
+                    
+                    while (entryIndex < totalEntries && rowsInColumn < entriesPerColumn)
+                    {
+                        var entry = tocEntries[entryIndex];
+                        string indent = entry.depth > 0 ? "  " : "";
+                        string bullet = entry.depth > 0 ? "• " : "";
+                        
+                        if (entry.depth == 0)
+                        {
+                            // Main section - underlined+bold in vanilla, orange+bold in ascended
+                            if (VanillaModeManager.IsVanillaMode)
+                            {
+                                sb.AppendLine($"<link=toc_{entry.tocId}><u><b><color=#FFFFFF>{entry.title}</color></b></u></link>");
+                            }
+                            else
+                            {
+                                sb.AppendLine($"<link=toc_{entry.tocId}><b><color=#FFA500>{entry.title}</color></b></link>");
+                            }
+                        }
+                        else
+                        {
+                            // Subsection with bullet
+                            string bulletColor = VanillaModeManager.IsVanillaMode ? "#888888" : "#CC6600";
+                            sb.AppendLine($"{indent}<color={bulletColor}>{bullet}</color><link=toc_{entry.tocId}><color=#FFFFFF>{entry.title}</color></link>");
+                        }
+                        
+                        entryIndex++;
+                        rowsInColumn++;
+                    }
+                    
+                    columnText.text = sb.ToString().TrimEnd();
+                    
+                    var colFitter = columnGO.AddComponent<UnityEngine.UI.ContentSizeFitter>();
+                    colFitter.horizontalFit = UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained;
+                    colFitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+                    
+                    // Add click handler for TOC links
+                    var linkHandler = columnGO.AddComponent<TocLinkHandler>();
+                    linkHandler.TextComponent = columnText;
+                }
+            }
+            catch (Exception ex)
+            {
+                ConsoleWindow.Print($"[Stationpedia Ascended] Error creating unified TOC: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Unified collapsible section renderer - handles devices, guides, and survival manual sections
+        /// </summary>
+        private static void CreateUnifiedCollapsibleSection(
+            RectTransform parent,
+            TMPro.TextMeshProUGUI sourceText,
+            OperationalDetail detail,
+            StationpediaCategory categoryPrefab,
+            UniversalPage page,
+            int depth,
+            string parentTocId,
+            Action<RectTransform, OperationalDetail, int, string> recurseCallback)
+        {
+            try
+            {
+                // Create nested category
+                var nestedCategory = UnityEngine.Object.Instantiate<StationpediaCategory>(categoryPrefab, parent);
+                if (nestedCategory == null) return;
+                
+                string safeTocId = detail.tocId ?? detail.title?.Replace(" ", "_") ?? $"section_{depth}";
+                nestedCategory.gameObject.name = $"Section_{safeTocId}";
+                
+                // Set title with depth-based coloring
+                string titleColor = VanillaModeManager.GetTitleColor(depth);
+                nestedCategory.Title.text = $"<color={titleColor}>{detail.title}</color>";
+                
+                // Apply custom icons (respects vanilla mode)
+                ApplyCustomCategoryIcons(nestedCategory);
+                
+                // Configure layout with proper backgrounds
+                ConfigureNestedCategoryLayout(nestedCategory, detail, depth);
+                
+                // Register for TOC navigation
+                if (!string.IsNullOrEmpty(detail.tocId))
+                {
+                    TocLinkHandler.RegisterSection(detail.tocId, nestedCategory.GetComponent<RectTransform>(), nestedCategory, parentTocId);
+                }
+                
+                // Add image if specified
+                if (!string.IsNullOrEmpty(detail.imageFile))
+                {
+                    CreateInlineImage(nestedCategory.Contents, detail.imageFile);
+                }
+                
+                // Add description text
+                if (!string.IsNullOrEmpty(detail.description))
+                {
+                    CreateTextElement(nestedCategory.Contents, sourceText, detail.description);
+                }
+                
+                // Add bullet items
+                if (detail.items != null && detail.items.Count > 0)
+                {
+                    var sb = new System.Text.StringBuilder();
+                    foreach (var item in detail.items)
+                    {
+                        sb.AppendLine($"  • {item}");
+                    }
+                    CreateTextElement(nestedCategory.Contents, sourceText, sb.ToString().TrimEnd());
+                }
+                
+                // Add numbered steps
+                if (detail.steps != null && detail.steps.Count > 0)
+                {
+                    var sb = new System.Text.StringBuilder();
+                    int stepNum = 1;
+                    string stepColor = VanillaModeManager.IsVanillaMode ? "#FFFFFF" : "#FFA500";
+                    foreach (var step in detail.steps)
+                    {
+                        sb.AppendLine($"  <color={stepColor}>{stepNum}.</color> {step}");
+                        stepNum++;
+                    }
+                    CreateTextElement(nestedCategory.Contents, sourceText, sb.ToString().TrimEnd());
+                }
+                
+                // Add YouTube link if specified
+                if (!string.IsNullOrEmpty(detail.youtubeUrl))
+                {
+                    CreateYouTubeLink(nestedCategory.Contents, sourceText, detail.youtubeUrl, detail.youtubeLabel);
+                }
+                
+                // Add inline video if specified
+                if (!string.IsNullOrEmpty(detail.videoFile))
+                {
+                    CreateInlineVideo(nestedCategory.Contents, detail.videoFile);
+                }
+                
+                // Add table if specified
+                if (detail.table != null && detail.table.Count > 0)
+                {
+                    CreateTableElement(nestedCategory.Contents, sourceText, detail.table);
+                }
+                
+                // Recursively render children using the provided callback
+                if (detail.children != null && recurseCallback != null)
+                {
+                    foreach (var child in detail.children)
+                    {
+                        recurseCallback(nestedCategory.Contents, child, depth + 1, detail.tocId);
+                    }
+                }
+                
+                // Default to collapsed
+                nestedCategory.Contents.gameObject.SetActive(false);
+                if (nestedCategory.CollapseImage != null && nestedCategory.NotVisibleImage != null)
+                {
+                    nestedCategory.CollapseImage.sprite = nestedCategory.NotVisibleImage;
+                }
+                
+                // Update animator state
+                var animator = nestedCategory.GetComponent<IconAnimator>();
+                if (animator != null)
+                {
+                    animator.Initialize(false);
+                }
+                
+                // Add to page's category list for cleanup
+                page.CreatedCategories.Add(nestedCategory);
+            }
+            catch (Exception ex)
+            {
+                ConsoleWindow.Print($"[Stationpedia Ascended] Error creating unified section: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Unified inline content renderer - for non-collapsible content
+        /// </summary>
+        private static void CreateUnifiedInlineContent(
+            RectTransform parent,
+            TMPro.TextMeshProUGUI sourceText,
+            OperationalDetail detail,
+            StationpediaCategory categoryPrefab,
+            UniversalPage page,
+            int depth,
+            string parentTocId,
+            Action<RectTransform, OperationalDetail, int, string> recurseCallback)
+        {
+            // Create container for inline content
+            var containerGO = new GameObject($"InlineContent_{detail.title ?? "text"}");
+            containerGO.transform.SetParent(parent, false);
+            
+            var containerRT = containerGO.AddComponent<RectTransform>();
+            containerRT.anchorMin = new Vector2(0, 1);
+            containerRT.anchorMax = new Vector2(1, 1);
+            containerRT.pivot = new Vector2(0.5f, 1);
+            
+            var containerLayout = containerGO.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
+            containerLayout.childForceExpandWidth = true;
+            containerLayout.childForceExpandHeight = false;
+            containerLayout.childControlWidth = true;
+            containerLayout.childControlHeight = true;
+            containerLayout.spacing = 5;
+            
+            var containerFitter = containerGO.AddComponent<UnityEngine.UI.ContentSizeFitter>();
+            containerFitter.horizontalFit = UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained;
+            containerFitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+            
+            // Register for TOC navigation if has tocId
+            if (!string.IsNullOrEmpty(detail.tocId))
+            {
+                TocLinkHandler.RegisterSection(detail.tocId, containerRT, null, parentTocId);
+            }
+            
+            // Add title if present (as styled header text)
+            if (!string.IsNullOrEmpty(detail.title))
+            {
+                string titleColor = VanillaModeManager.GetTitleColor(depth);
+                CreateTextElement(containerRT, sourceText, $"<b><color={titleColor}>{detail.title}</color></b>");
+            }
+            
+            // Add image if specified
+            if (!string.IsNullOrEmpty(detail.imageFile))
+            {
+                CreateInlineImage(containerRT, detail.imageFile);
+            }
+            
+            // Add description
+            if (!string.IsNullOrEmpty(detail.description))
+            {
+                CreateTextElement(containerRT, sourceText, detail.description);
+            }
+            
+            // Add bullet items
+            if (detail.items != null && detail.items.Count > 0)
+            {
+                var sb = new System.Text.StringBuilder();
+                foreach (var item in detail.items)
+                {
+                    sb.AppendLine($"  • {item}");
+                }
+                CreateTextElement(containerRT, sourceText, sb.ToString().TrimEnd());
+            }
+            
+            // Add numbered steps
+            if (detail.steps != null && detail.steps.Count > 0)
+            {
+                var sb = new System.Text.StringBuilder();
+                int stepNum = 1;
+                string stepColor = VanillaModeManager.IsVanillaMode ? "#FFFFFF" : "#FFA500";
+                foreach (var step in detail.steps)
+                {
+                    sb.AppendLine($"  <color={stepColor}>{stepNum}.</color> {step}");
+                    stepNum++;
+                }
+                CreateTextElement(containerRT, sourceText, sb.ToString().TrimEnd());
+            }
+            
+            // Add YouTube link if specified
+            if (!string.IsNullOrEmpty(detail.youtubeUrl))
+            {
+                CreateYouTubeLink(containerRT, sourceText, detail.youtubeUrl, detail.youtubeLabel);
+            }
+            
+            // Add inline video if specified
+            if (!string.IsNullOrEmpty(detail.videoFile))
+            {
+                CreateInlineVideo(containerRT, detail.videoFile);
+            }
+            
+            // Add table if specified
+            if (detail.table != null && detail.table.Count > 0)
+            {
+                CreateTableElement(containerRT, sourceText, detail.table);
+            }
+            
+            // Render children
+            if (detail.children != null && recurseCallback != null)
+            {
+                foreach (var child in detail.children)
+                {
+                    recurseCallback(containerRT, child, depth + 1, detail.tocId);
+                }
+            }
+        }
+
+        /// <summary>
         /// Render all operational details - creates nested collapsible categories or inline text
         /// </summary>
         private static void RenderAllOperationalDetails(StationpediaCategory parentCategory, TMPro.TextMeshProUGUI sourceText, 
@@ -1928,33 +2418,42 @@ namespace StationpediaAscended.Patches
         }
 
         /// <summary>
-        /// Render a single operational detail element - either as collapsible category or inline content
+        /// Render a single operational detail element - now uses unified section renderer
         /// </summary>
         private static void RenderOperationalDetailElement(StationpediaCategory parentCategory, TMPro.TextMeshProUGUI sourceText,
             OperationalDetail detail, StationpediaCategory categoryPrefab, UniversalPage page, int depth, string parentTocId = null)
         {
+            // Recursive callback for children
+            Action<RectTransform, OperationalDetail, int, string> recurse = (p, d, dep, pid) => 
+            {
+                // For devices, we need to find or use the parent category
+                // Since we're in a StationpediaCategory context, we use its Contents
+                var parentCat = p.GetComponentInParent<StationpediaCategory>();
+                if (parentCat != null)
+                {
+                    RenderOperationalDetailElement(parentCat, sourceText, d, categoryPrefab, page, dep, pid);
+                }
+                else
+                {
+                    // Fallback: render as guide section element
+                    RenderGuideSectionElement(p, sourceText, d, categoryPrefab, page, dep, pid);
+                }
+            };
+            
             if (detail.collapsible && !string.IsNullOrEmpty(detail.title))
             {
-                // Create a nested collapsible category
-                CreateNestedCollapsibleCategory(parentCategory, sourceText, detail, categoryPrefab, page, depth, parentTocId);
+                // Use unified collapsible section
+                CreateUnifiedCollapsibleSection(parentCategory.Contents, sourceText, detail, categoryPrefab, page, depth, parentTocId, recurse);
             }
             else
             {
-                // Create inline content (text, items, steps, image)
-                CreateInlineContent(parentCategory.Contents, sourceText, detail, depth);
-                
-                // Recursively render non-collapsible children (pass current tocId as parent)
-                if (detail.children != null)
-                {
-                    foreach (var child in detail.children)
-                    {
-                        RenderOperationalDetailElement(parentCategory, sourceText, child, categoryPrefab, page, depth + 1, detail.tocId);
-                    }
-                }
+                // Use unified inline content
+                CreateUnifiedInlineContent(parentCategory.Contents, sourceText, detail, categoryPrefab, page, depth, parentTocId, recurse);
             }
         }
 
         /// <summary>
+        /// DEPRECATED - Use CreateUnifiedCollapsibleSection instead
         /// Create a nested collapsible category within parent's Contents
         /// </summary>
         private static void CreateNestedCollapsibleCategory(StationpediaCategory parentCategory, TMPro.TextMeshProUGUI sourceText,
@@ -2230,11 +2729,15 @@ namespace StationpediaAscended.Patches
 
         /// <summary>
         /// Create a text element inside a parent container
-        /// Processes game format tags like {HEADER:Text} and {LINK:Page;Text}
+        /// Processes game format tags like {HEADER:Text}, {LINK:Page;Text}, {THING:Key}
         /// </summary>
         private static void CreateTextElement(RectTransform parent, TMPro.TextMeshProUGUI sourceText, string text)
         {
-            // Process {HEADER:Text} tags - convert to styled headers
+            // Process {LINK:}, {THING:}, {GAS:}, etc. tags through Localization.ParseHelpText
+            // This handles device/page links, gas links, reagent links, etc.
+            text = Localization.ParseHelpText(text);
+            
+            // Process {HEADER:Text} tags - convert to styled headers (after ParseHelpText)
             text = System.Text.RegularExpressions.Regex.Replace(text, @"\{HEADER:([^}]+)\}", match =>
             {
                 string headerText = match.Groups[1].Value;
@@ -2265,6 +2768,10 @@ namespace StationpediaAscended.Patches
             var fitter = textGO.AddComponent<UnityEngine.UI.ContentSizeFitter>();
             fitter.horizontalFit = UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained;
             fitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+            
+            // Add link handler to enable clicking on {LINK:PageKey;Text} links
+            var linkHandler = textGO.AddComponent<TocLinkHandler>();
+            linkHandler.TextComponent = textComponent;
         }
 
         /// <summary>
@@ -2293,8 +2800,8 @@ namespace StationpediaAscended.Patches
                 rectTransform.anchorMax = new Vector2(1, 1);
                 rectTransform.pivot = new Vector2(0.5f, 1);
                 
-                // Calculate size based on image aspect ratio
-                float maxWidth = 300f;
+                // Calculate size based on image aspect ratio (smaller to match vanilla)
+                float maxWidth = 100f;
                 float aspectRatio = (float)sprite.texture.width / sprite.texture.height;
                 float height = maxWidth / aspectRatio;
                 
@@ -2590,6 +3097,156 @@ namespace StationpediaAscended.Patches
             catch (Exception ex)
             {
                 ConsoleWindow.Print($"[Stationpedia Ascended] Error creating inline video: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Create a markdown-style table element with header row and data rows.
+        /// First row is treated as headers (bold), all cells are center-aligned.
+        /// Uses nested section background styling.
+        /// </summary>
+        private static void CreateTableElement(RectTransform parent, TMPro.TextMeshProUGUI sourceText, List<TableRow> tableData)
+        {
+            try
+            {
+                if (tableData == null || tableData.Count == 0) return;
+                
+                // Determine column count from first row
+                int columnCount = tableData[0].cells?.Count ?? 0;
+                if (columnCount == 0) return;
+                
+                // Create outer container with background (like nested sections)
+                var tableContainerGO = new GameObject("TableContainer");
+                tableContainerGO.transform.SetParent(parent, false);
+                
+                var containerRT = tableContainerGO.AddComponent<RectTransform>();
+                containerRT.anchorMin = new Vector2(0, 1);
+                containerRT.anchorMax = new Vector2(1, 1);
+                containerRT.pivot = new Vector2(0.5f, 1);
+                
+                // Add background image (like nested sections)
+                var bgImage = tableContainerGO.AddComponent<UnityEngine.UI.Image>();
+                if (VanillaModeManager.IsVanillaMode)
+                {
+                    if (_nativePanelSprite != null)
+                    {
+                        bgImage.sprite = _nativePanelSprite;
+                        bgImage.type = _nativePanelType;
+                        bgImage.material = _nativePanelMaterial;
+                    }
+                    bgImage.color = Color.white;
+                }
+                else
+                {
+                    var windowSprite = StationpediaAscendedMod.GetWindowBackgroundSprite();
+                    if (windowSprite != null)
+                    {
+                        bgImage.sprite = windowSprite;
+                        bgImage.type = UnityEngine.UI.Image.Type.Sliced;
+                    }
+                    bgImage.color = StationeersBlue;
+                }
+                
+                // Add vertical layout for rows
+                var containerLayout = tableContainerGO.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
+                containerLayout.padding = new RectOffset(12, 12, 10, 10);
+                containerLayout.spacing = 4;
+                containerLayout.childForceExpandWidth = true;
+                containerLayout.childForceExpandHeight = false;
+                containerLayout.childControlWidth = true;
+                containerLayout.childControlHeight = true;
+                
+                // Auto-size the container
+                var containerFitter = tableContainerGO.AddComponent<UnityEngine.UI.ContentSizeFitter>();
+                containerFitter.horizontalFit = UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained;
+                containerFitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+                
+                // Create each row
+                for (int rowIndex = 0; rowIndex < tableData.Count; rowIndex++)
+                {
+                    var rowData = tableData[rowIndex];
+                    if (rowData?.cells == null) continue;
+                    
+                    bool isHeader = (rowIndex == 0);
+                    
+                    // Create row container
+                    var rowGO = new GameObject($"TableRow_{rowIndex}");
+                    rowGO.transform.SetParent(tableContainerGO.transform, false);
+                    
+                    // Add horizontal layout for cells
+                    var rowLayout = rowGO.AddComponent<UnityEngine.UI.HorizontalLayoutGroup>();
+                    rowLayout.spacing = 8;
+                    rowLayout.childForceExpandWidth = true;
+                    rowLayout.childForceExpandHeight = false;
+                    rowLayout.childControlWidth = true;
+                    rowLayout.childControlHeight = true;
+                    rowLayout.childAlignment = UnityEngine.TextAnchor.MiddleCenter;
+                    
+                    // Add row size fitter
+                    var rowFitter = rowGO.AddComponent<UnityEngine.UI.ContentSizeFitter>();
+                    rowFitter.horizontalFit = UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained;
+                    rowFitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+                    
+                    // Create cells (ensure we have the right column count)
+                    for (int colIndex = 0; colIndex < columnCount; colIndex++)
+                    {
+                        string cellText = colIndex < rowData.cells.Count ? rowData.cells[colIndex] : "";
+                        
+                        // Create cell container
+                        var cellGO = new GameObject($"Cell_{rowIndex}_{colIndex}");
+                        cellGO.transform.SetParent(rowGO.transform, false);
+                        
+                        // Add layout element for flexible width distribution
+                        var cellLayout = cellGO.AddComponent<UnityEngine.UI.LayoutElement>();
+                        cellLayout.flexibleWidth = 1f;
+                        cellLayout.minWidth = 50f;
+                        
+                        // Create text element
+                        var cellTextComponent = cellGO.AddComponent<TMPro.TextMeshProUGUI>();
+                        cellTextComponent.font = sourceText.font;
+                        cellTextComponent.fontSharedMaterial = sourceText.fontSharedMaterial;
+                        cellTextComponent.fontSize = sourceText.fontSize * 0.9f;
+                        cellTextComponent.color = sourceText.color;
+                        cellTextComponent.enableWordWrapping = true;
+                        cellTextComponent.alignment = TMPro.TextAlignmentOptions.Center;
+                        cellTextComponent.richText = true;
+                        cellTextComponent.margin = new Vector4(4, 4, 4, 4);
+                        
+                        // Header row is bold
+                        if (isHeader)
+                        {
+                            string headerColor = VanillaModeManager.IsVanillaMode ? "#FFFFFF" : "#FFA500";
+                            cellTextComponent.text = $"<b><color={headerColor}>{cellText}</color></b>";
+                        }
+                        else
+                        {
+                            cellTextComponent.text = cellText;
+                        }
+                        
+                        // Auto-size cell text
+                        var cellFitter = cellGO.AddComponent<UnityEngine.UI.ContentSizeFitter>();
+                        cellFitter.horizontalFit = UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained;
+                        cellFitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+                    }
+                    
+                    // Add separator line after header row
+                    if (isHeader && tableData.Count > 1)
+                    {
+                        var separatorGO = new GameObject("HeaderSeparator");
+                        separatorGO.transform.SetParent(tableContainerGO.transform, false);
+                        
+                        var separatorImage = separatorGO.AddComponent<UnityEngine.UI.Image>();
+                        separatorImage.color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+                        
+                        var separatorLayout = separatorGO.AddComponent<UnityEngine.UI.LayoutElement>();
+                        separatorLayout.preferredHeight = 1f;
+                        separatorLayout.flexibleWidth = 1f;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ConsoleWindow.Print($"[Stationpedia Ascended] Error creating table: {ex.Message}");
             }
         }
 
@@ -2979,12 +3636,23 @@ namespace StationpediaAscended.Patches
                 UnityEngine.Object.Destroy(child.gameObject);
             }
             
-            // Get the list of Game Mechanics pages
-            var mechanicsPages = GameMechanicsRegistry.GameMechanicsPages;
+            // First register all mechanics pages so they exist in Stationpedia
+            Data.JsonMechanicsLoader.RegisterMechanicsPages();
             
-            // Create buttons for each page
-            foreach (string pageKey in mechanicsPages)
+            // Get all loaded mechanics from JSON
+            var mechanics = Data.JsonMechanicsLoader.GetAllMechanics();
+            
+            if (mechanics == null || mechanics.Count == 0)
             {
+                ConsoleWindow.Print("[Stationpedia Ascended] No game mechanics pages to display");
+                return;
+            }
+            
+            // Create buttons for each mechanic
+            foreach (var mechanic in mechanics)
+            {
+                string pageKey = mechanic.guideKey;
+                
                 StationpediaPage page;
                 if (!Stationpedia.StationpediaPages.Exists(p => p.Key == pageKey))
                     continue;
@@ -2993,7 +3661,7 @@ namespace StationpediaAscended.Patches
                 if (page == null) continue;
                 
                 var listItem = UnityEngine.Object.Instantiate(stationpedia.ListSearchPrefab, stationpedia.LoreGuideContents);
-                listItem.Apply(page.Title);
+                listItem.Apply(mechanic.displayName ?? page.Title);
                 
                 // Capture for lambda
                 string capturedKey = pageKey;
@@ -3227,6 +3895,36 @@ namespace StationpediaAscended.Patches
             catch (Exception ex)
             {
                 ConsoleWindow.Print($"[Stationpedia Ascended] Error adding vanilla guides header: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Prefix patch for SetPageLore - clear orphaned items before vanilla repopulates
+        /// When switching from Game Mechanics to Universe, our items remain because vanilla
+        /// only clears items it tracks in _SPDAGuideLoreInserts. This clears everything first.
+        /// </summary>
+        public static void Stationpedia_SetPageLore_Prefix(Stationpedia __instance)
+        {
+            try
+            {
+                if (__instance?.LoreGuideContents == null) return;
+                
+                // Clear ALL children from LoreGuideContents before vanilla repopulates
+                // This ensures our Game Mechanics buttons don't persist when switching to Universe
+                var toRemove = new List<GameObject>();
+                foreach (Transform child in __instance.LoreGuideContents)
+                {
+                    toRemove.Add(child.gameObject);
+                }
+                
+                foreach (var obj in toRemove)
+                {
+                    UnityEngine.Object.Destroy(obj);
+                }
+            }
+            catch (Exception ex)
+            {
+                ConsoleWindow.Print($"[Stationpedia Ascended] Error in SetPageLore prefix: {ex.Message}");
             }
         }
 

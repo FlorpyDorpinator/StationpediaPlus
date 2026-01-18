@@ -72,6 +72,19 @@ namespace StationpediaAscended.UI
                 string sectionId = linkId.Substring(4); // Remove "toc_" prefix
                 ScrollToSection(sectionId);
             }
+            else if (!string.IsNullOrEmpty(linkId) && linkId != "Clipboard")
+            {
+                // Handle page navigation links (e.g., {LINK:PageKey;Text} generates <link=PageKey>)
+                // Navigate to the Stationpedia page with this key
+                try
+                {
+                    Stationpedia.Instance?.SetPage(linkId, true);
+                }
+                catch (System.Exception ex)
+                {
+                    StationpediaAscended.StationpediaAscendedMod.Log?.LogWarning($"Failed to navigate to page '{linkId}': {ex.Message}");
+                }
+            }
         }
         
         public void OnPointerMove(PointerEventData eventData)
