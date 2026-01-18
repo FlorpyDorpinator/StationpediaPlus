@@ -1,0 +1,4441 @@
+{
+  "guides": [
+    {
+      "guideKey": "GuideAimeeMiningBotGuide",
+      "displayName": "Complete AIMEE Mining Bot Guide for Stationeers",
+      "pageDescription": "---",
+      "generateToc": true,
+      "tocTitle": "Contents",
+      "buttonColor": "orange",
+      "sortOrder": 100,
+      "OperationalDetails": [
+        {
+          "title": "Section 1: Introduction & Overview",
+          "tocId": "section-1-introduction-overview",
+          "collapsible": true,
+          "description": "AIMEE (Autonomous Intelligent Mining and Exploration Entity) is a programmable mining robot that autonomously collects surface ores. Unlike manual mining or deep miners, AIMEE roams the surface finding and collecting exposed ore deposits.",
+          "children": [
+            {
+              "title": "Key Specifications (From Game Code)",
+              "tocId": "key-specifications-from-game-code",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Spec",
+                    "Value",
+                    "Source"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Max Speed",
+                    "3 m/s",
+                    "`MaxSpeed = 3f`"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Search Radius",
+                    "32 meters",
+                    "`MinableSearchArea = 32`"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Mining Depth",
+                    "2 layers (surface only)",
+                    "`maxMiningDepth = 2`"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Unload Range",
+                    "3 meters",
+                    "`GetNearestRobotInput(..., 3f)`"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Stuck Detection",
+                    "60 seconds",
+                    "`_isStuckCheckAmount = 60f`"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Stuck Threshold",
+                    "0.1m movement",
+                    "`_isStuckMovementAmount = 0.1f`"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "What It Can Do",
+              "tocId": "what-it-can-do",
+              "collapsible": true,
+              "items": [
+                "<b>Mine surface ores</b> - Any ore visible on or near the surface (within 2 layers deep)",
+                "<b>Navigate autonomously</b> - Uses pathfinding when programmed",
+                "<b>Store mined ores</b> - Internal storage slots hold collected ore",
+                "<b>Unload to chutes</b> - Deposits ores into Chute Inlet or Chute Bin",
+                "<b>Be fully programmable</b> - IC10 chip slot for custom behavior",
+                "<b>Be repaired</b> - Uses Duct Tape for repairs"
+              ]
+            },
+            {
+              "title": "What It Cannot Do",
+              "tocId": "what-it-cannot-do",
+              "collapsible": true,
+              "description": "---",
+              "items": [
+                "Mine deep underground deposits (depth > 2)",
+                "Select specific ore types to mine",
+                "Navigate reliably over significant terrain height changes",
+                "Operate indefinitely without battery recharging"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 2: Slots & Power",
+          "tocId": "section-2-slots-power",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Slot Configuration",
+              "tocId": "slot-configuration",
+              "collapsible": true,
+              "description": "AIMEE has three types of slots:\n\n<b>Important:</b> The battery slot is checked first when reading <color=#88FF88>ChargeRatio</color> via logic. Access it via slot index 0.",
+              "table": [
+                {
+                  "cells": [
+                    "Slot",
+                    "Purpose",
+                    "Contents"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Battery Slot",
+                    "Power source",
+                    "Battery Cell (any size)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Chip Slot",
+                    "Programming",
+                    "Programmable Chip"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Storage Slots",
+                    "Ore storage",
+                    "Mined ores"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Power Consumption (From Game Code)",
+              "tocId": "power-consumption-from-game-code",
+              "collapsible": true,
+              "description": "AIMEE's power draw is calculated per game tick:\n\n<b>Practical Power Usage:</b>",
+              "items": [
+                "Stationary with chip running: ~7.5W average",
+                "Moving at full speed: ~30-50W (depends on terrain)",
+                "Following/roaming: Variable, 15-50W typical"
+              ],
+              "table": [
+                {
+                  "cells": [
+                    "Component",
+                    "Power Draw",
+                    "Condition"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Base (Idle)",
+                    "5W",
+                    "When OnOff = true"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Motor",
+                    "CurrentMotorPower x 10W",
+                    "When moving"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Chip Execution",
+                    "2.5W",
+                    "Per chip execution cycle (128 ops)"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Battery Recommendations",
+              "tocId": "battery-recommendations",
+              "collapsible": true,
+              "description": "<b>Tip:</b> Use a Large Battery Cell for extended autonomous operation. AIMEE can be programmed to return for charging when battery drops below a threshold.\n\n---",
+              "table": [
+                {
+                  "cells": [
+                    "Battery Cell",
+                    "Capacity",
+                    "Approx Runtime (Idle)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Small",
+                    "36 kJ",
+                    "~2 hours"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Large",
+                    "3.6 MJ",
+                    "~8+ hours"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 3: Modes",
+          "tocId": "section-3-modes",
+          "collapsible": true,
+          "description": "AIMEE operates in distinct modes controlled via the <color=#88FF88>Mode</color> logic variable.",
+          "children": [
+            {
+              "title": "Mode Reference (From RobotMode.cs)",
+              "tocId": "mode-reference-from-robotmodecs",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Mode",
+                    "Value",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "None/Idle",
+                    "0",
+                    "Stopped, not operating"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Follow",
+                    "1",
+                    "Follows the nearest player"
+                  ]
+                },
+                {
+                  "cells": [
+                    "MoveToTarget",
+                    "2",
+                    "Moves to TargetX/Y/Z coordinates"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Roam",
+                    "3",
+                    "Autonomously searches for and mines ore"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Unload",
+                    "4",
+                    "Deposits ores into nearby Chute Inlet/Bin"
+                  ]
+                },
+                {
+                  "cells": [
+                    "PathToTarget",
+                    "5",
+                    "Uses pathfinding to reach TargetX/Y/Z"
+                  ]
+                },
+                {
+                  "cells": [
+                    "StorageFull",
+                    "6",
+                    "READ ONLY - Indicates storage is full"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Mode Details",
+              "tocId": "mode-details",
+              "collapsible": true,
+              "description": "<b>Mode 0 (Idle):</b>\n<b>Mode 1 (Follow):</b>\n<b>Mode 2 (MoveToTarget):</b>\n<b>Mode 3 (Roam):</b>\n<b>Mode 4 (Unload):</b>\n<b>Mode 5 (PathToTarget):</b>\n<b>Mode 6 (StorageFull):</b>\n---",
+              "items": [
+                "AIMEE stops all movement",
+                "Power consumption drops to base 5W + chip",
+                "Use to pause operations or during setup",
+                "Follows the nearest player",
+                "Good for guiding AIMEE to new locations",
+                "No mining occurs in this mode",
+                "Moves directly toward TargetX/Y/Z",
+                "Does NOT use pathfinding",
+                "Can get stuck on obstacles or height differences",
+                "Stops when close to target",
+                "Autonomous mining mode",
+                "Searches 32-meter radius for surface ores",
+                "Mines any ore found within 2 layers of surface",
+                "Roams randomly when no ore nearby",
+                "<b>This is the primary mining mode</b>",
+                "Attempts to deposit ores into nearby Chute Inlet or Chute Bin",
+                "Must be within 3 meters of a valid input",
+                "Returns to Mode 0 (Idle) when empty or no valid input",
+                "Uses pathfinding to reach TargetX/Y/Z",
+                "Better at navigating around obstacles than Mode 2",
+                "Still struggles with major terrain height changes",
+                "More reliable for longer distances",
+                "READ ONLY - automatically set when storage is full",
+                "Indicates AIMEE needs to unload",
+                "Program should detect this and initiate unload sequence"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 4: Logic Variables",
+          "tocId": "section-4-logic-variables",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Readable Variables (From GetLogicValue)",
+              "tocId": "readable-variables-from-getlogicvalue",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Variable",
+                    "Type",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "PositionX",
+                    "float",
+                    "Current X world coordinate"
+                  ]
+                },
+                {
+                  "cells": [
+                    "PositionY",
+                    "float",
+                    "Current Y world coordinate (height)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "PositionZ",
+                    "float",
+                    "Current Z world coordinate"
+                  ]
+                },
+                {
+                  "cells": [
+                    "VelocityMagnitude",
+                    "float",
+                    "Current speed (m/s)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "VelocityX/Y/Z",
+                    "float",
+                    "Velocity components"
+                  ]
+                },
+                {
+                  "cells": [
+                    "VelocityRelativeX/Y/Z",
+                    "float",
+                    "Relative velocity components"
+                  ]
+                },
+                {
+                  "cells": [
+                    "ForwardX/Y/Z",
+                    "float",
+                    "Forward direction vector"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Orientation",
+                    "float",
+                    "Current heading (degrees)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "MineablesInVicinity",
+                    "int",
+                    "Count of ores within search radius"
+                  ]
+                },
+                {
+                  "cells": [
+                    "PressureExternal",
+                    "float",
+                    "External atmosphere pressure"
+                  ]
+                },
+                {
+                  "cells": [
+                    "TemperatureExternal",
+                    "float",
+                    "External atmosphere temperature"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Writable Variables (From SetLogicValue)",
+              "tocId": "writable-variables-from-setlogicvalue",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Variable",
+                    "Type",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "TargetX",
+                    "float",
+                    "Target X coordinate for movement"
+                  ]
+                },
+                {
+                  "cells": [
+                    "TargetY",
+                    "float",
+                    "Target Y coordinate (height)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "TargetZ",
+                    "float",
+                    "Target Z coordinate"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Slot Variables",
+              "tocId": "slot-variables",
+              "collapsible": true,
+              "description": "Access battery status via slot 0:\n\n---",
+              "table": [
+                {
+                  "cells": [
+                    "Variable",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Charge",
+                    "Current battery charge (joules)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "ChargeRatio",
+                    "Battery percentage (0.0 - 1.0)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "MaxCharge",
+                    "Battery capacity (joules)"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 5: Unloading System",
+          "tocId": "section-5-unloading-system",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Compatible Devices",
+              "tocId": "compatible-devices",
+              "collapsible": true,
+              "description": "AIMEE can unload into any device implementing <color=#88FF88>IRobotInput</color>:",
+              "table": [
+                {
+                  "cells": [
+                    "Device",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Chute Inlet",
+                    "Standard item input point"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Chute Bin",
+                    "Container with item input"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Unload Requirements",
+              "tocId": "unload-requirements",
+              "collapsible": true,
+              "steps": [
+                "AIMEE must be within <b>3 meters</b> of the input device",
+                "The input slot must be empty (can accept item)",
+                "The device must allow input (`AllowInput = true`)",
+                "Set AIMEE to Mode 4 (Unload)"
+              ]
+            },
+            {
+              "title": "Unload Process",
+              "tocId": "unload-process",
+              "collapsible": true,
+              "steps": [
+                "AIMEE checks for nearest `IRobotInput` within 3m",
+                "Transfers one item at a time from storage to input",
+                "Continues until storage is empty",
+                "Returns to Mode 0 (Idle) when complete",
+                "If no valid input found, immediately returns to Mode 0"
+              ]
+            },
+            {
+              "title": "Chute Setup Example",
+              "tocId": "chute-setup-example",
+              "collapsible": true,
+              "description": "Place the Chute Inlet facing AIMEE's parking/unload location. Connect chutes to your ore sorting or storage system.\n\n---"
+            }
+          ]
+        },
+        {
+          "title": "Section 6: IC10 Programming",
+          "tocId": "section-6-ic10-programming",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Basic AIMEE Program Structure",
+              "tocId": "basic-aimee-program-structure",
+              "collapsible": true
+            },
+            {
+              "title": "Key Programming Patterns",
+              "tocId": "key-programming-patterns",
+              "collapsible": true,
+              "description": "<b>Check if at destination:</b>\n\n<b>Wait for mode change:</b>\n\n<b>Read battery from slot:</b>\n\n---"
+            }
+          ]
+        },
+        {
+          "title": "Section 7: Troubleshooting",
+          "tocId": "section-7-troubleshooting",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Movement Issues",
+              "tocId": "movement-issues",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Problem",
+                    "Cause",
+                    "Solution"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Won't move",
+                    "Mode set to 0 (Idle)",
+                    "Set Mode to 1, 2, 3, or 5"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Won't move",
+                    "Battery empty",
+                    "Charge or replace battery"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Won't move",
+                    "No chip or chip error",
+                    "Check chip installation and code"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Stuck dancing",
+                    "Height difference at target",
+                    "Y coordinate unreachable - see below"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Moves slowly",
+                    "Low battery",
+                    "Charge battery"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Goes wrong direction",
+                    "Wrong target coordinates",
+                    "Verify TargetX/Y/Z values"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "The Y-Coordinate Problem",
+              "tocId": "the-y-coordinate-problem",
+              "collapsible": true,
+              "description": "AIMEE struggles when the target Y coordinate doesn't match terrain height:\n\n<b>Symptoms:</b>\n<b>Cause:</b> MoveToTarget and PathToTarget try to reach the exact Y coordinate. If terrain is higher or lower, AIMEE can't physically reach it.\n\n<b>Solutions:</b>",
+              "items": [
+                "AIMEE lifts front or rear wheels, \"dancing\"",
+                "Never reaches destination",
+                "Gets stuck indefinitely"
+              ],
+              "steps": [
+                "Use waypoints at known good elevations",
+                "Set TargetY slightly above expected terrain",
+                "Use Follow mode to manually guide over difficult terrain",
+                "Place unload stations on flat ground"
+              ]
+            },
+            {
+              "title": "Mining Issues",
+              "tocId": "mining-issues",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Problem",
+                    "Cause",
+                    "Solution"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Not mining",
+                    "Not in Roam mode (3)",
+                    "Set Mode to 3"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Not mining",
+                    "No surface ores in 32m radius",
+                    "Move to new location"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Not mining",
+                    "Ores too deep (>2 layers)",
+                    "Ores must be surface or near-surface"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Storage full",
+                    "Mode 6 active",
+                    "Trigger unload sequence"
+                  ]
+                },
+                {
+                  "cells": [
+                    "MineablesInVicinity = 0",
+                    "Area depleted",
+                    "Relocate to new mining zone"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Unloading Issues",
+              "tocId": "unloading-issues",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Problem",
+                    "Cause",
+                    "Solution"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Won't unload",
+                    "Too far from Chute Inlet/Bin",
+                    "Must be within 3 meters"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Won't unload",
+                    "Chute input slot occupied",
+                    "Ensure chute is processing items"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Won't unload",
+                    "Chute not powered/enabled",
+                    "Check chute power and settings"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Returns to Idle immediately",
+                    "No valid input found",
+                    "Position closer to chute input"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Power Issues",
+              "tocId": "power-issues",
+              "collapsible": true,
+              "description": "---",
+              "table": [
+                {
+                  "cells": [
+                    "Problem",
+                    "Cause",
+                    "Solution"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Drains fast",
+                    "High motor usage (terrain)",
+                    "Operate on flatter terrain"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Drains fast",
+                    "Chip running heavy loops",
+                    "Optimize chip code, add yields"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Won't charge",
+                    "Not at charging station",
+                    "Create charging dock with APC"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Won't charge",
+                    "Battery full",
+                    "Check ChargeRatio = 1.0"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 8: Setup Checklist",
+          "tocId": "section-8-setup-checklist",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Initial Deployment",
+              "tocId": "initial-deployment",
+              "collapsible": true,
+              "steps": [
+                "<b>Craft AIMEE Kit</b> from Electronics Printer",
+                "<b>Place and build</b> AIMEE on relatively flat ground",
+                "<b>Insert Battery Cell</b> (Large recommended)",
+                "<b>Insert Programmable Chip</b> (optional but recommended)",
+                "<b>Set Mode to 3</b> (Roam) for basic autonomous mining",
+                "<b>Place Chute Inlet</b> within 3m of intended unload spot"
+              ]
+            },
+            {
+              "title": "Automated Setup",
+              "tocId": "automated-setup",
+              "collapsible": true,
+              "steps": [
+                "Complete initial deployment",
+                "<b>Program chip</b> with unload/return logic",
+                "<b>Set up charging station</b> (APC with battery near unload point)",
+                "<b>Test unload sequence</b> - verify AIMEE can reach and deposit",
+                "<b>Monitor first few cycles</b> for stuck conditions",
+                "<b>Establish waypoints</b> if terrain is problematic"
+              ]
+            },
+            {
+              "title": "Recommended Base Layout",
+              "tocId": "recommended-base-layout",
+              "collapsible": true,
+              "description": "---"
+            }
+          ]
+        },
+        {
+          "title": "Quick Reference Card",
+          "tocId": "quick-reference-card",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Mode Values",
+              "tocId": "mode-values",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Value",
+                    "Mode",
+                    "Use"
+                  ]
+                },
+                {
+                  "cells": [
+                    "0",
+                    "Idle",
+                    "Stopped"
+                  ]
+                },
+                {
+                  "cells": [
+                    "1",
+                    "Follow",
+                    "Follow player"
+                  ]
+                },
+                {
+                  "cells": [
+                    "2",
+                    "MoveToTarget",
+                    "Direct movement"
+                  ]
+                },
+                {
+                  "cells": [
+                    "3",
+                    "Roam",
+                    "**Mining mode**"
+                  ]
+                },
+                {
+                  "cells": [
+                    "4",
+                    "Unload",
+                    "Deposit ores"
+                  ]
+                },
+                {
+                  "cells": [
+                    "5",
+                    "PathToTarget",
+                    "Pathfinding movement"
+                  ]
+                },
+                {
+                  "cells": [
+                    "6",
+                    "StorageFull",
+                    "Read-only flag"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Key Constants",
+              "tocId": "key-constants",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Constant",
+                    "Value"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Max Speed",
+                    "3 m/s"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Search Radius",
+                    "32 meters"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Mining Depth",
+                    "2 layers"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Unload Range",
+                    "3 meters"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Stuck Detection",
+                    "60 seconds"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Power Draw",
+              "tocId": "power-draw",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "State",
+                    "Power"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Idle (OnOff)",
+                    "5W"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Motor (max)",
+                    "+30W"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Chip cycle",
+                    "+2.5W"
+                  ]
+                },
+                {
+                  "cells": [
+                    "**Typical moving**",
+                    "**15-50W**"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Critical Logic Variables",
+              "tocId": "critical-logic-variables",
+              "collapsible": true,
+              "description": "---\n\n<i>Data extracted from decompiled game files: RobotMining.cs, RobotMode.cs. Values are authoritative as of game version current to January 2026.</i>",
+              "table": [
+                {
+                  "cells": [
+                    "Read",
+                    "Write"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Mode",
+                    "Mode"
+                  ]
+                },
+                {
+                  "cells": [
+                    "PositionX/Y/Z",
+                    "TargetX/Y/Z"
+                  ]
+                },
+                {
+                  "cells": [
+                    "VelocityMagnitude",
+                    "-"
+                  ]
+                },
+                {
+                  "cells": [
+                    "MineablesInVicinity",
+                    "-"
+                  ]
+                },
+                {
+                  "cells": [
+                    "(Slot 0) ChargeRatio",
+                    "-"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "guideKey": "GuideLarreRoboticArmGuide",
+      "displayName": "Complete LARRE Robotic Arm Guide for Stationeers",
+      "pageDescription": "---",
+      "generateToc": true,
+      "tocTitle": "Contents",
+      "buttonColor": "orange",
+      "sortOrder": 100,
+      "OperationalDetails": [
+        {
+          "title": "Section 1: Introduction & Overview",
+          "tocId": "section-1-introduction-overview",
+          "collapsible": true,
+          "description": "LARRE is a robotic arm system that travels on rail tracks to automate tasks like plant harvesting, item transport, and collection. Unlike AIMEE which roams freely, LARRE follows a fixed rail network you design.",
+          "children": [
+            {
+              "title": "System Components",
+              "tocId": "system-components",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Component",
+                    "Purpose"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Rail (Straight)",
+                    "Track sections for arm travel"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Rail (Corner)",
+                    "Corner track sections"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Junction",
+                    "Stopping points where arm can act"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Bypass",
+                    "Points where arm can dock/undock"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Dock",
+                    "The robotic arm itself (multiple variants)"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Dock Variants (From Game Code)",
+              "tocId": "dock-variants-from-game-code",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Dock Type",
+                    "Function",
+                    "Slots"
+                  ]
+                },
+                {
+                  "cells": [
+                    "**Hydroponics**",
+                    "Harvest, plant, fertilize plants",
+                    "2 (Hand + Extra)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "**Cargo**",
+                    "Move items to/from device slots",
+                    "1 (Hand)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "**Collector**",
+                    "Collect or eject items",
+                    "20 (Storage)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "**Atmos**",
+                    "Atmospheric operations",
+                    "-"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Key Concept",
+              "tocId": "key-concept",
+              "collapsible": true,
+              "description": "The LARRE arm travels between <b>junctions</b> on the rail network. You set the <color=#88FF88>TargetJunctionIndex</color> (Setting) to tell it where to go. When it arrives at a junction, it can extend down to perform actions on devices/items below.\n\n---"
+            }
+          ]
+        },
+        {
+          "title": "Section 2: Rail Network Setup",
+          "tocId": "section-2-rail-network-setup",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Basic Network Layout",
+              "tocId": "basic-network-layout",
+              "collapsible": true
+            },
+            {
+              "title": "Junction Numbering",
+              "tocId": "junction-numbering",
+              "collapsible": true,
+              "items": [
+                "Junctions are numbered starting from 0",
+                "The <b>starting dock</b> determines which junction is 0",
+                "You can change the starting dock via the dock's interface (Button3)",
+                "Junction numbering wraps for looped networks"
+              ]
+            },
+            {
+              "title": "Looped vs Non-Looped Networks",
+              "tocId": "looped-vs-non-looped-networks",
+              "collapsible": true,
+              "description": "<b>Non-Looped (Linear):</b>\n<b>Looped (Circular):</b>",
+              "items": [
+                "Arm travels back and forth",
+                "Index clamped to min/max junction",
+                "Simpler to set up",
+                "Arm can travel in either direction",
+                "Index wraps around",
+                "More efficient for many junctions"
+              ]
+            },
+            {
+              "title": "Building Tips",
+              "tocId": "building-tips",
+              "collapsible": true,
+              "description": "---",
+              "steps": [
+                "Place rails on a ceiling or overhead structure",
+                "Junctions should be positioned over devices/plants",
+                "Bypass points allow the arm to dock and undock",
+                "Connect power to docks (not rails)"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 3: Hydroponics Dock",
+          "tocId": "section-3-hydroponics-dock",
+          "collapsible": true,
+          "description": "The Hydroponics LARRE automates plant care: harvesting, planting, and fertilizing.",
+          "children": [
+            {
+              "title": "Slots",
+              "tocId": "slots",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Slot",
+                    "Purpose"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Hand (0)",
+                    "Primary item slot"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Extra (1)",
+                    "Overflow/secondary slot"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Face States (Visual Indicator)",
+              "tocId": "face-states-visual-indicator",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "State",
+                    "Color",
+                    "Meaning"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Idle",
+                    "Grey",
+                    "Not over a plant / Off / No power"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Happy",
+                    "Green",
+                    "Plant healthy, can grow"
+                  ]
+                },
+                {
+                  "cells": [
+                    "UnHappy",
+                    "Yellow",
+                    "Plant has issues (dehydrated, bad gas, can't heal)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Dead",
+                    "Red",
+                    "Plant is dead"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Behavior (From AnimateDownFinished)",
+              "tocId": "behavior-from-animatedownfinished",
+              "collapsible": true,
+              "description": "<b>When hand is empty:</b>\n<b>When hand has item:</b>",
+              "items": [
+                "If harvestable plant exists: Harvest it (seeds if seeding, fruit if mature)",
+                "If plant is dead/stuck: Destroy and clear it",
+                "If fertilizer present but no plant: Destroy fertilizer",
+                "Can also take items from ChuteExportBin",
+                "<b>Seed/Plant in hand + empty tray:</b> Plants it",
+                "<b>Fertilizer in hand + tray with plant:</b> Fertilizes",
+                "<b>Harvestable plant + stackable in hand:</b> Harvest if compatible",
+                "Can also deposit items to ChuteBin"
+              ]
+            },
+            {
+              "title": "Logic Variables (Readable)",
+              "tocId": "logic-variables-readable",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Variable",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "TargetSlotIndex",
+                    "Index of target tray/device slot"
+                  ]
+                },
+                {
+                  "cells": [
+                    "TargetPrefabHash",
+                    "Prefab hash of target device"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Logic Variables (Per Slot, Slot 255 = Proxy Target)",
+              "tocId": "logic-variables-per-slot-slot-255-proxy-target",
+              "collapsible": true,
+              "description": "---",
+              "table": [
+                {
+                  "cells": [
+                    "Variable",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Efficiency",
+                    "Growth efficiency (0-1)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Health",
+                    "Plant health (0-1)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Growth",
+                    "Current growth stage"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Mature",
+                    "1 if mature, 0 otherwise"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Seeding",
+                    "1 if seeding with seeds, 0 otherwise, -1 if no plant"
+                  ]
+                },
+                {
+                  "cells": [
+                    "MaturityRatio",
+                    "Progress to maturity (0-1)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "SeedingRatio",
+                    "Progress to seeding (0-1)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "HarvestedHash",
+                    "Prefab hash of what will be harvested"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 4: Cargo Dock",
+          "tocId": "section-4-cargo-dock",
+          "collapsible": true,
+          "description": "The Cargo LARRE moves items to and from device slots (lockers, containers, etc.).",
+          "children": [
+            {
+              "title": "Slot",
+              "tocId": "slot",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Slot",
+                    "Purpose"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Hand (0)",
+                    "Item being moved"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Target Slot Index",
+              "tocId": "target-slot-index",
+              "collapsible": true,
+              "items": [
+                "Range: 0-50",
+                "Set via buttons on dock or via logic (TargetSlotIndex)",
+                "Determines which slot of the target device to interact with"
+              ]
+            },
+            {
+              "title": "Behavior (From DoContextualAction)",
+              "tocId": "behavior-from-docontextualaction",
+              "collapsible": true,
+              "description": "<b>When hand is empty:</b>\n<b>When hand has item:</b>",
+              "items": [
+                "Takes item from target device's slot (CurrentSlotIndex)",
+                "If target slot empty and accepts item type: Deposits item",
+                "If target slot occupied and swappable: Swaps items"
+              ]
+            },
+            {
+              "title": "Slot Access Rules (From CanAccessSlot)",
+              "tocId": "slot-access-rules-from-canaccessslot",
+              "collapsible": true,
+              "description": "Cannot access slots that are:",
+              "items": [
+                "Plant-type slots",
+                "Non-interactable slots",
+                "Locked slots",
+                "Hidden occupant slots (internal slots)"
+              ]
+            },
+            {
+              "title": "Logic Variables",
+              "tocId": "logic-variables",
+              "collapsible": true,
+              "description": "---",
+              "table": [
+                {
+                  "cells": [
+                    "Variable",
+                    "R/W",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Setting",
+                    "R/W",
+                    "Target junction index"
+                  ]
+                },
+                {
+                  "cells": [
+                    "TargetSlotIndex",
+                    "R/W",
+                    "Target device slot (0-50)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "TargetPrefabHash",
+                    "R",
+                    "Prefab hash of target device"
+                  ]
+                },
+                {
+                  "cells": [
+                    "PositionX",
+                    "R",
+                    "Current junction index"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Idle",
+                    "R",
+                    "1 if idle, 0 otherwise"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Extended",
+                    "R",
+                    "1 if arm down, 0 otherwise"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 5: Collector Dock",
+          "tocId": "section-5-collector-dock",
+          "collapsible": true,
+          "description": "The Collector LARRE collects items from the world or ejects items from its storage.",
+          "children": [
+            {
+              "title": "Slots",
+              "tocId": "slots",
+              "collapsible": true,
+              "items": [
+                "20 storage slots",
+                "Fill indicator shows capacity (checks slots 5, 12, 19)"
+              ]
+            },
+            {
+              "title": "Modes (VentDirection)",
+              "tocId": "modes-ventdirection",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Mode",
+                    "Value",
+                    "Behavior"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Outward",
+                    "0",
+                    "Ejects items from storage"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Inward",
+                    "1",
+                    "Collects nearby items into storage"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Behavior (From DoContextualArmAction)",
+              "tocId": "behavior-from-docontextualarmaction",
+              "collapsible": true,
+              "description": "<b>Mode = Inward (Collecting):</b>\n<b>Mode = Outward (Ejecting):</b>",
+              "items": [
+                "Attracts nearby items with force (300-600N based on distance)",
+                "Collection range: 1 meter from arm tip",
+                "If over ChuteExportBin: Takes items from export bin",
+                "Retracts automatically when full",
+                "Ejects items at 0.2-0.4 second intervals",
+                "If over ChuteBin/ChuteInlet: Deposits to chute",
+                "Retracts automatically when empty"
+              ]
+            },
+            {
+              "title": "Logic Variables",
+              "tocId": "logic-variables",
+              "collapsible": true,
+              "description": "---",
+              "table": [
+                {
+                  "cells": [
+                    "Variable",
+                    "R/W",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Setting",
+                    "R/W",
+                    "Target junction index"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Mode",
+                    "R/W",
+                    "VentDirection (0=Out, 1=In)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Ratio",
+                    "R",
+                    "Fill ratio (0-1)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Quantity",
+                    "R",
+                    "Number of items (0-20)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "PositionX",
+                    "R",
+                    "Current junction index"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Idle",
+                    "R",
+                    "1 if idle, 0 otherwise"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Extended",
+                    "R",
+                    "1 if arm down, 0 otherwise"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 6: Common Logic Variables (All Docks)",
+          "tocId": "section-6-common-logic-variables-all-docks",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Readable Variables",
+              "tocId": "readable-variables",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Variable",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Setting",
+                    "Target junction index"
+                  ]
+                },
+                {
+                  "cells": [
+                    "PositionX",
+                    "Current junction index (-1 if moving)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Idle",
+                    "1 if stationary and arm up, 0 otherwise"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Extended",
+                    "1 if arm is down, 0 otherwise"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Writable Variables",
+              "tocId": "writable-variables",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Variable",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Setting",
+                    "Set target junction index"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Activate",
+                    "1 to trigger arm action"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Open",
+                    "0 to close (dock at bypass), 1 to open (undock)"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Arm States (Internal)",
+              "tocId": "arm-states-internal",
+              "collapsible": true,
+              "description": "---",
+              "table": [
+                {
+                  "cells": [
+                    "State",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Up",
+                    "Arm retracted, can travel"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Down",
+                    "Arm extended, can act"
+                  ]
+                },
+                {
+                  "cells": [
+                    "AnimatingUp",
+                    "Arm retracting"
+                  ]
+                },
+                {
+                  "cells": [
+                    "AnimatingDown",
+                    "Arm extending"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 7: IC10 Programming",
+          "tocId": "section-7-ic10-programming",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Basic Hydroponics Automation",
+              "tocId": "basic-hydroponics-automation",
+              "collapsible": true
+            },
+            {
+              "title": "Cargo Dock Item Mover",
+              "tocId": "cargo-dock-item-mover",
+              "collapsible": true
+            },
+            {
+              "title": "Collector Inward/Outward Control",
+              "tocId": "collector-inwardoutward-control",
+              "collapsible": true,
+              "description": "---"
+            }
+          ]
+        },
+        {
+          "title": "Section 8: Troubleshooting",
+          "tocId": "section-8-troubleshooting",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Movement Issues",
+              "tocId": "movement-issues",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Problem",
+                    "Cause",
+                    "Solution"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Arm won't move",
+                    "Not powered or off",
+                    "Check power connection and OnOff state"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Arm stops mid-travel",
+                    "Obstruction detected",
+                    "Clear path, check for blocking objects"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Arm stuck at junction",
+                    "Error state",
+                    "Check Error variable, clear obstruction"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Wrong junction numbers",
+                    "Starting dock changed",
+                    "Set correct dock as starting dock"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Action Issues",
+              "tocId": "action-issues",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Problem",
+                    "Cause",
+                    "Solution"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Arm won't extend",
+                    "Face blocked",
+                    "Clear structure below arm"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Arm won't extend",
+                    "Currently moving",
+                    "Wait for Idle = 1 before activating"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Hydroponics not harvesting",
+                    "Plant not mature",
+                    "Check Mature slot variable"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Cargo not picking up",
+                    "Slot locked/hidden",
+                    "Use accessible slot index"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Collector full",
+                    "Mode is Inward",
+                    "Set Mode to 0 (Outward) to eject"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Collector empty",
+                    "Mode is Outward",
+                    "Set Mode to 1 (Inward) to collect"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Network Issues",
+              "tocId": "network-issues",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Problem",
+                    "Cause",
+                    "Solution"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Rails not connected",
+                    "Gap in network",
+                    "Place rails end-to-end"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Junction count wrong",
+                    "Network reconfigured",
+                    "Rail network auto-updates on change"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Arm teleports",
+                    "Network rebuilt",
+                    "Normal after network update"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Error Codes",
+              "tocId": "error-codes",
+              "collapsible": true,
+              "description": "---",
+              "table": [
+                {
+                  "cells": [
+                    "Error",
+                    "Cause",
+                    "Solution"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Error = 1",
+                    "Obstructed",
+                    "Clear obstacle near arm"
+                  ]
+                },
+                {
+                  "cells": [
+                    "FaceBlocked",
+                    "Structure below",
+                    "Remove wall/structure under arm"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 9: Setup Checklist",
+          "tocId": "section-9-setup-checklist",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Initial Setup",
+              "tocId": "initial-setup",
+              "collapsible": true,
+              "steps": [
+                "<b>Plan layout</b> - Determine where devices/trays will be",
+                "<b>Build overhead structure</b> - Rails need ceiling/mounting",
+                "<b>Place rails</b> - Connect junctions with straight/corner rails",
+                "<b>Place junctions</b> - Over each target device",
+                "<b>Place dock</b> - This is the arm itself",
+                "<b>Set starting dock</b> - Button3 on dock",
+                "<b>Connect power</b> - To the dock"
+              ]
+            },
+            {
+              "title": "Hydroponics Setup",
+              "tocId": "hydroponics-setup",
+              "collapsible": true,
+              "steps": [
+                "Complete initial setup",
+                "Place hydroponic trays under junctions",
+                "Place ChuteBin or ChuteExportBin at deposit junction",
+                "Program IC or use manual control",
+                "Give arm seeds to plant (or harvest existing)"
+              ]
+            },
+            {
+              "title": "Cargo Setup",
+              "tocId": "cargo-setup",
+              "collapsible": true,
+              "steps": [
+                "Complete initial setup",
+                "Place devices (lockers, etc.) under junctions",
+                "Set TargetSlotIndex appropriately",
+                "Program IC for automated transfer"
+              ]
+            },
+            {
+              "title": "Collector Setup",
+              "tocId": "collector-setup",
+              "collapsible": true,
+              "description": "---",
+              "steps": [
+                "Complete initial setup",
+                "Place collection area under junction",
+                "Place ChuteBin/ChuteInlet at unload junction",
+                "Set Mode (0=Out, 1=In)",
+                "Program IC for automated collection"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Quick Reference Card",
+          "tocId": "quick-reference-card",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Dock Types",
+              "tocId": "dock-types",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Type",
+                    "Purpose",
+                    "Slots"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Hydroponics",
+                    "Plant care",
+                    "2"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Cargo",
+                    "Item transfer",
+                    "1"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Collector",
+                    "Item collection/ejection",
+                    "20"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Common Logic (All Docks)",
+              "tocId": "common-logic-all-docks",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Read",
+                    "Write"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Setting",
+                    "Setting"
+                  ]
+                },
+                {
+                  "cells": [
+                    "PositionX",
+                    "Activate"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Idle",
+                    "Open"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Extended",
+                    "-"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Collector Modes",
+              "tocId": "collector-modes",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Mode",
+                    "Value",
+                    "Action"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Outward",
+                    "0",
+                    "Eject items"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Inward",
+                    "1",
+                    "Collect items"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Cargo Slot Range",
+              "tocId": "cargo-slot-range",
+              "collapsible": true,
+              "items": [
+                "TargetSlotIndex: 0-50"
+              ]
+            },
+            {
+              "title": "Key Commands",
+              "tocId": "key-commands",
+              "collapsible": true,
+              "description": "---\n\n<i>Data extracted from decompiled game files: RoboticArmDock.cs, RoboticArmDockHydroponics.cs, RoboticArmDockCargo.cs, RoboticArmDockCollector.cs. Values are authoritative as of game version current to January 2026.</i>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "guideKey": "GuideStirlingEngineGuide",
+      "displayName": "Complete Stirling Engine Guide for Stationeers",
+      "pageDescription": "---",
+      "generateToc": true,
+      "tocTitle": "Contents",
+      "buttonColor": "orange",
+      "sortOrder": 100,
+      "OperationalDetails": [
+        {
+          "title": "Section 1: Introduction & Overview",
+          "tocId": "section-1-introduction-overview",
+          "collapsible": true,
+          "description": "The Stirling Engine is a heat-differential power generator. It converts temperature differences between a hot gas input and the cold room atmosphere into electrical power. Unlike solar panels or solid fuel generators, it requires continuous heat input but can run indefinitely with the right setup.",
+          "children": [
+            {
+              "title": "Key Specifications (From Game Code)",
+              "tocId": "key-specifications-from-game-code",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Spec",
+                    "Value",
+                    "Source"
+                  ]
+                },
+                {
+                  "cells": [
+                    "**Max Power Output**",
+                    "6,000W (6 kW)",
+                    "`maxPower = 6000f`"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Piston Volume",
+                    "4 L",
+                    "`PistonVolume = 4f`"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Internal (Regenerator) Volume",
+                    "56 L",
+                    "`InternalVolume = 56f`"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Hot Side Heat Exchanger Area",
+                    "3 m\u00b2",
+                    "`HotSideHeatExchangerArea = 3f`"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Cold Side Heat Exchanger Area",
+                    "2 m\u00b2",
+                    "`ColdSideHeatExchangerArea = 2f`"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Heat Exchanger Atmosphere Volume",
+                    "10 L",
+                    "`HeatExchangerAtmosphereVolume = 10f`"
+                  ]
+                },
+                {
+                  "cells": [
+                    "**Ideal Pressure Differential**",
+                    "3,000 kPa (3 MPa)",
+                    "`IdealPressureDifferential = 3000f`"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Max Operating Temperature",
+                    "3,000 K",
+                    "`MAXOperatingTemperature = 3000K`"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Max RPM (visual only)",
+                    "300",
+                    "`MaxRpm = 300f`"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "How It Works",
+              "tocId": "how-it-works",
+              "collapsible": true,
+              "description": "The Stirling Engine uses the temperature difference between:\n\nThe greater the temperature difference, the more power generated. A sealed gas canister provides the working fluid that transfers energy between the hot and cold chambers.",
+              "steps": [
+                "<b>Hot Side:</b> Connected to input pipe (receives hot gas)",
+                "<b>Cold Side:</b> Exposed to room atmosphere"
+              ]
+            },
+            {
+              "title": "What You Need",
+              "tocId": "what-you-need",
+              "collapsible": true,
+              "description": "---",
+              "steps": [
+                "<b>Gas Canister</b> - Any gas canister (closed, not broken)",
+                "<b>Hot Input Pipe</b> - Connected to hot gas source (furnace exhaust, hot atmosphere)",
+                "<b>Output Pipe</b> - Returns cooled gas to the loop",
+                "<b>Cold Room</b> - The engine's cold side needs exposure to atmosphere"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 2: Setup Requirements",
+          "tocId": "section-2-setup-requirements",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Placement Requirements",
+              "tocId": "placement-requirements",
+              "collapsible": true,
+              "items": [
+                "<b>Must be placed on a frame</b> (verified in CanConstruct)",
+                "Cold side (fan area) must be exposed to room atmosphere",
+                "Cannot be fully enclosed - needs atmospheric access"
+              ]
+            },
+            {
+              "title": "Connection Requirements (From IsAbleToOperate)",
+              "tocId": "connection-requirements-from-isabletooperate",
+              "collapsible": true,
+              "description": "<b>Error State:</b> If any requirement is not met, the engine enters Error state and outputs 0W.",
+              "table": [
+                {
+                  "cells": [
+                    "Requirement",
+                    "Condition"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Input Network",
+                    "Valid pipe connection to hot side"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Output Network",
+                    "Valid pipe connection for return"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Gas Canister",
+                    "Inserted, closed, and not broken"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Gas Canister Rules",
+              "tocId": "gas-canister-rules",
+              "collapsible": true,
+              "description": "<b>Tip:</b> Pre-pressurize your canister with a gas that has high thermal efficiency (like Nitrogen) for better performance.\n\n---",
+              "items": [
+                "The canister must be <b>closed</b> (`!GasCanister.IsOpen`)",
+                "The canister must be <b>intact</b> (`!GasCanister.IsBroken`)",
+                "When turned on, the canister's gas is moved into the internal atmosphere",
+                "When turned off, the gas is returned to the canister"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 3: Efficiency System",
+          "tocId": "section-3-efficiency-system",
+          "collapsible": true,
+          "description": "The Stirling Engine's output is calculated by multiplying three efficiency factors:",
+          "children": [
+            {
+              "title": "Power Calculation Formula (From OnAtmosphericTick)",
+              "tocId": "power-calculation-formula-from-onatmospherictick",
+              "collapsible": true,
+              "description": "Where:",
+              "items": [
+                "<b>EnergyDifference</b> = |HotSideEnergy - ColdSideEnergy|",
+                "<b>MaxPower</b> = 6,000W (hard cap)"
+              ]
+            },
+            {
+              "title": "Efficiency Factor 1: Working Gas Efficiency",
+              "tocId": "efficiency-factor-1-working-gas-efficiency",
+              "collapsible": true,
+              "description": "Different gases have different thermal efficiencies. The gas in your canister determines this factor.\n\n<b>Note:</b> Thermal efficiency is a property of the gas mixture. Pure gases work best.",
+              "table": [
+                {
+                  "cells": [
+                    "Gas",
+                    "Approximate Efficiency"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Nitrogen (N2)",
+                    "~0.12 (good)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Oxygen (O2)",
+                    "~0.10"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Carbon Dioxide (CO2)",
+                    "~0.08"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Volatiles (H2)",
+                    "~0.14 (higher)"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Efficiency Factor 2: Environment Efficiency",
+              "tocId": "efficiency-factor-2-environment-efficiency",
+              "collapsible": true,
+              "description": "The default curve returns 1.0 (100%) for all temperatures from 0K to 3000K, meaning room temperature typically doesn't penalize efficiency.\n\n<b>Cold rooms = Better cooling = More power</b>",
+              "table": [
+                {
+                  "cells": [
+                    "Factor",
+                    "Source",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "EnvironmentEfficiency",
+                    "`MachineEfficiency.Evaluate(roomTemperature)`",
+                    "Based on room atmosphere temperature"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Efficiency Factor 3: Pressure Differential Efficiency",
+              "tocId": "efficiency-factor-3-pressure-differential-efficiency",
+              "collapsible": true,
+              "description": "This is the <b>most important factor</b> to optimize:\n\n<b>To maximize this:</b>\n\n---",
+              "items": [
+                "<b>Ideal Pressure Differential:</b> 3,000 kPa (3 MPa)",
+                "Calculated as: (Hot Side Pressure - Cold Side Pressure) / 3000",
+                "Clamped to 0-100%"
+              ],
+              "steps": [
+                "Increase hot side pressure (hot gas = higher pressure)",
+                "Keep cold side as cool as possible (colder = lower pressure)",
+                "Use higher pressure input gas"
+              ],
+              "table": [
+                {
+                  "cells": [
+                    "Factor",
+                    "Source",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "PressureDifferentialEfficiency",
+                    "`(HotPressure - ColdPressure) / IdealPressureDifferential`",
+                    "Clamped 0-1"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 4: Optimal Setup",
+          "tocId": "section-4-optimal-setup",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Maximizing Power Output",
+              "tocId": "maximizing-power-output",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Priority",
+                    "Action",
+                    "Why"
+                  ]
+                },
+                {
+                  "cells": [
+                    "1",
+                    "Large temperature differential",
+                    "More energy to extract"
+                  ]
+                },
+                {
+                  "cells": [
+                    "2",
+                    "High pressure hot gas",
+                    "Higher pressure differential efficiency"
+                  ]
+                },
+                {
+                  "cells": [
+                    "3",
+                    "Cold room atmosphere",
+                    "Better heat rejection"
+                  ]
+                },
+                {
+                  "cells": [
+                    "4",
+                    "Good thermal efficiency gas",
+                    "Better energy transfer"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Hot Side Heat Sources",
+              "tocId": "hot-side-heat-sources",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Source",
+                    "Temperature",
+                    "Notes"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Furnace exhaust",
+                    "500-2000K+",
+                    "Direct pipe connection"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Rocket exhaust",
+                    "Very high",
+                    "Challenging to capture"
+                  ]
+                },
+                {
+                  "cells": [
+                    "H2 combustion",
+                    "2000K+",
+                    "Requires combustion chamber"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Solar heater",
+                    "Planet dependent",
+                    "Passive but limited"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Example Piping Setup",
+              "tocId": "example-piping-setup",
+              "collapsible": true
+            },
+            {
+              "title": "Multi-Engine Configuration",
+              "tocId": "multi-engine-configuration",
+              "collapsible": true,
+              "description": "Multiple engines can share the same hot gas loop:\n\n<b>Note:</b> Each engine extracts heat from the gas, so downstream engines receive progressively cooler gas.\n\n---"
+            }
+          ]
+        },
+        {
+          "title": "Section 5: Logic Variables",
+          "tocId": "section-5-logic-variables",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Readable Variables (From GetLogicValue)",
+              "tocId": "readable-variables-from-getlogicvalue",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Variable",
+                    "Type",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "**PowerGeneration**",
+                    "float",
+                    "Current power output (W)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "**Pressure**",
+                    "float",
+                    "Internal atmosphere pressure (kPa)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "**Temperature**",
+                    "float",
+                    "Internal atmosphere temperature (K)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "**Quantity**",
+                    "float",
+                    "Total moles (internal + hot side + cold side)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "**EnvironmentEfficiency**",
+                    "float",
+                    "Room-based efficiency (0-1)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "**WorkingGasEfficiency**",
+                    "float",
+                    "Gas-based efficiency (0-1)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "RatioOxygen",
+                    "float",
+                    "O2 ratio in internal atmosphere"
+                  ]
+                },
+                {
+                  "cells": [
+                    "RatioCarbonDioxide",
+                    "float",
+                    "CO2 ratio"
+                  ]
+                },
+                {
+                  "cells": [
+                    "RatioNitrogen",
+                    "float",
+                    "N2 ratio"
+                  ]
+                },
+                {
+                  "cells": [
+                    "RatioPollutant",
+                    "float",
+                    "X ratio"
+                  ]
+                },
+                {
+                  "cells": [
+                    "RatioVolatiles",
+                    "float",
+                    "H2 ratio"
+                  ]
+                },
+                {
+                  "cells": [
+                    "RatioWater",
+                    "float",
+                    "H2O ratio"
+                  ]
+                },
+                {
+                  "cells": [
+                    "RatioNitrousOxide",
+                    "float",
+                    "N2O ratio"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Combustion",
+                    "int",
+                    "1 if sparked, 0 otherwise"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Note on Pressure Differential",
+              "tocId": "note-on-pressure-differential",
+              "collapsible": true,
+              "description": "The <color=#88FF88>MachinePressureDifferentialEfficiency</color> is calculated internally but not directly readable via logic. However, you can estimate it if you know your hot/cold side conditions:\n\n---"
+            }
+          ]
+        },
+        {
+          "title": "Section 6: IC10 Monitoring",
+          "tocId": "section-6-ic10-monitoring",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Basic Power Monitor",
+              "tocId": "basic-power-monitor",
+              "collapsible": true
+            },
+            {
+              "title": "Efficiency Monitor",
+              "tocId": "efficiency-monitor",
+              "collapsible": true
+            },
+            {
+              "title": "Overpressure Warning System",
+              "tocId": "overpressure-warning-system",
+              "collapsible": true
+            },
+            {
+              "title": "Multi-Engine Power Total",
+              "tocId": "multi-engine-power-total",
+              "collapsible": true,
+              "description": "---"
+            }
+          ]
+        },
+        {
+          "title": "Section 7: Explosion & Safety",
+          "tocId": "section-7-explosion-safety",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Overpressure Danger (From HandlePressureCheck)",
+              "tocId": "overpressure-danger-from-handlepressurecheck",
+              "collapsible": true,
+              "description": "The Stirling Engine can <b>explode</b> if internal pressure exceeds its MaxPressureDelta rating:",
+              "table": [
+                {
+                  "cells": [
+                    "Parameter",
+                    "Value"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Explosion Force",
+                    "1850"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Explosion Radius",
+                    "2 meters"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Max Explosion Radius",
+                    "4 meters"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Explosion Conditions",
+              "tocId": "explosion-conditions",
+              "collapsible": true,
+              "steps": [
+                "Internal pressure significantly exceeds MaxPressureDelta",
+                "Random roll based on pressure difference",
+                "Engine takes 200 brute damage per explosion event"
+              ]
+            },
+            {
+              "title": "Warning Signs",
+              "tocId": "warning-signs",
+              "collapsible": true,
+              "description": "In the tooltip display:",
+              "items": [
+                "Pressure text turns <b>red</b> when above 80% of MaxPressureDelta",
+                "Engine plays \"stressed\" sound when overpressured"
+              ]
+            },
+            {
+              "title": "Prevention",
+              "tocId": "prevention",
+              "collapsible": true,
+              "description": "---",
+              "steps": [
+                "Don't overfill the gas canister",
+                "Monitor internal pressure via logic",
+                "Use pressure relief systems if needed",
+                "Keep cold side well-ventilated"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Section 8: Troubleshooting",
+          "tocId": "section-8-troubleshooting",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Not Generating Power",
+              "tocId": "not-generating-power",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Problem",
+                    "Cause",
+                    "Solution"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Error state",
+                    "Missing requirement",
+                    "Check canister, input pipe, output pipe"
+                  ]
+                },
+                {
+                  "cells": [
+                    "0W output",
+                    "No temperature difference",
+                    "Verify hot gas is actually hot"
+                  ]
+                },
+                {
+                  "cells": [
+                    "0W output",
+                    "Canister empty",
+                    "Use pre-filled canister"
+                  ]
+                },
+                {
+                  "cells": [
+                    "0W output",
+                    "Canister open",
+                    "Close the canister before starting"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Low output",
+                    "Low pressure differential",
+                    "Increase hot side pressure"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Error States",
+              "tocId": "error-states",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Error",
+                    "Meaning",
+                    "Fix"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Error = 1",
+                    "Missing canister or broken canister",
+                    "Insert working canister"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Error = 1",
+                    "Canister is open",
+                    "Close canister"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Error = 1",
+                    "Input not connected",
+                    "Connect input pipe"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Error = 1",
+                    "Output not connected",
+                    "Connect output pipe"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Low Efficiency",
+              "tocId": "low-efficiency",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Symptom",
+                    "Cause",
+                    "Solution"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Low WorkingGasEfficiency",
+                    "Poor gas choice",
+                    "Use nitrogen or volatiles"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Low EnvironmentEfficiency",
+                    "Very hot room",
+                    "Cool the room"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Low PressureDifferential",
+                    "Not enough pressure difference",
+                    "Increase hot gas pressure/temperature"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Gas Loss",
+              "tocId": "gas-loss",
+              "collapsible": true,
+              "description": "When the engine is turned <b>OFF</b>, internal gas returns to the canister. When turned <b>ON</b>, canister gas moves to internal atmosphere.\n\nIf canister is missing/broken when turning off, gas vents to room atmosphere.\n\n---"
+            }
+          ]
+        },
+        {
+          "title": "Section 9: Setup Checklist",
+          "tocId": "section-9-setup-checklist",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Initial Setup",
+              "tocId": "initial-setup",
+              "collapsible": true,
+              "steps": [
+                "[ ] Place Stirling Engine on frame",
+                "[ ] Connect input pipe to hot gas source",
+                "[ ] Connect output pipe (for gas return loop)",
+                "[ ] Ensure cold side exposed to room atmosphere",
+                "[ ] Insert gas canister (filled, closed)",
+                "[ ] Connect to power network (cable)",
+                "[ ] Turn on"
+              ]
+            },
+            {
+              "title": "Verification",
+              "tocId": "verification",
+              "collapsible": true,
+              "steps": [
+                "[ ] Error indicator = 0 (no error)",
+                "[ ] PowerGeneration > 0",
+                "[ ] Hot side temperature significantly higher than cold side",
+                "[ ] Internal pressure not approaching danger levels"
+              ]
+            },
+            {
+              "title": "Optimization",
+              "tocId": "optimization",
+              "collapsible": true,
+              "description": "---",
+              "steps": [
+                "[ ] Check WorkingGasEfficiency via logic",
+                "[ ] Check EnvironmentEfficiency via logic",
+                "[ ] Calculate estimated PressureDifferentialEfficiency",
+                "[ ] Adjust hot gas temperature/pressure for maximum output"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Quick Reference Card",
+          "tocId": "quick-reference-card",
+          "collapsible": true,
+          "children": [
+            {
+              "title": "Specifications",
+              "tocId": "specifications",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Spec",
+                    "Value"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Max Power",
+                    "6,000W"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Ideal Pressure Diff",
+                    "3 MPa (3000 kPa)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Max Operating Temp",
+                    "3000K"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Piston Volume",
+                    "4L"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Internal Volume",
+                    "56L"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Efficiency Formula",
+              "tocId": "efficiency-formula",
+              "collapsible": true
+            },
+            {
+              "title": "Requirements",
+              "tocId": "requirements",
+              "collapsible": true,
+              "items": [
+                "Gas canister (closed, intact)",
+                "Input pipe (hot gas)",
+                "Output pipe (return)",
+                "Room atmosphere exposure (cold side)"
+              ]
+            },
+            {
+              "title": "Key Logic Variables",
+              "tocId": "key-logic-variables",
+              "collapsible": true,
+              "table": [
+                {
+                  "cells": [
+                    "Read",
+                    "Description"
+                  ]
+                },
+                {
+                  "cells": [
+                    "PowerGeneration",
+                    "Current output (W)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Pressure",
+                    "Internal pressure (kPa)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "Temperature",
+                    "Internal temp (K)"
+                  ]
+                },
+                {
+                  "cells": [
+                    "EnvironmentEfficiency",
+                    "0-1"
+                  ]
+                },
+                {
+                  "cells": [
+                    "WorkingGasEfficiency",
+                    "0-1"
+                  ]
+                }
+              ]
+            },
+            {
+              "title": "Safety",
+              "tocId": "safety",
+              "collapsible": true,
+              "description": "---\n\n<i>Data extracted from decompiled game file: StirlingEngine.cs. Values are authoritative as of game version current to January 2026.</i>",
+              "items": [
+                "Monitor pressure (explodes if overpressured)",
+                "Pressure warning at 80% of MaxPressureDelta",
+                "Keep room ventilated for cold side"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mechanics": [
+    {
+      "guideKey": "MechanicSmeltingCompleteGuide",
+      "displayName": "Complete Smelting Guide for Stationeers",
+      "pageDescription": "",
+      "generateToc": true,
+      "tocTitle": "Contents",
+      "buttonColor": "blue",
+      "sortOrder": 50,
+      "flatStructure": true,
+      "OperationalDetails": [
+        {
+          "title": "The Three Furnace Types",
+          "tocId": "the-three-furnace-types",
+          "collapsible": true,
+          "description": "<b>Arc Furnace</b>\n<b>Furnace (Standard)</b>\n<b>Advanced Furnace</b>",
+          "items": [
+            "Electric-powered, no combustion needed",
+            "<b>Ores only</b> - cannot make alloys",
+            "Perfect for bulk ingot production",
+            "Best for: Iron, Gold, Copper, Silicon, Nickel, Cobalt, Lead ingots",
+            "Use when: You need lots of basic ingots and have power to spare",
+            "Combustion-based, requires fuel gas (H2 + O2 from ice)",
+            "Makes steel and basic alloys",
+            "This is what most players build first",
+            "Makes: Steel, Solder, Electrum, Invar, Constantan",
+            "Use when: You need alloys for construction and electronics",
+            "Required for super-alloys",
+            "Higher pressure tolerance (max 60 MPa before explosion)",
+            "Makes: Stellite, Inconel, Hastelloy, Astroloy, Waspaloy",
+            "Use when: Building rockets or endgame equipment"
+          ]
+        },
+        {
+          "title": "Key Concept",
+          "tocId": "key-concept",
+          "collapsible": true,
+          "description": "The furnace combines whatever's inside when temperature and pressure conditions are met. <b>YOU</b> must load the correct ratios before igniting. Ratios must be exact - 3:1 means exactly 3:1, not approximately."
+        },
+        {
+          "title": "Safety Warning",
+          "tocId": "safety-warning",
+          "collapsible": true,
+          "description": "All furnaces radiate heat into surrounding atmosphere. Your base WILL heat up. Plan for ventilation or isolate your smelting area."
+        },
+        {
+          "title": "Recipe (Verified)",
+          "tocId": "recipe-verified",
+          "collapsible": true,
+          "description": "<b>Conditions:</b>",
+          "items": [
+            "Temperature: 900 K - 100 kK (wide range, easy to hit)",
+            "Pressure: 1 - 100 MPa (wide range, easy to hit)"
+          ],
+          "table": [
+            {
+              "cells": [
+                "Component",
+                "Ratio",
+                "Example Quantities"
+              ]
+            },
+            {
+              "cells": [
+                "Iron Ore",
+                "3",
+                "12, 15, 75"
+              ]
+            },
+            {
+              "cells": [
+                "Coal Ore",
+                "1",
+                "4, 5, 25"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "What You Need",
+          "tocId": "what-you-need",
+          "collapsible": true,
+          "items": [
+            "<b>Furnace (Standard)</b> - not Arc Furnace!",
+            "Iron and Coal in exact 3:1 ratio",
+            "<b>2 Volatiles Ice + 1 Oxite Ice</b> (provides H2 fuel + O2 oxidizer)"
+          ]
+        },
+        {
+          "title": "The Process",
+          "tocId": "the-process",
+          "collapsible": true,
+          "steps": [
+            "Load ores FIRST - Iron and Coal in 3:1 ratio (e.g., 75 Iron + 25 Coal)",
+            "Load ice - 2 Volatiles, 1 Oxite",
+            "Close the furnace",
+            "Activate (click igniter)",
+            "Wait - furnace will reach ~1050K and ~6.2 MPa",
+            "When \"Output: Steel\" shows and temp/pressure stabilize, open and collect"
+          ]
+        },
+        {
+          "title": "Why It Works",
+          "tocId": "why-it-works",
+          "collapsible": true,
+          "items": [
+            "Volatiles ice releases H2 (hydrogen) - the fuel",
+            "Oxite ice releases O2 (oxygen) - the oxidizer",
+            "Combustion creates heat AND pressure simultaneously",
+            "Steel's wide acceptable ranges (900K+, 1 MPa+) make it forgiving"
+          ]
+        },
+        {
+          "title": "Common Failures",
+          "tocId": "common-failures",
+          "collapsible": true,
+          "table": [
+            {
+              "cells": [
+                "Problem",
+                "Cause",
+                "Solution"
+              ]
+            },
+            {
+              "cells": [
+                "Nothing happened",
+                "Didn't ignite",
+                "Check the activation port, use welder or igniter"
+              ]
+            },
+            {
+              "cells": [
+                "Got iron ingots instead",
+                "Pressure or temp too low",
+                "Add more ice"
+              ]
+            },
+            {
+              "cells": [
+                "Furnace exploded",
+                "Too much ice",
+                "Standard furnace maxes at ~90 MPa"
+              ]
+            },
+            {
+              "cells": [
+                "Ores disappeared, no output",
+                "Wrong ratio",
+                "Must be exactly 3:1 Iron:Coal"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Solder",
+          "tocId": "solder",
+          "collapsible": true,
+          "description": "<i>For electronics, circuits, cables</i>\n\n<b>Warning:</b> Temperature has a MAX of 550K. Too hot = failure. This is the only alloy where you might need to COOL the furnace or use less ice.",
+          "table": [
+            {
+              "cells": [
+                "Condition",
+                "Min",
+                "Max"
+              ]
+            },
+            {
+              "cells": [
+                "Temperature",
+                "350 K",
+                "550 K"
+              ]
+            },
+            {
+              "cells": [
+                "Pressure",
+                "1 MPa",
+                "100 MPa"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Electrum",
+          "tocId": "electrum",
+          "collapsible": true,
+          "description": "<i>For advanced electronics, some sensors</i>\n\n<b>Warning:</b> Pressure has a narrow window (0.8-2.4 MPa). Too much ice will overshoot. Use minimal ice - 1 Volatiles + 1 Oxite or less.",
+          "table": [
+            {
+              "cells": [
+                "Condition",
+                "Min",
+                "Max"
+              ]
+            },
+            {
+              "cells": [
+                "Temperature",
+                "600 K",
+                "100 kK"
+              ]
+            },
+            {
+              "cells": [
+                "Pressure",
+                "0.8 MPa",
+                "2.4 MPa"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Invar",
+          "tocId": "invar",
+          "collapsible": true,
+          "description": "<i>For precision instruments, advanced frames</i>\n\n<b>Warning:</b> BOTH windows are narrow. Temperature must be 1.2-1.5 kK AND pressure must be 18-20 MPa. This is one of the hardest basic alloys. You need significant ice but precise amounts.",
+          "table": [
+            {
+              "cells": [
+                "Condition",
+                "Min",
+                "Max"
+              ]
+            },
+            {
+              "cells": [
+                "Temperature",
+                "1,200 K",
+                "1,500 K"
+              ]
+            },
+            {
+              "cells": [
+                "Pressure",
+                "18 MPa",
+                "20 MPa"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Constantan",
+          "tocId": "constantan",
+          "collapsible": true,
+          "description": "<i>For heating elements, thermocouples</i>\n\n<b>Notes:</b> High minimum pressure (20 MPa) but wide ranges otherwise. Easier than Invar once you get enough pressure.",
+          "table": [
+            {
+              "cells": [
+                "Condition",
+                "Min",
+                "Max"
+              ]
+            },
+            {
+              "cells": [
+                "Temperature",
+                "1,000 K",
+                "10 kK"
+              ]
+            },
+            {
+              "cells": [
+                "Pressure",
+                "20 MPa",
+                "100 MPa"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Alloy Difficulty Ranking",
+          "tocId": "alloy-difficulty-ranking",
+          "collapsible": true,
+          "steps": [
+            "<b>Steel</b> - Easiest (wide ranges)",
+            "<b>Solder</b> - Easy but watch max temp",
+            "<b>Constantan</b> - Medium (need high pressure)",
+            "<b>Electrum</b> - Tricky (narrow pressure window)",
+            "<b>Invar</b> - Hardest basic alloy (both windows narrow)"
+          ]
+        },
+        {
+          "title": "Critical Rules for ALL Super-Alloys",
+          "tocId": "critical-rules-for-all-super-alloys",
+          "collapsible": true,
+          "steps": [
+            "<b>Use Advanced Furnace only</b> (60 MPa max capacity)",
+            "<b>Recipes use ingots AND ores</b> - some require Steel Ingots, not ores",
+            "<b>Monitor pressure/temp constantly</b> - windows can be very narrow",
+            "As of 2021, recipes return only <b>1 ingot per batch</b>"
+          ]
+        },
+        {
+          "title": "Stellite",
+          "tocId": "stellite",
+          "collapsible": true,
+          "description": "<i>High-wear applications, cutting tools</i>\n\n<b>Notes:</b> Most forgiving super-alloy. Wide temperature range. Good first attempt.",
+          "table": [
+            {
+              "cells": [
+                "Condition",
+                "Min",
+                "Max"
+              ]
+            },
+            {
+              "cells": [
+                "Temperature",
+                "1,800 K",
+                "100 kK"
+              ]
+            },
+            {
+              "cells": [
+                "Pressure",
+                "10 MPa",
+                "20 MPa"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Inconel",
+          "tocId": "inconel",
+          "collapsible": true,
+          "description": "<i>Heat shields, rocket components</i>\n\n<b>Warning:</b> That 0.5 MPa pressure window is brutal. Requires precise pressure control. Monitor closely and vent small amounts to dial in.",
+          "table": [
+            {
+              "cells": [
+                "Condition",
+                "Min",
+                "Max"
+              ]
+            },
+            {
+              "cells": [
+                "Temperature",
+                "600 K",
+                "100 kK"
+              ]
+            },
+            {
+              "cells": [
+                "Pressure",
+                "23.5 MPa",
+                "24 MPa"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Hastelloy",
+          "tocId": "hastelloy",
+          "collapsible": true,
+          "description": "<i>Corrosion-resistant components</i>\n\n<b>Warning:</b> Temperature window is only 50K (950-1000K). Pressure window is reasonable at 5 MPa range.",
+          "table": [
+            {
+              "cells": [
+                "Condition",
+                "Min",
+                "Max"
+              ]
+            },
+            {
+              "cells": [
+                "Temperature",
+                "950 K",
+                "1,000 K"
+              ]
+            },
+            {
+              "cells": [
+                "Pressure",
+                "25 MPa",
+                "30 MPa"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Astroloy",
+          "tocId": "astroloy",
+          "collapsible": true,
+          "description": "<i>Aerospace, high-stress applications</i>\n\n<b>Notes:</b> Requires Steel Ingots (smelt steel first). 10 MPa pressure window is workable. Wide temp range.",
+          "table": [
+            {
+              "cells": [
+                "Condition",
+                "Min",
+                "Max"
+              ]
+            },
+            {
+              "cells": [
+                "Temperature",
+                "1,000 K",
+                "100 kK"
+              ]
+            },
+            {
+              "cells": [
+                "Pressure",
+                "30 MPa",
+                "40 MPa"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Waspaloy",
+          "tocId": "waspaloy",
+          "collapsible": true,
+          "description": "<i>Ultimate high-temp applications</i>\n\n<b>Notes:</b> Highest pressure requirement (50+ MPa) but widest pressure window. Temperature is counterintuitively LOW - don't overheat!",
+          "table": [
+            {
+              "cells": [
+                "Condition",
+                "Min",
+                "Max"
+              ]
+            },
+            {
+              "cells": [
+                "Temperature",
+                "400 K",
+                "800 K"
+              ]
+            },
+            {
+              "cells": [
+                "Pressure",
+                "50 MPa",
+                "100 MPa"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Super-Alloy Difficulty Ranking",
+          "tocId": "super-alloy-difficulty-ranking",
+          "collapsible": true,
+          "steps": [
+            "<b>Stellite</b> - Easiest (wide ranges, common ores)",
+            "<b>Astroloy</b> - Medium (needs Steel Ingots, reasonable windows)",
+            "<b>Waspaloy</b> - Medium (high pressure but wide windows)",
+            "<b>Hastelloy</b> - Hard (tight 50K temp window)",
+            "<b>Inconel</b> - Hardest (0.5 MPa pressure window!)"
+          ]
+        },
+        {
+          "title": "Explosion Prevention",
+          "tocId": "explosion-prevention",
+          "collapsible": true,
+          "description": "<b>Prevention Rules:</b>",
+          "items": [
+            "<b>Never overload ice</b> - 3 Volatiles + 2 Oxite is usually the safe max",
+            "<b>Watch the pressure gauge</b> during smelting",
+            "<b>Vent early</b> if pressure climbing dangerously"
+          ],
+          "table": [
+            {
+              "cells": [
+                "Furnace Type",
+                "Max Pressure",
+                "Consequence"
+              ]
+            },
+            {
+              "cells": [
+                "Standard Furnace",
+                "~90 MPa",
+                "Explodes, destroys contents"
+              ]
+            },
+            {
+              "cells": [
+                "Advanced Furnace",
+                "60 MPa",
+                "Explodes, destroys contents"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Heat Management",
+          "tocId": "heat-management",
+          "collapsible": true,
+          "description": "Furnaces radiate heat into surrounding atmosphere. A 1000K furnace WILL cook your base and kill you.\n\n<b>Solutions:</b>",
+          "steps": [
+            "<b>Isolate it</b> - Put furnace in separate room with airlock, vent to space after each smelt",
+            "<b>Vacuum smelting</b> - No atmosphere = no heat transfer to base",
+            "<b>Active cooling</b> - Wall coolers + radiators if you want it indoors",
+            "<b>Distance</b> - Further from living space = more time to react"
+          ]
+        },
+        {
+          "title": "Troubleshooting Quick Reference",
+          "tocId": "troubleshooting-quick-reference",
+          "collapsible": true,
+          "table": [
+            {
+              "cells": [
+                "Problem",
+                "Cause",
+                "Fix"
+              ]
+            },
+            {
+              "cells": [
+                "Nothing happens when ignited",
+                "No fuel gas or no O2",
+                "Check ice loaded, try more Oxite"
+              ]
+            },
+            {
+              "cells": [
+                "Got base ingots instead of alloy",
+                "Temp or pressure outside range",
+                "Check BOTH min AND max values"
+              ]
+            },
+            {
+              "cells": [
+                "Wrong alloy came out",
+                "Wrong ore ratio",
+                "Ratios must be exact"
+              ]
+            },
+            {
+              "cells": [
+                "Ores vanished, nothing output",
+                "Invalid ratio",
+                "Check recipe again"
+              ]
+            },
+            {
+              "cells": [
+                "Furnace exploded",
+                "Overpressure",
+                "Use less ice"
+              ]
+            },
+            {
+              "cells": [
+                "Base is heating up",
+                "Normal furnace behavior",
+                "Isolate or vacuum smelt"
+              ]
+            },
+            {
+              "cells": [
+                "Alloy won't form despite correct values",
+                "Outside MAX temp/pressure",
+                "Some alloys have narrow windows - check maximums"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Emergency Procedures",
+          "tocId": "emergency-procedures",
+          "collapsible": true,
+          "description": "<b>Overheating base:</b>\n<b>Pressure climbing dangerously:</b>",
+          "items": [
+            "Vent atmosphere to space immediately",
+            "Seal furnace room from living area",
+            "Open furnace to vent (loses heat too)",
+            "Or use attached pipe to bleed off gas gradually"
+          ]
+        },
+        {
+          "title": "Basic Alloys (Standard Furnace)",
+          "tocId": "basic-alloys-standard-furnace",
+          "collapsible": true,
+          "table": [
+            {
+              "cells": [
+                "Alloy",
+                "Recipe (Ratio)",
+                "Temp Range",
+                "Pressure Range"
+              ]
+            },
+            {
+              "cells": [
+                "Steel",
+                "3 Iron + 1 Coal",
+                "900 K - 100 kK",
+                "1 - 100 MPa"
+              ]
+            },
+            {
+              "cells": [
+                "Solder",
+                "1 Iron + 1 Lead",
+                "350 - 550 K",
+                "1 - 100 MPa"
+              ]
+            },
+            {
+              "cells": [
+                "Electrum",
+                "1 Silver + 1 Gold",
+                "600 K - 100 kK",
+                "0.8 - 2.4 MPa"
+              ]
+            },
+            {
+              "cells": [
+                "Invar",
+                "1 Iron + 1 Nickel",
+                "1.2 - 1.5 kK",
+                "18 - 20 MPa"
+              ]
+            },
+            {
+              "cells": [
+                "Constantan",
+                "1 Copper + 1 Nickel",
+                "1 - 10 kK",
+                "20 - 100 MPa"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Super-Alloys (Advanced Furnace)",
+          "tocId": "super-alloys-advanced-furnace",
+          "collapsible": true,
+          "table": [
+            {
+              "cells": [
+                "Alloy",
+                "Recipe",
+                "Temp Range",
+                "Pressure Range"
+              ]
+            },
+            {
+              "cells": [
+                "Stellite",
+                "3 Silver + 1 Cobalt",
+                "1.8 - 100 kK",
+                "10 - 20 MPa"
+              ]
+            },
+            {
+              "cells": [
+                "Inconel",
+                "2 Gold + 1 Nickel + 1 Steel",
+                "600 K - 100 kK",
+                "23.5 - 24 MPa"
+              ]
+            },
+            {
+              "cells": [
+                "Hastelloy",
+                "2 Silver + 1 Nickel + 1 Cobalt",
+                "950 - 1000 K",
+                "25 - 30 MPa"
+              ]
+            },
+            {
+              "cells": [
+                "Astroloy",
+                "2 Steel + 1 Copper + 1 Cobalt",
+                "1 - 100 kK",
+                "30 - 40 MPa"
+              ]
+            },
+            {
+              "cells": [
+                "Waspaloy",
+                "2 Lead + 1 Silver + 1 Nickel",
+                "400 - 800 K",
+                "50 - 100 MPa"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Key Notes",
+          "tocId": "key-notes",
+          "collapsible": true,
+          "description": "<i>Data verified from Stationeers Wiki (January 2025). Game updates may change values - if a recipe fails, check the in-game Stationpedia (F1).</i>",
+          "items": [
+            "<b>Ratios must be exact</b> - 3:1 means exactly 3:1",
+            "<b>Check BOTH min AND max</b> - Many alloys fail from exceeding maximums",
+            "<b>Super-alloys return 1 ingot</b> per batch (as of 2021 update)",
+            "<b>Inconel and Astroloy need Steel Ingots</b> - smelt steel first"
+          ]
+        }
+      ]
+    },
+    {
+      "guideKey": "MechanicSpeciesSurvivalGuide",
+      "displayName": "Species Survival Guide for Stationeers",
+      "pageDescription": "",
+      "generateToc": true,
+      "tocTitle": "Contents",
+      "buttonColor": "blue",
+      "sortOrder": 50,
+      "flatStructure": true,
+      "OperationalDetails": [
+        {
+          "title": "Atmospheric Requirements (From Lungs.cs)",
+          "tocId": "atmospheric-requirements-from-lungscs",
+          "collapsible": true,
+          "table": [
+            {
+              "cells": [
+                "Requirement",
+                "Value",
+                "Source"
+              ]
+            },
+            {
+              "cells": [
+                "**Breathable Gas**",
+                "Oxygen (O2)",
+                "`BreathedType = Chemistry.GasType.Oxygen`"
+              ]
+            },
+            {
+              "cells": [
+                "**Minimum O2 Pressure**",
+                "16 kPa partial pressure",
+                "`MinimumOxygenPartialPressure = 16.0`"
+              ]
+            },
+            {
+              "cells": [
+                "**Toxic Gases**",
+                "Volatiles + Pollutant",
+                "`ToxicTypes = GasType.Volatiles \\",
+                "GasType.Pollutant`"
+              ]
+            },
+            {
+              "cells": [
+                "**Toxin Warning**",
+                "0.5 kPa partial pressure",
+                "`ToxicPartialPressureForWarning = 0.5`"
+              ]
+            },
+            {
+              "cells": [
+                "**Toxin Damage**",
+                "1.0 kPa partial pressure",
+                "`ToxicPartialPressureForDamage = 1.0`"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Temperature Tolerance (From Lungs.cs)",
+          "tocId": "temperature-tolerance-from-lungscs",
+          "collapsible": true,
+          "description": "Calculation: <color=#88FF88>ZeroDegrees (273.15K) \u00b1 offset</color>",
+          "items": [
+            "Min: 273.15 - 10 = 263.15 K",
+            "Max: 273.15 + 50 = 323.15 K"
+          ],
+          "table": [
+            {
+              "cells": [
+                "Limit",
+                "Temperature",
+                "Kelvin"
+              ]
+            },
+            {
+              "cells": [
+                "**Minimum**",
+                "-10\u00b0C",
+                "263 K"
+              ]
+            },
+            {
+              "cells": [
+                "**Maximum**",
+                "+50\u00b0C",
+                "323 K"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Ideal Human Atmosphere",
+          "tocId": "ideal-human-atmosphere",
+          "collapsible": true,
+          "description": "<b>Safe Ranges:</b>",
+          "items": [
+            "Temperature: 20-25\u00b0C (comfortable, healing occurs)",
+            "Pressure: 50-200 kPa total (too high = suit warning)",
+            "O2: 16+ kPa partial pressure",
+            "Toxins: <0.5 kPa combined Volatiles + Pollutant"
+          ],
+          "table": [
+            {
+              "cells": [
+                "Gas",
+                "Partial Pressure",
+                "Purpose"
+              ]
+            },
+            {
+              "cells": [
+                "Oxygen (O2)",
+                "20-25 kPa",
+                "Breathing (16 kPa minimum)"
+              ]
+            },
+            {
+              "cells": [
+                "Nitrogen (N2)",
+                "80 kPa",
+                "Filler (inert, safe)"
+              ]
+            },
+            {
+              "cells": [
+                "**Total**",
+                "~100 kPa",
+                "Earth-like pressure"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Human Danger Signs",
+          "tocId": "human-danger-signs",
+          "collapsible": true,
+          "table": [
+            {
+              "cells": [
+                "Warning",
+                "Meaning",
+                "Action"
+              ]
+            },
+            {
+              "cells": [
+                "Low O2 icon",
+                "O2 < 16 kPa",
+                "Add oxygen, check tank/filters"
+              ]
+            },
+            {
+              "cells": [
+                "Toxin icon",
+                "Volatiles or Pollutant > 0.5 kPa",
+                "Vent atmosphere, filter toxins"
+              ]
+            },
+            {
+              "cells": [
+                "Cold damage",
+                "Temp < -10\u00b0C",
+                "Heat atmosphere, suit heater"
+              ]
+            },
+            {
+              "cells": [
+                "Heat damage",
+                "Temp > 50\u00b0C",
+                "Cool atmosphere, move away"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Atmospheric Requirements (From LungsZrilian.cs)",
+          "tocId": "atmospheric-requirements-from-lungszriliancs",
+          "collapsible": true,
+          "description": "<b>Critical:</b> Volatiles (H2) are NOT toxic to Zrilians - they breathe it! But Volatiles ARE toxic to Humans.",
+          "table": [
+            {
+              "cells": [
+                "Requirement",
+                "Value",
+                "Source"
+              ]
+            },
+            {
+              "cells": [
+                "**Breathable Gas**",
+                "Volatiles (H2)",
+                "`PartialPressureVolatiles` used for efficiency"
+              ]
+            },
+            {
+              "cells": [
+                "**Minimum Volatiles Pressure**",
+                "16 kPa partial pressure",
+                "Uses same threshold as human O2"
+              ]
+            },
+            {
+              "cells": [
+                "**Toxic Gas**",
+                "Pollutant ONLY",
+                "`ToxinLevel = PartialPressurePollutant`"
+              ]
+            },
+            {
+              "cells": [
+                "**Toxin Warning**",
+                "0.5 kPa partial pressure",
+                "Same as human"
+              ]
+            },
+            {
+              "cells": [
+                "**Toxin Damage**",
+                "1.0 kPa partial pressure",
+                "Same as human"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Temperature Tolerance (From LungsZrilian.cs)",
+          "tocId": "temperature-tolerance-from-lungszriliancs",
+          "collapsible": true,
+          "description": "Zrilians have <b>wider temperature tolerance</b> than Humans:",
+          "items": [
+            "10\u00b0C colder minimum (-20\u00b0C vs -10\u00b0C)",
+            "30\u00b0C hotter maximum (+80\u00b0C vs +50\u00b0C)"
+          ],
+          "table": [
+            {
+              "cells": [
+                "Limit",
+                "Temperature",
+                "Kelvin"
+              ]
+            },
+            {
+              "cells": [
+                "**Minimum**",
+                "-20\u00b0C",
+                "253 K"
+              ]
+            },
+            {
+              "cells": [
+                "**Maximum**",
+                "+80\u00b0C",
+                "353 K"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Ideal Zrilian Atmosphere",
+          "tocId": "ideal-zrilian-atmosphere",
+          "collapsible": true,
+          "description": "<b>Safe Ranges:</b>",
+          "items": [
+            "Temperature: 20-40\u00b0C (wider comfort zone)",
+            "Pressure: 50-200 kPa total",
+            "Volatiles: 16+ kPa partial pressure",
+            "Pollutant: <0.5 kPa"
+          ],
+          "table": [
+            {
+              "cells": [
+                "Gas",
+                "Partial Pressure",
+                "Purpose"
+              ]
+            },
+            {
+              "cells": [
+                "Volatiles (H2)",
+                "20-25 kPa",
+                "Breathing (16 kPa minimum)"
+              ]
+            },
+            {
+              "cells": [
+                "Nitrogen (N2)",
+                "80 kPa",
+                "Filler (inert, safe for Zrilians)"
+              ]
+            },
+            {
+              "cells": [
+                "**Total**",
+                "~100 kPa",
+                "Comfortable pressure"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Zrilian Danger Signs",
+          "tocId": "zrilian-danger-signs",
+          "collapsible": true,
+          "description": "*The UI still shows the O2 icon, but Zrilians need Volatiles, not Oxygen.",
+          "table": [
+            {
+              "cells": [
+                "Warning",
+                "Meaning",
+                "Action"
+              ]
+            },
+            {
+              "cells": [
+                "Low O2 icon*",
+                "Volatiles < 16 kPa",
+                "Add volatiles (from ice)"
+              ]
+            },
+            {
+              "cells": [
+                "Toxin icon",
+                "Pollutant > 0.5 kPa",
+                "Filter pollutant"
+              ]
+            },
+            {
+              "cells": [
+                "Cold damage",
+                "Temp < -20\u00b0C",
+                "Heat atmosphere"
+              ]
+            },
+            {
+              "cells": [
+                "Heat damage",
+                "Temp > 80\u00b0C",
+                "Cool atmosphere"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Atmospheric Requirements",
+          "tocId": "atmospheric-requirements",
+          "collapsible": true,
+          "description": "Robots have no breathing requirements:",
+          "items": [
+            "`IsArtificial` check bypasses nutrition and respiration",
+            "No atmosphere needed for survival",
+            "Can operate in vacuum indefinitely"
+          ]
+        },
+        {
+          "title": "Temperature Tolerance",
+          "tocId": "temperature-tolerance",
+          "collapsible": true,
+          "description": "Robots have wider temperature tolerance than organic species, but still take damage from extreme temperatures. Exact limits depend on specific robot type."
+        },
+        {
+          "title": "Power Requirements",
+          "tocId": "power-requirements",
+          "collapsible": true,
+          "description": "Instead of food/water, robots need:",
+          "items": [
+            "Battery power (varies by robot type)",
+            "Some robots can recharge from power networks"
+          ]
+        },
+        {
+          "title": "Robot Advantages",
+          "tocId": "robot-advantages",
+          "collapsible": true,
+          "items": [
+            "No atmosphere needed",
+            "No food or water consumption",
+            "Wider temperature tolerance",
+            "Can work in vacuum",
+            "No toxin concerns"
+          ]
+        },
+        {
+          "title": "Robot Disadvantages",
+          "tocId": "robot-disadvantages",
+          "collapsible": true,
+          "items": [
+            "Battery dependent",
+            "Cannot eat/drink for quick healing",
+            "May require specialized repair"
+          ]
+        },
+        {
+          "title": "Nutrition (From Entity.cs)",
+          "tocId": "nutrition-from-entitycs",
+          "collapsible": true,
+          "table": [
+            {
+              "cells": [
+                "Stat",
+                "Value",
+                "Source"
+              ]
+            },
+            {
+              "cells": [
+                "**Max Nutrition**",
+                "5 units (base)",
+                "`BaseNutritionStorage` returns 5f"
+              ]
+            },
+            {
+              "cells": [
+                "**Full Nutrition**",
+                "4.5 units",
+                "`FullNutrition = 4.5f`"
+              ]
+            },
+            {
+              "cells": [
+                "**Warning Level**",
+                "2 units",
+                "`WarningNutrition = 2f`"
+              ]
+            },
+            {
+              "cells": [
+                "**Critical Level**",
+                "1 unit",
+                "`CriticalNutrition = 1f`"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Hydration (From Entity.cs)",
+          "tocId": "hydration-from-entitycs",
+          "collapsible": true,
+          "table": [
+            {
+              "cells": [
+                "Stat",
+                "Value",
+                "Source"
+              ]
+            },
+            {
+              "cells": [
+                "**Max Hydration**",
+                "5 units",
+                "Hardcoded"
+              ]
+            },
+            {
+              "cells": [
+                "**Warning Level**",
+                "2 units",
+                "`WarningHydration = 2f`"
+              ]
+            },
+            {
+              "cells": [
+                "**Critical Level**",
+                "1 unit",
+                "`CriticalHydration = 1f`"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Starvation & Dehydration Damage",
+          "tocId": "starvation-dehydration-damage",
+          "collapsible": true,
+          "description": "When Nutrition or Hydration reaches 0:",
+          "items": [
+            "Damage accumulates over time",
+            "Rate affected by difficulty setting",
+            "Damage type: Starvation (nutrition) or Hydration (water)",
+            "Healing occurs when fed/hydrated if damage < certain threshold"
+          ]
+        },
+        {
+          "title": "Food Sources",
+          "tocId": "food-sources",
+          "collapsible": true,
+          "description": "Both species can eat the same foods:",
+          "items": [
+            "Canned food (starting supplies)",
+            "Grown plants (tomatoes, corn, potatoes, etc.)",
+            "Cooked meals (from plants + processing)",
+            "Eggs, milk, meat (from animals)"
+          ]
+        },
+        {
+          "title": "Water Sources",
+          "tocId": "water-sources",
+          "collapsible": true,
+          "items": [
+            "Water bottles (starting supplies)",
+            "Filled from water tanks",
+            "Vending machines (if stocked)"
+          ]
+        },
+        {
+          "title": "The Human-Zrilian Problem",
+          "tocId": "the-human-zrilian-problem",
+          "collapsible": true,
+          "description": "<b>Humans need:</b> O2 (breathe) + no Volatiles (toxic)\n<b>Zrilians need:</b> Volatiles (breathe) + no Pollutant (toxic)\n\nThese requirements are <b>mutually exclusive</b>:",
+          "items": [
+            "Volatiles are life support for Zrilians",
+            "Volatiles are toxic to Humans",
+            "They cannot share the same air"
+          ]
+        },
+        {
+          "title": "Solutions for Multi-Species Bases",
+          "tocId": "solutions-for-multi-species-bases",
+          "collapsible": true,
+          "items": [
+            "Human areas: O2 + N2 atmosphere",
+            "Zrilian areas: Volatiles + N2 atmosphere",
+            "Airlocks between zones",
+            "Shared work areas in vacuum",
+            "Everyone wears suits with appropriate tanks",
+            "Flush atmosphere between species",
+            "Time-consuming but uses one habitat"
+          ],
+          "steps": [
+            "<b>Rotating Shifts</b>"
+          ]
+        },
+        {
+          "title": "Suit Requirements",
+          "tocId": "suit-requirements",
+          "collapsible": true,
+          "description": "<b>Human Suits:</b>\n<b>Zrilian Suits:</b>",
+          "items": [
+            "Tank with O2",
+            "Filter for Volatiles and Pollutant",
+            "Tank with Volatiles (H2)",
+            "Filter for Pollutant"
+          ]
+        },
+        {
+          "title": "Human First Minutes",
+          "tocId": "human-first-minutes",
+          "collapsible": true,
+          "steps": [
+            "Check suit O2 tank pressure",
+            "Find/build shelter before suit runs out",
+            "Set up O2 supply (Oxite ice \u2192 furnace/electrolyzer)",
+            "Remove Volatiles from atmosphere (vent or filter)",
+            "Maintain temperature -10\u00b0C to +50\u00b0C",
+            "Eat and drink before critical"
+          ]
+        },
+        {
+          "title": "Zrilian First Minutes",
+          "tocId": "zrilian-first-minutes",
+          "collapsible": true,
+          "steps": [
+            "Check suit Volatiles tank pressure",
+            "Find/build shelter before suit runs out",
+            "Set up Volatiles supply (Volatiles ice \u2192 furnace/electrolyzer)",
+            "Remove Pollutant from atmosphere (filter)",
+            "Maintain temperature -20\u00b0C to +80\u00b0C",
+            "Eat and drink before critical"
+          ]
+        },
+        {
+          "title": "Robot First Minutes",
+          "tocId": "robot-first-minutes",
+          "collapsible": true,
+          "steps": [
+            "Check battery level",
+            "Locate power source for recharging",
+            "No atmosphere concerns",
+            "Operate indefinitely if powered"
+          ]
+        },
+        {
+          "title": "Atmospheric Needs",
+          "tocId": "atmospheric-needs",
+          "collapsible": true,
+          "table": [
+            {
+              "cells": [
+                "Species",
+                "Breathes",
+                "Min Pressure",
+                "Toxic"
+              ]
+            },
+            {
+              "cells": [
+                "Human",
+                "O2",
+                "16 kPa",
+                "Volatiles, Pollutant"
+              ]
+            },
+            {
+              "cells": [
+                "Zrilian",
+                "Volatiles",
+                "16 kPa",
+                "Pollutant"
+              ]
+            },
+            {
+              "cells": [
+                "Robot",
+                "None",
+                "N/A",
+                "None"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Temperature Ranges",
+          "tocId": "temperature-ranges",
+          "collapsible": true,
+          "table": [
+            {
+              "cells": [
+                "Species",
+                "Min",
+                "Max"
+              ]
+            },
+            {
+              "cells": [
+                "Human",
+                "-10\u00b0C (263K)",
+                "+50\u00b0C (323K)"
+              ]
+            },
+            {
+              "cells": [
+                "Zrilian",
+                "-20\u00b0C (253K)",
+                "+80\u00b0C (353K)"
+              ]
+            },
+            {
+              "cells": [
+                "Robot",
+                "Wider tolerance",
+                "Varies"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Toxin Thresholds",
+          "tocId": "toxin-thresholds",
+          "collapsible": true,
+          "table": [
+            {
+              "cells": [
+                "Level",
+                "Partial Pressure",
+                "Effect"
+              ]
+            },
+            {
+              "cells": [
+                "Warning",
+                "0.5 kPa",
+                "UI warning"
+              ]
+            },
+            {
+              "cells": [
+                "Damage",
+                "1.0 kPa",
+                "Health damage"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Food/Water (Organics)",
+          "tocId": "foodwater-organics",
+          "collapsible": true,
+          "table": [
+            {
+              "cells": [
+                "Stat",
+                "Max",
+                "Warning",
+                "Critical"
+              ]
+            },
+            {
+              "cells": [
+                "Nutrition",
+                "5",
+                "2",
+                "1"
+              ]
+            },
+            {
+              "cells": [
+                "Hydration",
+                "5",
+                "2",
+                "1"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Gas Sources",
+          "tocId": "gas-sources",
+          "collapsible": true,
+          "description": "<i>Data extracted from decompiled game files: Lungs.cs, LungsZrilian.cs, Entity.cs, SpeciesClass.cs, Chemistry.cs. Values are authoritative as of game version current to January 2026.</i>",
+          "table": [
+            {
+              "cells": [
+                "Gas",
+                "Ice Source",
+                "Used By"
+              ]
+            },
+            {
+              "cells": [
+                "Oxygen (O2)",
+                "Oxite",
+                "Humans"
+              ]
+            },
+            {
+              "cells": [
+                "Volatiles (H2)",
+                "Volatiles",
+                "Zrilians"
+              ]
+            },
+            {
+              "cells": [
+                "Nitrogen (N2)",
+                "Nitrice",
+                "Both (filler)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,14 +1,14 @@
 ================================================================================
-STATIONPEDIA ASCENDED - LLM INSTRUCTIONS FOR WRITING descriptions.json ENTRIES
+STATIONPEDIA ASCENDED v0.3.0 - LLM INSTRUCTIONS FOR WRITING descriptions.json
 ================================================================================
 
 You are helping write device documentation for the Stationeers game mod 
 "Stationpedia Ascended". This mod enhances the in-game encyclopedia with 
-custom tooltips and descriptions.
+custom tooltips, collapsible sections, table of contents, images, and videos.
 
---------------------------------------------------------------------------------
+================================================================================
 FILE STRUCTURE
---------------------------------------------------------------------------------
+================================================================================
 
 The descriptions.json file has this top-level structure:
 
@@ -18,84 +18,158 @@ The descriptions.json file has this top-level structure:
   "genericDescriptions": { ... global fallback descriptions ... }
 }
 
---------------------------------------------------------------------------------
-DEVICE ENTRY FORMAT
---------------------------------------------------------------------------------
-
-Each device in the "devices" array follows this structure:
+================================================================================
+DEVICE ENTRY FORMAT (Complete Reference)
+================================================================================
 
 {
-  "deviceKey": "ThingStructureDeviceName",    // REQUIRED - exact prefab name
-  "displayName": "Human Readable Name",        // Optional - for documentation only
-  
-  // Page description options (pick ONE or combine append/prepend):
+  "deviceKey": "ThingStructureDeviceName",      // REQUIRED - exact prefab name
+  "displayName": "Human Readable Name",          // Optional - for documentation
+
+  // === PAGE DESCRIPTION OPTIONS (pick ONE or combine append/prepend) ===
   "pageDescription": "Replaces entire description",
   "pageDescriptionAppend": "Added to end of existing description",
   "pageDescriptionPrepend": "Added to beginning of existing description",
-  
-  // Operational Details - MUST BE AN ARRAY:
-  "OperationalDetails": [
-    {
-      "title": "Section Title",
-      "description": "Section content goes here.",
-      "items": ["Bullet item 1", "Bullet item 2"],
-      "steps": ["Step one", "Step two", "Step three"],
-      "children": [ /* nested OperationalDetails */ ]
-    }
-  ],
-  "operationalDetailsTitleColor": "#FF7A18",   // Optional hex color
-  
-  // Logic tooltips - object with logic type names as keys:
-  "logicDescriptions": {
-    "Temperature": {
-      "dataType": "Float",
-      "range": "0+",
-      "description": "Internal temperature in Kelvin."
-    }
-  },
-  
-  // Mode tooltips - object with mode names as keys:
-  "modeDescriptions": {
-    "Mode0": {
-      "modeValue": "0",
-      "description": "What mode 0 does."
-    }
-  },
-  
-  // Slot tooltips:
-  "slotDescriptions": {
-    "InputSlot": {
-      "slotType": "Ore",
-      "description": "Accepts ore for processing."
-    }
-  }
+
+  // === TABLE OF CONTENTS (TOC) ===
+  "generateToc": true,                           // Enable TOC panel at top
+  "tocTitle": "Quick Navigation",                // Custom TOC title (default: "Contents")
+
+  // === OPERATIONAL DETAILS (MUST BE AN ARRAY) ===
+  "operationalDetails": [ ... ],                 // Main content sections
+  "operationalDetailsTitleColor": "#FF7A18",     // Title color (hex)
+  "operationalDetailsBackgroundColor": "#1A2B3C", // Section background (hex)
+
+  // === TOOLTIP DESCRIPTIONS (Objects with keys) ===
+  "logicDescriptions": { ... },
+  "modeDescriptions": { ... },
+  "slotDescriptions": { ... },
+  "versionDescriptions": { ... },
+  "memoryDescriptions": { ... }
 }
 
---------------------------------------------------------------------------------
-OPERATIONALDETAILS - SUPPORTED PROPERTIES
---------------------------------------------------------------------------------
+================================================================================
+OPERATIONALDETAILS - ALL SUPPORTED PROPERTIES
+================================================================================
 
-Each item in the OperationalDetails array can have:
+Each item in the operationalDetails array can have these properties:
 
-  "title"       - (string) Section heading, displayed in orange
-  "description" - (string) Main text content
-  "items"       - (array of strings) Bullet list, rendered with • prefix
-  "steps"       - (array of strings) Numbered list, rendered as 1. 2. 3.
-  "children"    - (array) Nested OperationalDetails for sub-sections
+BASIC CONTENT:
+  "title"           - (string) Section heading
+  "description"     - (string) Main text content with TMP rich text support
+  "items"           - (array of strings) Bullet list (rendered with • prefix)
+  "steps"           - (array of strings) Numbered list (rendered as 1. 2. 3.)
+  "children"        - (array) Nested OperationalDetail objects for sub-sections
 
-All properties are OPTIONAL. Use what makes sense for your content.
+COLLAPSIBLE SECTIONS:
+  "collapsible"     - (boolean) If true, renders as expandable/collapsible section
+                      Default: false (renders as inline text)
 
---------------------------------------------------------------------------------
-NESTING EXAMPLE
---------------------------------------------------------------------------------
+TABLE OF CONTENTS:
+  "tocId"           - (string) Unique ID for TOC linking. When set:
+                      - Section appears in the Table of Contents
+                      - Clicking TOC link scrolls to this section
+                      - Works on both collapsible and non-collapsible sections
 
-"OperationalDetails": [
+MEDIA:
+  "imageFile"       - (string) Image filename in mod/images/ folder
+                      Supports: PNG, JPG, GIF (first frame only)
+  "videoFile"       - (string) Video filename in mod/images/ folder
+                      Supports: MP4. Renders as embedded video player
+  "youtubeUrl"      - (string) Full YouTube URL (e.g., "https://www.youtube.com/watch?v=...")
+                      Renders as clickable link that opens in system browser
+  "youtubeLabel"    - (string) Custom label for YouTube link
+                      Default: "Watch on YouTube"
+
+STYLING:
+  "backgroundColor" - (string) Custom hex color for this section's background
+                      Format: "#RRGGBB" (e.g., "#1A2B3C")
+
+================================================================================
+COLLAPSIBLE VS INLINE CONTENT
+================================================================================
+
+COLLAPSIBLE (collapsible: true):
+  - Renders as expandable StationpediaCategory with header bar
+  - User can click to expand/collapse
+  - Supports nested children that also render as collapsibles
+  - Best for: Long content, optional reading, nested documentation
+
+INLINE (collapsible: false or not set):
+  - Renders as regular text directly in the parent section
+  - Always visible, cannot be collapsed
+  - Best for: Short content, important notes, simple lists
+
+Example:
+{
+  "title": "This is collapsible",
+  "collapsible": true,
+  "description": "User must click to see this content"
+}
+
+{
+  "title": "This is inline",
+  "description": "This content is always visible"
+}
+
+================================================================================
+TABLE OF CONTENTS (TOC) SYSTEM
+================================================================================
+
+To enable TOC for a device:
+
+1. Set "generateToc": true on the device entry
+2. Add "tocId" to each section you want in the TOC
+
+The TOC panel:
+  - Appears at the top of Operational Details
+  - Shows clickable links to each tocId section
+  - Automatically uses multi-column layout (max 8 rows per column)
+  - Clicking a link scrolls to and expands that section
+
+Example:
+{
+  "deviceKey": "ThingRobot",
+  "generateToc": true,
+  "tocTitle": "AIMeE Guide",
+  "operationalDetails": [
+    {
+      "title": "Overview",
+      "tocId": "overview",
+      "collapsible": true,
+      "description": "Introduction to AIMeE..."
+    },
+    {
+      "title": "Modes",
+      "tocId": "modes",
+      "collapsible": true,
+      "children": [
+        {
+          "title": "Follow Mode",
+          "tocId": "mode-follow",
+          "collapsible": true,
+          "description": "AIMeE follows the player..."
+        }
+      ]
+    }
+  ]
+}
+
+================================================================================
+NESTING EXAMPLE (Deep Structure)
+================================================================================
+
+"operationalDetails": [
   {
     "title": "Steel Smelting",
+    "tocId": "steel",
+    "collapsible": true,
     "description": "The most common furnace recipe.",
     "children": [
       {
         "title": "Requirements",
+        "tocId": "steel-requirements",
+        "collapsible": true,
         "items": [
           "Iron Ore + Coal Ore in 3:1 ratio",
           "Temperature above 900K",
@@ -104,6 +178,8 @@ NESTING EXAMPLE
       },
       {
         "title": "Process",
+        "tocId": "steel-process",
+        "collapsible": true,
         "steps": [
           "Load iron ore and coal (3:1 ratio)",
           "Add volatiles ice (fuel) and oxite ice (oxidizer)",
@@ -117,6 +193,8 @@ NESTING EXAMPLE
   },
   {
     "title": "Tips",
+    "tocId": "tips",
+    "collapsible": true,
     "items": [
       "Furnace handles extreme pressures safely",
       "On cold planets, use more fuel ice",
@@ -125,118 +203,179 @@ NESTING EXAMPLE
   }
 ]
 
-This renders as:
+================================================================================
+MEDIA EXAMPLES
+================================================================================
 
-  Steel Smelting
-  The most common furnace recipe.
-  
-    Requirements
-      • Iron Ore + Coal Ore in 3:1 ratio
-      • Temperature above 900K
-      • Pressure above 100 kPa
-    
-    Process
-      1. Load iron ore and coal (3:1 ratio)
-      2. Add volatiles ice (fuel) and oxite ice (oxidizer)
-      3. Close the furnace door
-      4. Activate the furnace
-      5. Wait for Mode=1 or temperature 900K+
-      6. Collect ingots from export slot
-  
-  Tips
-    • Furnace handles extreme pressures safely
-    • On cold planets, use more fuel ice
-    • Lock furnace via logic to prevent accidents
+IMAGE:
+{
+  "title": "Wiring Diagram",
+  "imageFile": "furnace_wiring.png",
+  "description": "Connect power as shown above."
+}
 
---------------------------------------------------------------------------------
+VIDEO (Embedded MP4):
+{
+  "title": "Video Tutorial",
+  "collapsible": true,
+  "videoFile": "furnace_tutorial.mp4",
+  "description": "Watch the full smelting process."
+}
+
+YOUTUBE LINK:
+{
+  "title": "External Tutorial",
+  "collapsible": true,
+  "youtubeUrl": "https://www.youtube.com/watch?v=ABC123",
+  "youtubeLabel": "Furnace Guide by StationeersGuru",
+  "description": "Watch a complete walkthrough."
+}
+
+================================================================================
 TEXTMESHPRO RICH TEXT FORMATTING
---------------------------------------------------------------------------------
+================================================================================
 
-The mod uses TextMeshPro for rendering. These tags are supported:
+The mod uses TextMeshPro for rendering. Supported tags:
 
-BASIC FORMATTING:
-  <b>bold text</b>
-  <i>italic text</i>
-  <u>underlined text</u>
+BASIC:
+  <b>bold</b>
+  <i>italic</i>
+  <u>underline</u>
   <s>strikethrough</s>
 
 COLORS:
-  <color=#FF0000>red text</color>
-  <color=#00FF00>green text</color>
-  <color=#FFA500>orange text</color>
+  <color=#FF0000>hex color</color>
   <color=red>named color</color>
 
 SIZE:
-  <size=150%>bigger text</size>
-  <size=80%>smaller text</size>
-  <size=24>24pt text</size>
+  <size=150%>bigger</size>
+  <size=80%>smaller</size>
+  <size=24>24pt</size>
 
 ALIGNMENT:
-  <align=center>centered text</align>
+  <align=center>centered</align>
   <align=right>right-aligned</align>
 
 INDENTATION:
   <indent=10%>indented text</indent>
-  <indent=2em>indented by 2em</indent>
 
 SUPER/SUBSCRIPT:
   H<sub>2</sub>O  →  H₂O
   x<sup>2</sup>   →  x²
 
 OTHER:
-  <nobr>prevent line break</nobr>
-  <lowercase>MAKES LOWERCASE</lowercase>
-  <uppercase>makes uppercase</uppercase>
-  <smallcaps>Small Caps Text</smallcaps>
+  <nobr>no line break</nobr>
+  <lowercase>LOWERCASE</lowercase>
+  <uppercase>uppercase</uppercase>
 
 LINE BREAKS:
-  Use \n in JSON strings for line breaks.
+  Use \n in JSON strings
 
---------------------------------------------------------------------------------
-BULLET AND LIST CHARACTERS
---------------------------------------------------------------------------------
+================================================================================
+TOOLTIP DESCRIPTIONS FORMAT
+================================================================================
 
-When writing inline lists (in description strings), use these Unicode chars:
+LOGIC DESCRIPTIONS:
+"logicDescriptions": {
+  "Temperature": {
+    "dataType": "Float",
+    "range": "0+",
+    "description": "Internal temperature in Kelvin."
+  },
+  "Mode": {
+    "dataType": "Integer",
+    "range": "0-5",
+    "description": "Current operational mode."
+  }
+}
 
-  • (U+2022) - standard bullet
-  ‣ (U+2023) - triangular bullet
-  ○ (U+25CB) - hollow circle
-  ► (U+25BA) - triangle pointer
-  → (U+2192) - arrow
+MODE DESCRIPTIONS:
+"modeDescriptions": {
+  "Mode0": {
+    "modeValue": "0",
+    "description": "Device is idle/off."
+  },
+  "Mode1": {
+    "modeValue": "1",
+    "description": "Standard operation."
+  }
+}
 
-Example in description:
-  "description": "• First point\n• Second point\n• Third point"
+SLOT DESCRIPTIONS:
+"slotDescriptions": {
+  "InputSlot": {
+    "slotType": "Ore",
+    "description": "Accepts ore for processing."
+  }
+}
 
-NOTE: Prefer using the "items" or "steps" arrays instead of manual bullets
-in the description - they render more consistently.
+VERSION DESCRIPTIONS:
+"versionDescriptions": {
+  "Tier1": {
+    "description": "Basic model with limited capacity."
+  }
+}
 
---------------------------------------------------------------------------------
-CRITICAL RULES
---------------------------------------------------------------------------------
+MEMORY DESCRIPTIONS:
+"memoryDescriptions": {
+  "Setting": {
+    "opCode": "s",
+    "parameters": "value",
+    "description": "Stores configuration value.",
+    "byteLayout": "4 bytes"
+  }
+}
 
-1. OperationalDetails MUST be an ARRAY (square brackets [])
-   
-   WRONG:  "OperationalDetails": { "title": "..." }
-   CORRECT: "OperationalDetails": [ { "title": "..." } ]
+================================================================================
+GENERIC DESCRIPTIONS (Fallback)
+================================================================================
 
-2. Use PascalCase "OperationalDetails" (capital O and D)
+"genericDescriptions": {
+  "logic": {
+    "Power": "Device power state (0=off, 1=on)",
+    "Setting": "Configurable parameter value"
+  },
+  "slotTypes": {
+    "Ore": "Accepts raw ore items"
+  },
+  "slots": {
+    "InputSlot": "Primary input for materials"
+  },
+  "modes": {
+    "0": "Idle state",
+    "1": "Active state"
+  },
+  "versions": {
+    "Tier1": "Basic variant"
+  },
+  "connections": {
+    "Power": "Electrical power connection"
+  },
+  "memory": {
+    "Setting": {
+      "opCode": "s",
+      "parameters": "value",
+      "description": "Configuration storage"
+    }
+  },
+  "properties": {
+    "MaxPressure": {
+      "type": "Float",
+      "description": "Maximum pressure tolerance"
+    }
+  }
+}
 
-3. All properties in each OperationalDetails item are OPTIONAL
-   - You can have just "title"
-   - You can have just "items" 
-   - You can have any combination
-
-4. Nesting depth: Keep it reasonable (2-3 levels max for readability)
-
-5. JSON escaping: Use \\n for newlines, \\" for quotes
-
---------------------------------------------------------------------------------
-COMPLETE EXAMPLE: FURNACE WITH NESTING
---------------------------------------------------------------------------------
+================================================================================
+COMPLETE DEVICE EXAMPLE
+================================================================================
 
 {
   "deviceKey": "ThingStructureFurnace",
   "displayName": "Furnace",
+  "generateToc": true,
+  "tocTitle": "Furnace Guide",
+  "operationalDetailsTitleColor": "#FF7A18",
   "logicDescriptions": {
     "Temperature": {
       "dataType": "Float",
@@ -246,85 +385,14 @@ COMPLETE EXAMPLE: FURNACE WITH NESTING
     "Mode": {
       "dataType": "Integer",
       "range": "0-1",
-      "description": "0=Invalid recipe/conditions, 1=Valid recipe ready."
+      "description": "0=Invalid recipe, 1=Ready to smelt."
     },
     "Activate": {
       "dataType": "Boolean",
       "range": "0-1",
-      "description": "Set to 1 to ignite furnace and start smelting."
-    },
-    "ExportCount": {
-      "dataType": "Integer",
-      "range": "0+",
-      "description": "Number of items ready in export slot."
+      "description": "Set to 1 to ignite furnace."
     }
   },
-  "OperationalDetails": [
-    {
-      "title": "Overview",
-      "description": "The Furnace smelts ores into ingots using combustion. Load ores and fuel (ice), close the door, then activate to ignite."
-    },
-    {
-      "title": "Steel Smelting",
-      "description": "The most common furnace recipe for early game.",
-      "children": [
-        {
-          "title": "Requirements",
-          "items": [
-            "Iron Ore (Fe) + Coal Ore in 3:1 ratio",
-            "Standard batch: 15 Iron + 5 Coal = 5 Steel ingots",
-            "Temperature above 900K (627°C)",
-            "Pressure above 100 kPa"
-          ]
-        },
-        {
-          "title": "Fuel Recipe",
-          "description": "Use Oxite + Volatiles ice to create combustion.",
-          "items": [
-            "Cold planets (Europa/Moon): 8 Volatiles + 4 Oxite",
-            "Hot planets (Vulcan/Venus): Less ice needed"
-          ]
-        },
-        {
-          "title": "Process",
-          "steps": [
-            "Load iron ore and coal (3:1 ratio) into furnace",
-            "Add volatiles ice (fuel) and oxite ice (oxidizer)",
-            "Close the furnace door",
-            "Activate - volatiles burn with oxygen, creating heat",
-            "Wait for Mode=1 or watch temperature reach 900K+",
-            "Smelting completes automatically when conditions met"
-          ]
-        }
-      ]
-    },
-    {
-      "title": "Common Problems",
-      "items": [
-        "<b>Won't activate:</b> Ensure door is closed. Need both fuel and oxidizer.",
-        "<b>Mode=0:</b> Invalid recipe or conditions not met. Check ore ratios.",
-        "<b>No output:</b> Ingots appear in export slot. Check ExportCount via logic."
-      ]
-    },
-    {
-      "title": "Logic Automation",
-      "items": [
-        "Read <color=#FFA500>Temperature</color> to track smelting progress",
-        "<color=#FFA500>Mode</color>=1 means ready to smelt",
-        "<color=#FFA500>Ratio</color> shows smelting progress (0 to 1)",
-        "Use <color=#FFA500>ExportCount</color> > 0 to trigger chute/arm pickup"
-      ]
-    },
-    {
-      "title": "Tips",
-      "items": [
-        "The furnace can handle extreme pressures - don't fear high MPa readings",
-        "On cold planets, you need more fuel ice for heat",
-        "On hot planets, ambient temperature helps - use less ice",
-        "Lock the furnace via logic to prevent accidental opening mid-smelt"
-      ]
-    }
-  ],
   "modeDescriptions": {
     "Mode0": {
       "modeValue": "0",
@@ -334,22 +402,106 @@ COMPLETE EXAMPLE: FURNACE WITH NESTING
       "modeValue": "1",
       "description": "Valid recipe ready to smelt."
     }
-  }
+  },
+  "operationalDetails": [
+    {
+      "title": "Overview",
+      "tocId": "overview",
+      "collapsible": true,
+      "description": "The Furnace smelts ores into ingots using combustion.",
+      "imageFile": "furnace_diagram.png"
+    },
+    {
+      "title": "Steel Smelting",
+      "tocId": "steel",
+      "collapsible": true,
+      "description": "The most common early-game recipe.",
+      "children": [
+        {
+          "title": "Requirements",
+          "tocId": "steel-reqs",
+          "collapsible": true,
+          "items": [
+            "Iron Ore (Fe) + Coal Ore in 3:1 ratio",
+            "Temperature above 900K",
+            "Pressure above 100 kPa"
+          ]
+        },
+        {
+          "title": "Process",
+          "tocId": "steel-steps",
+          "collapsible": true,
+          "steps": [
+            "Load iron ore and coal (3:1)",
+            "Add volatiles + oxite ice",
+            "Close door and activate",
+            "Wait for Mode=1",
+            "Collect from export slot"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Video Tutorial",
+      "tocId": "video",
+      "collapsible": true,
+      "youtubeUrl": "https://www.youtube.com/watch?v=EXAMPLE",
+      "youtubeLabel": "Furnace Tutorial",
+      "description": "Watch a complete walkthrough."
+    },
+    {
+      "title": "Tips",
+      "tocId": "tips",
+      "collapsible": true,
+      "items": [
+        "<b>Won't activate:</b> Ensure door is closed",
+        "<b>Mode=0:</b> Check ore ratios",
+        "Use <color=#FFA500>ExportCount</color> > 0 for automation"
+      ]
+    }
+  ]
 }
 
---------------------------------------------------------------------------------
+================================================================================
 VALIDATION CHECKLIST
---------------------------------------------------------------------------------
+================================================================================
 
 Before submitting your JSON:
 
 [ ] deviceKey matches exact prefab name (e.g., "ThingStructureFurnace")
-[ ] OperationalDetails is an ARRAY with square brackets []
-[ ] Each item uses valid properties: title, description, items, steps, children
+[ ] operationalDetails is an ARRAY with square brackets []
+[ ] Each collapsible section has "collapsible": true
+[ ] tocId values are unique within the device
+[ ] generateToc is set to true if using tocId entries
 [ ] Rich text tags are properly closed
-[ ] JSON is valid (no trailing commas, proper bracket matching)
-[ ] Nesting is not too deep (2-3 levels max recommended)
+[ ] Image/video files exist in mod/images/ folder
+[ ] YouTube URLs are full URLs (not shortened)
+[ ] JSON is valid (no trailing commas, proper brackets)
+[ ] Nesting depth is reasonable (2-3 levels max recommended)
 
---------------------------------------------------------------------------------
+================================================================================
+COMMON MISTAKES TO AVOID
+================================================================================
+
+WRONG - operationalDetails as object:
+  "operationalDetails": { "title": "..." }
+
+CORRECT - operationalDetails as array:
+  "operationalDetails": [ { "title": "..." } ]
+
+WRONG - Missing collapsible for expandable sections:
+  { "title": "Section", "children": [...] }
+
+CORRECT - Explicit collapsible:
+  { "title": "Section", "collapsible": true, "children": [...] }
+
+WRONG - tocId without generateToc:
+  "operationalDetails": [ { "tocId": "section1" } ]
+
+CORRECT - Enable TOC first:
+  "generateToc": true,
+  "operationalDetails": [ { "tocId": "section1" } ]
+
+================================================================================
 END OF INSTRUCTIONS
---------------------------------------------------------------------------------
+================================================================================

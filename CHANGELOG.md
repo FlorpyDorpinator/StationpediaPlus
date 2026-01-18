@@ -2,6 +2,122 @@
 
 All notable changes to Stationpedia Ascended will be documented in this file.
 
+## [0.8.0] - 2026-01-18
+
+### 📝 Station Notepad - In-Game Note Taking
+A complete note-taking system integrated into Stationpedia:
+- **Multi-Folder Organization** - Create folders and subfolders to organize notes
+- **Global & Per-Save Notes** - Notes can persist across all saves or be save-specific
+- **Rich Text Formatting** - Bold, italic, headers, colors, bullet points
+- **Link to Stationpedia** - Use `{LINK:DeviceKey;Display Text}` to create clickable links to any Stationpedia page
+- **Block Editor Mode** - Visual block-based editing with drag-and-drop
+- **Text Editor Mode** - Direct markdown-style text editing
+- **Auto-Save** - Notes save automatically when switching or closing
+- **Keyboard Shortcuts** - F2 to toggle, Escape to close
+- **Formatting Toolbar** - Quick access to bold, italic, headers, colors, and lists
+
+### 📚 Massive Content Expansion
+- **Survival Manual** - Complete multi-part beginner's guide covering first 5 minutes to advanced systems
+- **Power Systems Guide** - Comprehensive guide to electrical networks, solar, batteries, and troubleshooting
+- **Airlock Guide** - Basic and advanced airlock setup with component lists and configuration
+- **Air Conditioning Guide** - From portable AC safety to full climate control systems
+- **Daylight Sensor Guide** - Solar tracking and automation
+- **Species Survival Guide (Game Mechanic)** - Human, Zrilian, and Robot survival requirements from game code
+- **Complete Smelting Guide (Game Mechanic)** - All furnace types, recipes, temperatures, and alloy creation including Ice Only Recipes and Gaseous Fuel Recipes tables
+
+### 🎨 Table of Contents Enhancements
+- **Nested TOC Support** - Multi-level table of contents with collapsible sections
+- **Custom TOC Bullets** - Visual hierarchy with different bullet styles for nested items
+- **Smooth Scrolling** - Click TOC items to smoothly scroll to sections
+- **Auto-Generated IDs** - `tocId` property for precise section linking
+
+### 🎬 Media Support
+- **Video Embedding** - Play MP4 videos directly in Stationpedia pages using `videoFile` property
+- **Image Support** - Inline images with `imageFile` property
+- **YouTube Links** - Clickable YouTube links that open in browser
+
+### 🔄 Vanilla Mode & Ascended Mode
+- **Vanilla by Default** - Mod starts in vanilla Stationpedia styling
+- **Easter Egg Toggle** - Click the "Stationpedia" header to toggle Ascended mode
+- **Visual Distinction** - Ascended mode shows orange styling and phoenix icon
+- **Mode Persistence** - Your mode preference is remembered
+
+### 📋 New JSON Schema Features
+**Device-Level Properties:**
+- `flatStructure` - Render sections without nesting for simpler guides
+- `pageImage` - Display image at top of page
+- `buttonColor` - Custom color for guide buttons (blue, orange, green, etc.)
+- `sortOrder` - Control order of guides in the category list
+
+**OperationalDetail Properties:**
+- `children` - Nested subsections for hierarchical content
+- `steps` - Numbered step lists for procedures
+- `items` - Bullet point lists
+- `table` - Data tables with rows and cells
+
+### 🛠️ Technical Improvements
+- **JSON Mechanics Loader** - Separate loading system for game mechanics guides
+- **Guide Loader System** - Modular guide loading with support for manuals, guides, and mechanics
+- **Home Page Layout Manager** - Custom home page with categorized guide buttons
+- **Icon Animator** - Smooth icon transitions for UI elements
+
+### 🐛 Bug Fixes
+- Fixed JSON BOM character causing parse errors
+- Fixed guide key detection for mixed guideKey/deviceKey schemas
+- Improved search indexing for new content types
+- Fixed Pause stopping tooltips from appearing
+
+---
+
+## [0.3.0] - 2025-12-31
+
+### 🤖 Comprehensive AIMeE Documentation
+- **Full AIMeE Guide** - Added extensive documentation for the AIMeE (ThingRobot) companion robot
+- **Mode Explanations** - Detailed descriptions for all AIMeE modes: None, Follow, MoveToTarget, Roam, Unload, PathToTarget, StorageFull
+- **IC10 Programming Guide** - Complete guide for programming AIMeE with example code snippets
+- **Navigation & Mining** - Documented pathfinding behavior, mining mechanics, and coordinate systems
+- **Table of Contents** - Added navigable TOC with clickable links to each section
+
+### 📑 Multi-Column Table of Contents
+- **Column Layout** - TOC now displays in columns (max 8 rows per column) instead of a long vertical list
+- **Dynamic Columns** - Automatically creates additional columns when entries exceed 8
+- **Improved Readability** - Better use of horizontal space for guides with many sections
+
+### 📋 New JSON Schema Features
+New properties for building rich, interactive documentation:
+
+**Device-Level Properties:**
+- `generateToc` - (boolean) Enable Table of Contents panel at top of Operational Details
+- `tocTitle` - (string) Custom title for TOC panel (default: "Contents")
+- `operationalDetailsBackgroundColor` - (string) Hex color for section backgrounds
+
+**OperationalDetail Properties:**
+- `collapsible` - (boolean) Render as expandable/collapsible section with header bar
+- `tocId` - (string) Unique ID for TOC linking; clicking scrolls to section
+- `imageFile` - (string) Display inline image from mod/images/ folder
+- `videoFile` - (string) Embed MP4 video player from mod/images/ folder
+- `youtubeUrl` - (string) Clickable YouTube link that opens in browser
+- `youtubeLabel` - (string) Custom label for YouTube link
+- `backgroundColor` - (string) Custom hex color for individual section
+
+### 🎨 Vanilla Mode Default & Easter Egg Toggle
+- **Vanilla by Default** - Mod now starts in vanilla Stationpedia styling mode
+- **Header Toggle** - Click the "Stationpedia" header to toggle Ascended mode (easter egg)
+- **Visual Feedback** - Header changes to "Stationpedia Ascended" with orange styling when enabled
+- **Icon Swap** - Custom phoenix icon only appears in Ascended mode
+- **Removed Book Button** - Simplified UI by removing the mode toggle button
+
+### 🔧 Bug Fixes
+- **Fixed JSON Syntax Error** - Resolved corrupted line in descriptions.json that broke tooltip parsing
+- **Fixed Brace Mismatch** - Corrected code structure issues in icon replacement logic
+
+### 📝 New Files
+- `VanillaModeManager.cs` - Static manager for vanilla/ascended mode state
+- `CategoryHeaderHandler.cs` - Handler for category header interactions
+- `LLM_INSTRUCTIONS.txt` - Completely rewritten documentation for JSON schema
+
+---
+
 ## [0.2.2] - 2025-12-30
 
 ### ⚡ Search Performance Optimizations

@@ -16,6 +16,9 @@ using Newtonsoft.Json;
 using StationpediaAscended.Data;
 using StationpediaAscended.Tooltips;
 using StationpediaAscended.Patches;
+using StationpediaAscended.UI;
+using StationpediaAscended.UI.StationPlanner;
+using StationpediaAscended.Diagnostics;
 
 namespace StationpediaAscended
 {
@@ -31,7 +34,7 @@ namespace StationpediaAscended
         // Plugin metadata
         public const string PluginGuid = "com.florpydorp.stationpediaascended";
         public const string PluginName = "Stationpedia Ascended";
-        public const string PluginVersion = "0.2.1";
+        public const string PluginVersion = "0.3.0";
         
         public const string HarmonyId = "com.stationpediaascended.mod";
         
@@ -72,6 +75,10 @@ namespace StationpediaAscended
         // Custom icon sprite (internal so nested HarmonyPatches class can access it)
         internal static Sprite _customIconSprite;
         
+        // Custom icons for collapsible sections
+        internal static Sprite _iconExpanded;   // Icon shown when category is expanded
+        internal static Sprite _iconCollapsed;  // Icon shown when category is collapsed
+        
         // Track created GameObjects and components for cleanup
         internal static List<GameObject> _createdGameObjects = new List<GameObject>();
         internal static List<Component> _addedComponents = new List<Component>();
@@ -84,6 +91,10 @@ namespace StationpediaAscended
         
         // Track if we've already hidden unwanted items in Stationpedia
         private static bool _hiddenItemsPopulated = false;
+        
+        // Station Planner button reference
+        private static UnityEngine.UI.Button _stationPlannerButton = null;
+        private static Sprite _stationPlannerIconSprite = null;
         
         #endregion
 
@@ -308,6 +319,9 @@ namespace StationpediaAscended
             // Load custom icon
             LoadCustomIcon();
             
+            // Load custom expand/collapse icons
+            LoadCustomIcons();
+            
             // Load descriptions from JSON file
             LoadDescriptions();
             
@@ -316,6 +330,9 @@ namespace StationpediaAscended
             
             // Start the monitoring coroutine
             _monitorCoroutine = StartCoroutine(MonitorStationpediaCoroutine());
+            
+            // Initialize UI Asset Inspector (debug tool)
+            UIAssetInspector.Initialize();
             
             _initialized = true;
             ConsoleWindow.Print($"[Stationpedia Ascended] v{PluginVersion} initialized successfully!");
@@ -343,19 +360,21 @@ namespace StationpediaAscended
                         // Hide unwanted items from Stationpedia searches (burnt cables, wreckage, etc.)
                         PopulateHiddenItems();
                         
-                        // Change the window title to Stationpedia Ascended
+                        // Change the window title to Stationpedia Ascended and make it clickable
                         try
                         {
                             var titleGO = Stationpedia.Instance.StationpediaTitleText;
                             if (titleGO != null)
                             {
+                                _headerTitleObject = titleGO;
                                 var titleText = titleGO.GetComponentInChildren<TMPro.TextMeshProUGUI>();
                                 if (titleText != null)
                                 {
-                                    titleText.text = "Stationpedia <color=#FF7A18>Ascended</color>";
+                                    _headerTitleText = titleText;
+                                    UpdateHeaderAppearance(); // Set initial appearance based on mode
                                 }
                                 
-                                // Replace the icon in the header
+                                // Find and store the icon in the header (for Ascended mode styling)
                                 var headerParent = titleGO.transform.parent;
                                 if (headerParent != null)
                                 {
@@ -364,13 +383,25 @@ namespace StationpediaAscended
                                         var child = headerParent.GetChild(i);
                                         var img = child.GetComponent<UnityEngine.UI.Image>();
                                         
-                                        if (img != null && child.gameObject != titleGO && _customIconSprite != null)
+                                        if (img != null && child.gameObject != titleGO)
                                         {
                                             if (img.sprite != null && !img.sprite.name.ToLower().Contains("background"))
                                             {
-                                                // Replace the sprite
-                                                img.sprite = _customIconSprite;
-                                                img.preserveAspect = true;
+                                                // Store reference to the icon
+                                                _headerIconImage = img;
+                                                
+                                                // Store original sprite so we can restore it in vanilla mode
+                                                if (_originalHeaderIconSprite == null)
+                                                {
+                                                    _originalHeaderIconSprite = img.sprite;
+                                                }
+                                                
+                                                // Only replace sprite if in Ascended mode
+                                                if (!UI.VanillaModeManager.IsVanillaMode && _customIconSprite != null)
+                                                {
+                                                    img.sprite = _customIconSprite;
+                                                    img.preserveAspect = true;
+                                                }
                                                 
                                                 // Add LayoutElement if missing to control size
                                                 var layoutElement = child.GetComponent<UnityEngine.UI.LayoutElement>();
@@ -379,21 +410,23 @@ namespace StationpediaAscended
                                                     layoutElement = child.gameObject.AddComponent<UnityEngine.UI.LayoutElement>();
                                                 }
                                                 
-                                                // Force size to 28x28
-                                                layoutElement.preferredWidth = 28;
-                                                layoutElement.preferredHeight = 28;
-                                                layoutElement.minWidth = 28;
-                                                layoutElement.minHeight = 28;
+                                                // Force size to 32x32 (15% larger than original 28x28)
+                                                layoutElement.preferredWidth = 32;
+                                                layoutElement.preferredHeight = 32;
+                                                layoutElement.minWidth = 32;
+                                                layoutElement.minHeight = 32;
                                                 layoutElement.flexibleWidth = 0;
                                                 layoutElement.flexibleHeight = 0;
                                                 
                                                 var rt = child.GetComponent<RectTransform>();
                                                 if (rt != null)
                                                 {
-                                                    rt.sizeDelta = new Vector2(28, 28);
-                                                    rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 28);
-                                                    rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 28);
+                                                    rt.sizeDelta = new Vector2(32, 32);
+                                                    rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 32);
+                                                    rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 32);
                                                 }
+                                                
+                                                break; // Found the icon
                                             }
                                         }
                                     }
@@ -403,6 +436,76 @@ namespace StationpediaAscended
                         catch (Exception ex) 
                         { 
                             Log?.LogWarning($"Error setting title/icon: {ex.Message}");
+                        }
+                        
+                        // Setup header as clickable toggle for Ascended mode (easter egg)
+                        try
+                        {
+                            SetupHeaderToggle();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log?.LogWarning($"Error setting up header toggle: {ex.Message}");
+                        }
+                        
+                        // Add Station Planner button to Stationpedia header
+                        try
+                        {
+                            SetupStationPlannerButton();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log?.LogWarning($"Error setting up Station Planner button: {ex.Message}");
+                        }
+                        
+                        // Initialize Station Planner
+                        try
+                        {
+                            StationPlannerWindow.Initialize();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log?.LogWarning($"Error initializing Station Planner: {ex.Message}");
+                        }
+                        
+                        // Initialize search system early for instant first search
+                        try
+                        {
+                            Patches.SearchPatches.InitializeSearchSystem(Stationpedia.Instance);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log?.LogWarning($"Error initializing search system: {ex.Message}");
+                        }
+                        
+                        // Initialize home page layout (Survival Manual & Game Mechanics buttons)
+                        try
+                        {
+                            UI.HomePageLayoutManager.Initialize();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log?.LogWarning($"Error initializing home page layout: {ex.Message}");
+                        }
+                        
+                        // Register Survival Manual page
+                        try
+                        {
+                            Data.SurvivalManualLoader.RegisterSurvivalManualPage();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log?.LogWarning($"Error registering Survival Manual: {ex.Message}");
+                        }
+                        
+                        // Register Daylight Sensor Guide page
+                        try
+                        {
+                            Data.DaylightSensorGuideLoader.RegisterDaylightSensorGuidePage();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log?.LogWarning($"Error registering Daylight Sensor Guide: {ex.Message}");
                         }
                     }
 
@@ -561,12 +664,12 @@ namespace StationpediaAscended
                     
 #if DEBUG
                     // Dev folder - only included in Debug builds for hot-reload development
-                    possiblePaths.Add(@"C:\Dev\12-17-25 Stationeers Respawn Update Code\StationpediaAscended\mod\phoenix-icon.png");
+                    possiblePaths.Add(@"C:\Dev\12-17-25 Stationeers Respawn Update Code\StationpediaAscended\mod\images\phoenix-icon.png");
 #endif
-                    // Next to the executing assembly (works for both SLP mods folder and BepInEx scripts)
-                    possiblePaths.Add(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "phoenix-icon.png"));
-                    // BepInEx scripts folder
-                    possiblePaths.Add(Path.Combine(BepInEx.Paths.BepInExRootPath, "scripts", "phoenix-icon.png"));
+                    // Images subfolder next to the executing assembly
+                    possiblePaths.Add(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "images", "phoenix-icon.png"));
+                    // BepInEx scripts/images folder
+                    possiblePaths.Add(Path.Combine(BepInEx.Paths.BepInExRootPath, "scripts", "images", "phoenix-icon.png"));
                     
                     foreach (var path in possiblePaths)
                     {
@@ -606,6 +709,471 @@ namespace StationpediaAscended
             {
                 Log?.LogError($"Error loading custom icon: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Load custom icons for expand/collapse buttons from images folder
+        /// </summary>
+        private void LoadCustomIcons()
+        {
+            try
+            {
+                // Paths to check for custom icons
+                var basePaths = new List<string>();
+                
+#if DEBUG
+                basePaths.Add(@"C:\Dev\12-17-25 Stationeers Respawn Update Code\StationpediaAscended\mod\images");
+#endif
+                basePaths.Add(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "images"));
+                basePaths.Add(Path.Combine(BepInEx.Paths.BepInExRootPath, "scripts", "images"));
+                
+                foreach (var basePath in basePaths)
+                {
+                    if (string.IsNullOrEmpty(basePath) || !Directory.Exists(basePath)) continue;
+                    
+                    // Try custom icon files first, then fall back to phoenix/book icons
+                    string expandedPath = Path.Combine(basePath, "icon_expanded.png");
+                    string collapsedPath = Path.Combine(basePath, "icon_collapsed.png");
+                    string phoenixPath = Path.Combine(basePath, "phoenix-icon.png");
+                    string bookClosedPath = Path.Combine(basePath, "Book-Closed.png");
+                    
+                    // Expanded icon: try icon_expanded.png, then phoenix-icon.png
+                    if (_iconExpanded == null)
+                    {
+                        if (File.Exists(expandedPath))
+                            _iconExpanded = LoadSpriteFromFile(expandedPath);
+                        else if (File.Exists(phoenixPath))
+                            _iconExpanded = LoadSpriteFromFile(phoenixPath);
+                    }
+                    
+                    // Collapsed icon: try icon_collapsed.png, then Book-Closed.png
+                    if (_iconCollapsed == null)
+                    {
+                        if (File.Exists(collapsedPath))
+                            _iconCollapsed = LoadSpriteFromFile(collapsedPath);
+                        else if (File.Exists(bookClosedPath))
+                            _iconCollapsed = LoadSpriteFromFile(bookClosedPath);
+                    }
+                    
+                    if (_iconExpanded != null && _iconCollapsed != null)
+                        break;
+                }
+                
+                // Fallback: Use phoenix icon for both states if custom icons not found
+                if (_iconExpanded == null && _customIconSprite != null)
+                {
+                    _iconExpanded = _customIconSprite;
+                }
+                if (_iconCollapsed == null && _customIconSprite != null)
+                {
+                    _iconCollapsed = _customIconSprite;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log?.LogError($"Error loading custom icons: {ex.Message}");
+            }
+        }
+
+        // Track header references for easter egg toggle
+        private static GameObject _headerTitleObject = null;
+        private static TMPro.TextMeshProUGUI _headerTitleText = null;
+        private static UnityEngine.UI.Image _headerIconImage = null;
+        private static UnityEngine.UI.Button _headerButton = null;
+        private static Sprite _originalHeaderIconSprite = null;  // Store original sprite for vanilla mode
+        
+        /// <summary>
+        /// Make the header title/icon clickable to toggle Ascended mode (easter egg)
+        /// </summary>
+        private void SetupHeaderToggle()
+        {
+            if (_headerTitleObject == null) return;
+            
+            // Find the header parent that contains title and icon
+            var headerParent = _headerTitleObject.transform.parent;
+            if (headerParent == null) return;
+            
+            // Check if button already exists
+            var existingButton = headerParent.GetComponent<UnityEngine.UI.Button>();
+            if (existingButton != null)
+            {
+                _headerButton = existingButton;
+                _headerButton.onClick.RemoveAllListeners();
+                _headerButton.onClick.AddListener(OnHeaderClicked);
+                return;
+            }
+            
+            // Make the header parent clickable by adding a Button component
+            // First ensure it has a Graphic for raycast
+            var graphic = headerParent.GetComponent<UnityEngine.UI.Graphic>();
+            if (graphic == null)
+            {
+                var img = headerParent.gameObject.AddComponent<UnityEngine.UI.Image>();
+                img.color = new Color(0, 0, 0, 0); // Fully transparent
+                img.raycastTarget = true;
+                graphic = img;
+            }
+            
+            _headerButton = headerParent.gameObject.AddComponent<UnityEngine.UI.Button>();
+            _headerButton.targetGraphic = graphic;
+            
+            // Set up button colors (subtle highlight)
+            var colors = _headerButton.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1f, 0.9f, 0.8f, 1f);  // Subtle warm highlight
+            colors.pressedColor = new Color(1f, 0.7f, 0.5f, 1f);
+            colors.selectedColor = Color.white;
+            _headerButton.colors = colors;
+            
+            // Add click handler
+            _headerButton.onClick.AddListener(OnHeaderClicked);
+        }
+        
+        /// <summary>
+        /// Handle header click - toggle Ascended mode (easter egg)
+        /// </summary>
+        private void OnHeaderClicked()
+        {
+            UI.VanillaModeManager.Toggle();
+            UpdateHeaderAppearance();
+            
+            // Force refresh the current page to apply new styling
+            RefreshCurrentPage();
+        }
+        
+        /// <summary>
+        /// Update header appearance based on current mode
+        /// </summary>
+        private void UpdateHeaderAppearance()
+        {
+            if (_headerTitleText != null)
+            {
+                // Always show "Ascended" in orange for both modes
+                _headerTitleText.text = "Stationpedia <color=#FF7A18>Ascended</color>";
+            }
+            
+            if (_headerIconImage != null && _customIconSprite != null)
+            {
+                // Always use custom icon, just different tint colors
+                _headerIconImage.sprite = _customIconSprite;
+                _headerIconImage.preserveAspect = true;
+                
+                // Make icon 20% larger
+                _headerIconImage.transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+                
+                if (UI.VanillaModeManager.IsVanillaMode)
+                {
+                    // Vanilla mode - white/normal color
+                    _headerIconImage.color = Color.white;
+                }
+                else
+                {
+                    // Ascended mode - orange tint
+                    _headerIconImage.color = new Color(1f, 0.6f, 0.2f, 1f);
+                }
+            }
+        }
+        
+        // Track if we've already created the button (persistent across hot reloads)
+        private static bool _stationPlannerButtonCreated = false;
+        
+        /// <summary>
+        /// Setup the Station Planner button next to the ToggleMouse button
+        /// </summary>
+        private void SetupStationPlannerButton()
+        {
+            var stationpedia = Stationpedia.Instance;
+            if (stationpedia == null) return;
+            
+            // Find the ToggleMouse to position our button next to it
+            var toggleMouse = stationpedia.ToggleMouse;
+            if (toggleMouse == null)
+            {
+                Log?.LogWarning("ToggleMouse not found, cannot create Station Planner button");
+                return;
+            }
+            
+            // Get the parent of the toggle to add our button as a sibling
+            var parent = toggleMouse.transform.parent;
+            if (parent == null) return;
+            
+            // Check if button already exists by searching in hierarchy
+            var existingButton = parent.Find("StationPlannerButton");
+            if (existingButton != null)
+            {
+                _stationPlannerButton = existingButton.GetComponent<UnityEngine.UI.Button>();
+                _stationPlannerButtonCreated = true;
+                return;
+            }
+            
+            // Also check our tracked state
+            if (_stationPlannerButton != null && _stationPlannerButtonCreated) return;
+            
+            // Load the Station Planner icon (Book-ClosedONE.png)
+            if (_stationPlannerIconSprite == null)
+            {
+                _stationPlannerIconSprite = LoadImageFromModFolder("Book-ClosedONE.png");
+            }
+            
+            // Create button GameObject
+            var buttonGO = new GameObject("StationPlannerButton");
+            buttonGO.transform.SetParent(parent, false);
+            
+            // Position to LEFT of mouse toggle
+            // The header layout appears to use higher index = further LEFT
+            // So we set our index to mouseIndex + 1 to appear LEFT of the mouse icon
+            int mouseIndex = toggleMouse.transform.GetSiblingIndex();
+            buttonGO.transform.SetSiblingIndex(mouseIndex + 1);
+            Log?.LogInfo($"Station Planner button: mouseIndex={mouseIndex}, set to {mouseIndex + 1}");
+            
+            // Add RectTransform with same size as mouse toggle
+            var rt = buttonGO.AddComponent<RectTransform>();
+            var mouseToggleRect = toggleMouse.GetComponent<RectTransform>();
+            if (mouseToggleRect != null)
+            {
+                rt.sizeDelta = mouseToggleRect.sizeDelta;
+            }
+            else
+            {
+                rt.sizeDelta = new Vector2(32, 32);
+            }
+            
+            // Add Image for button icon
+            var image = buttonGO.AddComponent<UnityEngine.UI.Image>();
+            if (_stationPlannerIconSprite != null)
+            {
+                image.sprite = _stationPlannerIconSprite;
+                image.preserveAspect = true;
+            }
+            else
+            {
+                // Fallback if icon not found - use a simple book emoji/color
+                image.color = new Color(0.9f, 0.8f, 0.6f, 1f);
+            }
+            
+            // Add Button component
+            _stationPlannerButton = buttonGO.AddComponent<UnityEngine.UI.Button>();
+            _stationPlannerButton.targetGraphic = image;
+            
+            // Setup button colors
+            var colors = _stationPlannerButton.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1f, 0.9f, 0.7f, 1f);  // Warm highlight
+            colors.pressedColor = new Color(0.9f, 0.7f, 0.5f, 1f);
+            colors.selectedColor = Color.white;
+            _stationPlannerButton.colors = colors;
+            
+            // Add click handler to toggle Station Planner
+            _stationPlannerButton.onClick.AddListener(() => {
+                StationPlannerWindow.Toggle();
+            });
+            
+            _stationPlannerButtonCreated = true;
+            Log?.LogInfo("Station Planner button added to Stationpedia header (to LEFT of mouse toggle)");
+        }
+        
+        /// <summary>
+        /// Force refresh the current Stationpedia page to apply mode changes
+        /// </summary>
+        private void RefreshCurrentPage()
+        {
+            try
+            {
+                // Force page to re-render by navigating away and back
+                if (Stationpedia.Instance != null && !string.IsNullOrEmpty(Stationpedia.CurrentPageKey))
+                {
+                    string currentKey = Stationpedia.CurrentPageKey;
+                    _lastPageKey = "";  // Reset tracking so our patches will re-run
+                    
+                    // Navigate to Home briefly then back to force re-render
+                    Stationpedia.Instance.SetPage("Home", false);
+                    StartCoroutine(DelayedSetPage(currentKey));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log?.LogWarning($"Error refreshing page: {ex.Message}");
+            }
+        }
+        
+        private IEnumerator DelayedSetPage(string pageKey)
+        {
+            yield return null;  // Wait one frame
+            if (Stationpedia.Instance != null)
+            {
+                Stationpedia.Instance.SetPage(pageKey, false);
+            }
+        }
+
+        /// <summary>
+        /// Helper to load a sprite from a PNG file
+        /// </summary>
+        private static Sprite LoadSpriteFromFile(string path)
+        {
+            try
+            {
+                byte[] imageData = File.ReadAllBytes(path);
+                Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                texture.filterMode = FilterMode.Bilinear;
+                
+                if (ImageConversion.LoadImage(texture, imageData))
+                {
+                    return Sprite.Create(
+                        texture,
+                        new Rect(0, 0, texture.width, texture.height),
+                        new Vector2(0.5f, 0.5f),
+                        100f
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                Log?.LogWarning($"Failed to load sprite from {path}: {ex.Message}");
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Load a sprite with 9-slice borders for proper scaling (used for rounded rectangles)
+        /// </summary>
+        /// <param name="relativePath">Path relative to images folder</param>
+        /// <param name="borderSize">Size of the border in pixels (same on all sides)</param>
+        public static Sprite LoadSlicedSprite(string relativePath, int borderSize = 10)
+        {
+            var basePaths = new List<string>();
+            
+#if DEBUG
+            basePaths.Add(@"C:\Dev\12-17-25 Stationeers Respawn Update Code\StationpediaAscended\mod\images");
+#endif
+            basePaths.Add(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "images"));
+            basePaths.Add(Path.Combine(BepInEx.Paths.BepInExRootPath, "scripts", "images"));
+            
+            foreach (var basePath in basePaths)
+            {
+                if (string.IsNullOrEmpty(basePath)) continue;
+                string fullPath = Path.Combine(basePath, relativePath);
+                if (File.Exists(fullPath))
+                {
+                    try
+                    {
+                        byte[] imageData = File.ReadAllBytes(fullPath);
+                        Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                        texture.filterMode = FilterMode.Bilinear;
+                        
+                        if (ImageConversion.LoadImage(texture, imageData))
+                        {
+                            // Create sprite with 9-slice border
+                            // Border: left, bottom, right, top (in pixels)
+                            Vector4 border = new Vector4(borderSize, borderSize, borderSize, borderSize);
+                            
+                            return Sprite.Create(
+                                texture,
+                                new Rect(0, 0, texture.width, texture.height),
+                                new Vector2(0.5f, 0.5f),
+                                100f,
+                                0,
+                                SpriteMeshType.FullRect,
+                                border
+                            );
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log?.LogWarning($"Failed to load sliced sprite from {fullPath}: {ex.Message}");
+                    }
+                }
+            }
+            
+            Log?.LogWarning($"Sliced sprite not found: {relativePath}");
+            return null;
+        }
+        
+        // Cached rounded background sprite
+        private static Sprite _roundedBgSprite = null;
+        private static Sprite _windowBgSprite = null;
+        
+        /// <summary>
+        /// Get the rounded background sprite (cached)
+        /// </summary>
+        public static Sprite GetRoundedBackgroundSprite()
+        {
+            if (_roundedBgSprite == null)
+            {
+                // Try to load rounded-bg.png with 9-slice borders
+                // Assuming the rounded corners are about 10-15 pixels
+                _roundedBgSprite = LoadSlicedSprite("rounded-bg.png", 12);
+            }
+            return _roundedBgSprite;
+        }
+        
+        /// <summary>
+        /// Get the fancy window background sprite (Inv-window-bg.png) - cached
+        /// This is the game's native window background with nice borders
+        /// </summary>
+        public static Sprite GetWindowBackgroundSprite()
+        {
+            if (_windowBgSprite == null)
+            {
+                // Load Inv-window-bg.png with 9-slice borders
+                // The border area is typically around 8-12 pixels
+                _windowBgSprite = LoadSlicedSprite("Inv-window-bg.png", 10);
+            }
+            return _windowBgSprite;
+        }
+
+        /// <summary>
+        /// Public method to load a sprite from the mod's images folder
+        /// </summary>
+        public static Sprite LoadImageFromModFolder(string relativePath)
+        {
+            var basePaths = new List<string>();
+            
+#if DEBUG
+            basePaths.Add(@"C:\Dev\12-17-25 Stationeers Respawn Update Code\StationpediaAscended\mod\images");
+#endif
+            basePaths.Add(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "images"));
+            basePaths.Add(Path.Combine(BepInEx.Paths.BepInExRootPath, "scripts", "images"));
+            
+            foreach (var basePath in basePaths)
+            {
+                if (string.IsNullOrEmpty(basePath)) continue;
+                string fullPath = Path.Combine(basePath, relativePath);
+                if (File.Exists(fullPath))
+                {
+                    return LoadSpriteFromFile(fullPath);
+                }
+            }
+            
+            Log?.LogWarning($"Image not found: {relativePath}");
+            return null;
+        }
+
+        /// <summary>
+        /// Get the full file path for a file in the mod's images folder.
+        /// Returns null if file doesn't exist.
+        /// </summary>
+        public static string GetImageFilePath(string relativePath)
+        {
+            var basePaths = new List<string>();
+            
+#if DEBUG
+            basePaths.Add(@"C:\Dev\12-17-25 Stationeers Respawn Update Code\StationpediaAscended\mod\images");
+#endif
+            basePaths.Add(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "", "images"));
+            basePaths.Add(Path.Combine(BepInEx.Paths.BepInExRootPath, "scripts", "images"));
+            
+            foreach (var basePath in basePaths)
+            {
+                if (string.IsNullOrEmpty(basePath)) continue;
+                string fullPath = Path.Combine(basePath, relativePath);
+                if (File.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+            }
+            
+            Log?.LogWarning($"File not found: {relativePath}");
+            return null;
         }
 
         /// <summary>
@@ -674,6 +1242,18 @@ namespace StationpediaAscended
                     if (data?.genericDescriptions != null)
                     {
                         GenericDescriptions = data.genericDescriptions;
+                    }
+                    
+                    // Load custom guides from JSON
+                    if (data?.guides != null && data.guides.Count > 0)
+                    {
+                        Data.JsonGuideLoader.LoadGuides(data);
+                    }
+                    
+                    // Load game mechanics from JSON
+                    if (data?.mechanics != null && data.mechanics.Count > 0)
+                    {
+                        Data.JsonMechanicsLoader.LoadMechanics(data);
                     }
                 }
                 else
@@ -764,6 +1344,38 @@ namespace StationpediaAscended
                     var postfix = typeof(SearchPatches).GetMethod("ClearPreviousSearch_Postfix", 
                         BindingFlags.Public | BindingFlags.Static);
                     _harmony.Patch(clearPreviousSearch, postfix: new HarmonyMethod(postfix));
+                }
+                
+                // Patch SetPage to handle Game Mechanics navigation
+                var setPage = stationpediaType.GetMethod("SetPage", 
+                    BindingFlags.Public | BindingFlags.Instance);
+                if (setPage != null)
+                {
+                    var prefix = typeof(HarmonyPatches).GetMethod("Stationpedia_SetPage_Prefix", 
+                        BindingFlags.Public | BindingFlags.Static);
+                    _harmony.Patch(setPage, prefix: new HarmonyMethod(prefix));
+                }
+                
+                // Patch SetPageGuides to modify button layout
+                var setPageGuides = stationpediaType.GetMethod("SetPageGuides", 
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                if (setPageGuides != null)
+                {
+                    var postfix = typeof(HarmonyPatches).GetMethod("Stationpedia_SetPageGuides_Postfix", 
+                        BindingFlags.Public | BindingFlags.Static);
+                    _harmony.Patch(setPageGuides, postfix: new HarmonyMethod(postfix));
+                }
+                
+                // Patch SetPageLore to clear orphaned items and modify button layout
+                var setPageLore = stationpediaType.GetMethod("SetPageLore", 
+                    BindingFlags.Public | BindingFlags.Instance);
+                if (setPageLore != null)
+                {
+                    var prefix = typeof(HarmonyPatches).GetMethod("Stationpedia_SetPageLore_Prefix", 
+                        BindingFlags.Public | BindingFlags.Static);
+                    var postfix = typeof(HarmonyPatches).GetMethod("Stationpedia_SetPageLore_Postfix", 
+                        BindingFlags.Public | BindingFlags.Static);
+                    _harmony.Patch(setPageLore, prefix: new HarmonyMethod(prefix), postfix: new HarmonyMethod(postfix));
                 }
                 
                 // Register console command to center Stationpedia
@@ -872,26 +1484,39 @@ namespace StationpediaAscended
         {
             try
             {
-                // Check if command already exists (for F6 reload)
-                if (Util.Commands.CommandLine.CommandsMap.ContainsKey("stationpediacenter"))
-                {
-                    return; // Already registered
-                }
+                var commandsMap = Util.Commands.CommandLine.CommandsMap;
                 
                 // Register "stationpediacenter" command to center the Stationpedia window
-                Util.Commands.CommandLine.AddCommand("stationpediacenter", 
-                    new Util.Commands.BasicCommand(CenterStationpediaCommand, 
-                        "Centers the Stationpedia window on screen", null, false));
+                if (!commandsMap.ContainsKey("stationpediacenter"))
+                {
+                    Util.Commands.CommandLine.AddCommand("stationpediacenter", 
+                        new Util.Commands.BasicCommand(CenterStationpediaCommand, 
+                            "Centers the Stationpedia window on screen", null, false));
+                }
                 
                 // Register "spda_dumpkeys" command to export all page keys
-                Util.Commands.CommandLine.AddCommand("spda_dumpkeys", 
-                    new Util.Commands.BasicCommand(DumpPageKeysCommand, 
-                        "Exports all Stationpedia page keys to a file for use in descriptions.json", null, false));
+                if (!commandsMap.ContainsKey("spda_dumpkeys"))
+                {
+                    Util.Commands.CommandLine.AddCommand("spda_dumpkeys", 
+                        new Util.Commands.BasicCommand(DumpPageKeysCommand, 
+                            "Exports all Stationpedia page keys to a file for use in descriptions.json", null, false));
+                }
                 
                 // Register "spda_currentkey" command to show current page key
-                Util.Commands.CommandLine.AddCommand("spda_currentkey", 
-                    new Util.Commands.BasicCommand(CurrentPageKeyCommand, 
-                        "Shows the deviceKey of the currently open Stationpedia page", null, false));
+                if (!commandsMap.ContainsKey("spda_currentkey"))
+                {
+                    Util.Commands.CommandLine.AddCommand("spda_currentkey", 
+                        new Util.Commands.BasicCommand(CurrentPageKeyCommand, 
+                            "Shows the deviceKey of the currently open Stationpedia page", null, false));
+                }
+                
+                // Register "assetdisplay" command to toggle the UI Asset Inspector (debug tool)
+                if (!commandsMap.ContainsKey("assetdisplay"))
+                {
+                    Util.Commands.CommandLine.AddCommand("assetdisplay", 
+                        new Util.Commands.BasicCommand(AssetDisplayCommand, 
+                            "Toggles the UI Asset Inspector to show asset names under mouse cursor", null, false));
+                }
             }
             catch (Exception ex)
             {
@@ -940,6 +1565,20 @@ namespace StationpediaAscended
             catch (Exception ex)
             {
                 return $"Error: {ex.Message}";
+            }
+        }
+        
+        private static string AssetDisplayCommand(string[] args)
+        {
+            try
+            {
+                UIAssetInspector.Toggle();
+                bool isEnabled = UIAssetInspector.IsEnabled;
+                return $"UI Asset Inspector: {(isEnabled ? "ENABLED - hover over UI elements to see asset names" : "DISABLED")}";
+            }
+            catch (Exception ex)
+            {
+                return $"Error toggling UI Asset Inspector: {ex.Message}";
             }
         }
         
@@ -1063,6 +1702,18 @@ namespace StationpediaAscended
                     if (data?.genericDescriptions != null)
                     {
                         GenericDescriptions = data.genericDescriptions;
+                    }
+                    
+                    // Load custom guides from JSON
+                    if (data?.guides != null && data.guides.Count > 0)
+                    {
+                        Data.JsonGuideLoader.LoadGuides(data);
+                    }
+                    
+                    // Load game mechanics from JSON
+                    if (data?.mechanics != null && data.mechanics.Count > 0)
+                    {
+                        Data.JsonMechanicsLoader.LoadMechanics(data);
                     }
                 }
                 else
@@ -1675,10 +2326,20 @@ namespace StationpediaAscended
         {
             string cleanName = CleanLogicTypeName(propertyName);
 
-            // Check genericDescriptions.properties for property descriptions
+            // Check genericDescriptions.properties for structured property descriptions
             if (GenericDescriptions?.properties != null && GenericDescriptions.properties.TryGetValue(cleanName, out var desc))
             {
                 return desc;
+            }
+            
+            // Also check AdditionalData for flat string tooltips (Flashpoint, Autoignition, etc.)
+            if (GenericDescriptions?.AdditionalData != null && GenericDescriptions.AdditionalData.TryGetValue(cleanName, out var token))
+            {
+                var stringValue = token?.ToString();
+                if (!string.IsNullOrEmpty(stringValue))
+                {
+                    return new PropertyDescription { description = stringValue };
+                }
             }
 
             return null;
@@ -1746,10 +2407,49 @@ namespace StationpediaAscended
         
         #endregion
 
+        #region Update Loop
+        
+        /// <summary>
+        /// Unity Update - handles F2 hotkey for Station Planner
+        /// </summary>
+        void Update()
+        {
+            // F2 hotkey to toggle Station Planner
+            if (UnityEngine.Input.GetKeyDown(KeyCode.F2))
+            {
+                StationPlannerWindow.Toggle();
+            }
+            
+            // Let Station Planner update its state
+            StationPlannerWindow.UpdateWindow();
+        }
+        
+        #endregion
+
         #region Cleanup
         
         void OnDestroy()
         {
+            // Cleanup Station Planner
+            try
+            {
+                StationPlannerWindow.Cleanup();
+            }
+            catch (Exception ex)
+            {
+                Log?.LogWarning($"Error cleaning up Station Planner: {ex.Message}");
+            }
+            
+            // Cleanup UI Asset Inspector
+            try
+            {
+                UIAssetInspector.Cleanup();
+            }
+            catch (Exception ex)
+            {
+                Log?.LogWarning($"Error cleaning up UI Asset Inspector: {ex.Message}");
+            }
+            
             // Stop all coroutines on this MonoBehaviour
             StopAllCoroutines();
             _monitorCoroutine = null;

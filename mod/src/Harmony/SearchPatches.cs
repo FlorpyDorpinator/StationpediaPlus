@@ -89,10 +89,43 @@ namespace StationpediaAscended.Patches
                 {
                     HookSearchField(__instance);
                 }
+                
+                // Pre-build indexes for faster first search (if not already built)
+                if (_pageTitleIndex == null && Stationpedia.StationpediaPages != null && Stationpedia.StationpediaPages.Count > 0)
+                {
+                    BuildPageIndexes();
+                    BuildCategoryCache();
+                }
             }
             catch (Exception ex)
             {
                 Debug.LogError($"[Stationpedia Ascended] Error in ClearPreviousSearch_Postfix: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// Initialize search system early (called from MonitorStationpediaCoroutine when Stationpedia found)
+        /// </summary>
+        public static void InitializeSearchSystem(Stationpedia stationpedia)
+        {
+            try
+            {
+                // Hook search field immediately
+                if (!_searchFieldHooked && stationpedia != null)
+                {
+                    HookSearchField(stationpedia);
+                }
+                
+                // Pre-build indexes for instant first search
+                if (_pageTitleIndex == null && Stationpedia.StationpediaPages != null && Stationpedia.StationpediaPages.Count > 0)
+                {
+                    BuildPageIndexes();
+                    BuildCategoryCache();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[Stationpedia Ascended] Error initializing search system: {ex.Message}");
             }
         }
         

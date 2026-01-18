@@ -39,7 +39,8 @@ namespace StationpediaAscended.Tooltips
 
         private IEnumerator ShowTooltipAfterDelay()
         {
-            yield return new WaitForSeconds(HOVER_DELAY);
+            // Use WaitForSecondsRealtime so tooltips work when game is paused (Time.timeScale = 0)
+            yield return new WaitForSecondsRealtime(HOVER_DELAY);
             
             if (_isHovering)
             {

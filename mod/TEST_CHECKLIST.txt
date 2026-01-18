@@ -1,0 +1,124 @@
+================================================================================
+                STATIONPEDIA ASCENDED - UI ENHANCEMENT TEST CHECKLIST
+================================================================================
+
+Test the following features after building and loading the mod in Stationeers.
+
+--------------------------------------------------------------------------------
+1. LOGO SIZE INCREASE (15%)
+--------------------------------------------------------------------------------
+[ ] Open Stationpedia
+[ ] Verify the StationpediaAscended logo is slightly larger than before
+    - Previous: 28x28 pixels
+    - New: 32x32 pixels
+[ ] Logo should still be properly centered and positioned
+
+--------------------------------------------------------------------------------
+2. HOME PAGE BUTTON LAYOUT
+--------------------------------------------------------------------------------
+[ ] Open Stationpedia home page
+
+NEW CUSTOM BUTTONS (Above Guides/Universe):
+[ ] Two new buttons should appear ABOVE the Guides and Universe buttons
+[ ] "Stationeers Survival Manual" button should appear
+[ ] "Game Mechanics" button should appear  
+[ ] Both buttons should use the SAME font, text size, and button style as Guides/Universe
+[ ] Buttons should be in two-column layout matching Guides/Universe format
+[ ] Button colors should match vanilla Stationpedia style
+
+EXISTING BUTTONS:
+[ ] Guides button should still work (NOT redirect to Game Mechanics)
+[ ] Universe button should still work
+[ ] Category buttons (Reagents, Gases, Ingots, etc.) should work normally
+[ ] NO buttons should overlap or be in wrong positions
+
+--------------------------------------------------------------------------------
+3. SURVIVAL MANUAL PAGE
+--------------------------------------------------------------------------------
+[ ] Click "Stationeers Survival Manual" button
+[ ] Page should open without errors
+
+PART STRUCTURE (3 Major Collapsibles):
+[ ] Part 1 header should appear as a MAJOR collapsible section
+[ ] Part 2 header should appear as a MAJOR collapsible section  
+[ ] Part 3 header should appear as a MAJOR collapsible section
+[ ] All three Parts should DEFAULT TO OPEN when page first loads
+[ ] Parts should save their collapsed state if player closes them
+[ ] NO "Operational Details" wrapper should exist - Parts are top-level
+
+TABLE OF CONTENTS (Per Part):
+[ ] Each Part should have its own Table of Contents box at the top
+[ ] "Table Of Contents" title should be CENTERED in the box
+[ ] ToC should display up to 3 columns if content is long enough
+[ ] Section titles in ToC should be UNDERLINED AND BOLDED (vanilla mode)
+[ ] Subsection entries should have dashes, NOT underlined
+[ ] ToC box should have its own background, separate from content
+[ ] ToC links should be CLICKABLE and scroll to the section
+
+CONTENT SECTIONS:
+[ ] Sections within each Part should be in their own collapsible boxes
+[ ] Section titles should display correctly
+[ ] Content text should render properly
+[ ] Vanilla syntax should work: {LINK:}, {THING:}, {HEADER:}
+
+NAVIGATION:
+[ ] ToC links should expand parent sections if needed and scroll to target
+[ ] Back button should return to home page
+[ ] Manual should be accessible from both vanilla and ascended modes
+
+--------------------------------------------------------------------------------
+4. GAME MECHANICS PAGE
+--------------------------------------------------------------------------------
+[ ] Click "Game Mechanics" button
+[ ] Page should open without errors
+[ ] Page should show "Game Mechanics" title
+[ ] Currently empty is OK - content not yet added
+[ ] Back button should return to home page
+
+--------------------------------------------------------------------------------
+5. GUIDES AND UNIVERSE BUTTONS
+--------------------------------------------------------------------------------
+[ ] Click Guides button - should open Guides page (NOT Game Mechanics)
+[ ] Guides page should list all guide entries
+[ ] Click Universe button - should open Universe/Lore page
+[ ] Both pages should work normally without null reference errors
+
+--------------------------------------------------------------------------------
+6. MODE COMPATIBILITY
+--------------------------------------------------------------------------------
+[ ] Test all above features in VANILLA mode
+[ ] Test all above features in ASCENDED mode
+[ ] Buttons should appear and function the same in both modes
+[ ] Color scheme should follow vanilla colors for new content
+
+--------------------------------------------------------------------------------
+7. EDGE CASES & ERROR HANDLING
+--------------------------------------------------------------------------------
+[ ] Test clicking buttons rapidly
+[ ] Test navigating away and back to home page
+[ ] Verify no console errors appear during normal use
+[ ] Test collapsing/expanding Parts and sections rapidly
+[ ] Verify ToC links work after collapsing and re-expanding
+
+================================================================================
+                              KNOWN ISSUES / NOTES
+================================================================================
+
+- If buttons don't appear, check if _homeGuideButtonContainer was found in logs
+- Survival Manual markdown file must exist in Guides folder
+- Game Mechanics pages must be registered via GameMechanicsRegistry
+
+================================================================================
+                            BUILD COMMAND REFERENCE
+================================================================================
+
+Build Dev:
+  dotnet build -c Debug -o build_dev
+
+Copy to Game:
+  Copy-Item -Path 'build_dev\StationpediaAscended.dll','descriptions.json' `
+    -Destination 'C:\Program Files (x86)\Steam\steamapps\common\Stationeers\BepInEx\scripts\' -Force
+
+Or use VS Code Task: "Build StationpediaAscended (Dev)"
+
+================================================================================
